@@ -1,0 +1,25 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "name": "manutrack",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite",
+        "brand": "node scripts/brand/build-wordmark.mjs"
+    },
+    "dependencies": {
+        "@fontsource-variable/archivo": "^5.2.0",
+        "@fontsource/ibm-plex-mono": "^5.2.0",
+        "@fontsource/ibm-plex-sans": "^5.2.0"
+    },
+    "devDependencies": {
+        "@fontsource/open-sans": "^5.2.0",
+        "@tailwindcss/vite": "^4.1.0",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^2.0.0",
+        "opentype.js": "^1.3.4",
+        "tailwindcss": "^4.1.0",
+        "vite": "^7.0.7"
+    }
+}

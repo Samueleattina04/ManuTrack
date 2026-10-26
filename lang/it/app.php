@@ -1,0 +1,81 @@
+<?php
+
+return [
+    'meta_description' => 'ManuTrack: gestione della manutenzione di macchine e impianti.',
+    'skip_to_content' => 'Vai al contenuto',
+    'search' => 'Cerca',
+    'search_placeholder' => 'Cerca o vai a…',
+    'soon' => 'in arrivo',
+    'close' => 'Chiudi',
+
+    'nav' => [
+        'label' => 'Navigazione principale',
+        'dashboard' => 'Panoramica',
+        'work_orders' => 'Ordini di lavoro',
+        'assets' => 'Macchine',
+        'plant' => 'Stabilimento 3D',
+        'preventive' => 'Preventiva',
+        'inventory' => 'Magazzino',
+        'notifications' => 'Avvisi',
+        'system' => 'Sistema',
+        'design' => 'Design system',
+        'report' => 'Segnala guasto',
+    ],
+
+    // Etichette brevi per la barra in basso del telefono
+    'nav_short' => [
+        'dashboard' => 'Home',
+        'work_orders' => 'Ordini',
+        'notifications' => 'Avvisi',
+        'system' => 'Sistema',
+    ],
+
+    'theme' => [
+        'label' => 'Tema',
+        'dark' => 'Scuro',
+        'light' => 'Chiaro',
+        'system' => 'Come il dispositivo',
+    ],
+
+    'palette' => [
+        'title' => 'Palette comandi',
+        'placeholder' => 'Cerca una pagina o un comando…',
+        'empty' => 'Nessun risultato.',
+    ],
+
+    'shortcuts' => [
+        'title' => 'Scorciatoie',
+        'list' => [
+            'Ctrl K' => 'Apri la palette comandi',
+            '/' => 'Cerca',
+            'G D' => 'Vai alla panoramica',
+            'G O' => 'Vai agli ordini di lavoro',
+            'G M' => 'Vai alle macchine',
+            'G P' => 'Vai alla preventiva',
+            'G R' => 'Vai al magazzino',
+            'G S' => 'Vai a Sistema',
+            '?' => 'Mostra questo elenco',
+            'Esc' => 'Chiudi finestre e menu',
+        ],
+    ],
+
+    'home' => [
+        'title' => 'Panoramica',
+        'welcome' => 'Benvenuto in ManuTrack',
+        'intro' => 'L\'installazione per :company è attiva. Le sezioni operative (macchine, ordini di lavoro, preventiva, magazzino) arrivano con le prossime versioni; qui sotto trovi lo stato del sistema.',
+        'version' => 'Versione',
+        'cron' => 'Cron',
+        'cron_ok' => 'attivo, ultimo giro :time',
+        'cron_missing' => 'nessun giro registrato',
+        'cron_late' => 'fermo da :time',
+        'queue' => 'Coda',
+        'queue_detail' => ':pending in attesa · :failed fallite',
+        'push' => 'Notifiche push',
+        'push_ok' => 'chiavi configurate',
+        'push_missing' => 'chiavi da generare',
+        'images' => 'Immagini',
+        'images_none' => 'GD o Imagick assenti: icone pre-generate',
+        'open_system' => 'Apri Sistema',
+        'open_design' => 'Guarda il design system',
+    ],
+];

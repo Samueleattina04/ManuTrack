@@ -1,6 +1,19 @@
-# ManuTrack: proposta di progetto (revisione 2)
+# ManuTrack: proposta di progetto (revisione 2, approvata)
 
-Stato: **in attesa di approvazione della revisione 2**. Nessun codice applicativo è stato scritto.
+Stato: **approvata** con le correzioni sotto. Sviluppo in corso dalla fase 1. Palette: Grafite e Rame, con Acciaio e Ciano e Ardesia e Indaco come preimpostazioni.
+
+### Correzioni approvate (prevalgono sul resto del documento)
+1. **Aggiornamento automatico dal cron, solo su caricamenti completi.**
+   - Lo script di rilascio scrive per ultimo il file `release.json` (versione, data, hash). Senza questo file il cron non aggiorna.
+   - Lock su file (`flock`) contro le esecuzioni doppie.
+   - Attesa di almeno `MANUTRACK_UPDATE_SETTLE_MINUTES` (predefinito 5) dall'ultima modifica dei file dell'app.
+   - Se l'aggiornamento fallisce, l'app esce dalla manutenzione e resta utilizzabile. L'errore viene salvato e mostrato all'amministratore in un avviso e nella pagina Sistema. Il cron non riprova sulla stessa versione finché l'amministratore non lo chiede.
+2. **Copia del database prima di ogni aggiornamento**, fatta in PHP (PDO, senza `exec`/`mysqldump`), in `storage/app/backups/` compressa gzip. `php artisan manutrack:restore` ripristina una copia, `manutrack:backup` la crea a mano. Restano solo le ultime `MANUTRACK_BACKUPS_KEEP` copie (predefinito 5).
+3. **Installazione dal browser una sola volta.**
+   - Dopo il primo completamento si blocca per sempre con `storage/app/installed.lock`, registrato anche nel database.
+   - Rifiuta di ripartire se l'app risulta già installata, cioè se esiste il lock, la tabella `users` ha righe o la versione è registrata.
+   - Le sue rotte rispondono 404 quando l'app è installata.
+4. **Requisiti:** l'installazione verifica GD o Imagick. Se mancano entrambi, l'app usa le icone PNG pre-generate incluse nel pacchetto per le tre preimpostazioni, e un colore personalizzato usa le icone della preimpostazione più vicina. Le foto vengono salvate senza ridimensionamento, con un avviso nella pagina Sistema.
 Anteprima dello stile: `docs/anteprima/stile.html` (da aprire nel browser).
 
 ### Cosa cambia rispetto alla revisione 1

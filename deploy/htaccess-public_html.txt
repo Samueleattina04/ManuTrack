@@ -1,0 +1,24 @@
+# =====================================================================
+#  ManuTrack — .htaccess DI RISERVA per public_html (metodo C della guida)
+#
+#  Da usare SOLO se non puoi far puntare il dominio alla cartella
+#  manutrack/public (metodi A e B di docs/INSTALLAZIONE.md).
+#  Struttura attesa:
+#     public_html/.htaccess        ← questo file, rinominato in .htaccess
+#     public_html/manutrack/...    ← l'app completa
+#  Tutto ciò che non sta in manutrack/public resta inaccessibile dal web.
+# =====================================================================
+Options -Indexes
+RewriteEngine On
+
+# Solo HTTPS
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Blocca l'accesso diretto a tutto ciò che non è la cartella pubblica
+RewriteRule ^manutrack/(?!public/) - [F,L]
+
+# Inoltra ogni richiesta alla cartella pubblica dell'app
+RewriteCond %{REQUEST_URI} !^/manutrack/public/
+RewriteRule ^(.*)$ manutrack/public/$1 [L]

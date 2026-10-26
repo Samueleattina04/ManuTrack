@@ -1,0 +1,386 @@
+/*
+ * ManuTrack — design system
+ * Documentazione: docs/DESIGN.md
+ *
+ * Tema scuro predefinito su :root; tema chiaro con [data-theme="light"].
+ * I colori d'accento e del logo arrivano dalla palette dell'azienda
+ * (variabili --acc-*, --logo-l*), stampate nella pagina da <x-theme-head>.
+ */
+@import 'tailwindcss' source(none);
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+@source '../views';
+@source '../js';
+@source '../../app/View';
+@source '../../app/Enums';
+
+@custom-variant light (&:where([data-theme=light], [data-theme=light] *));
+
+/* ---------- Token ---------- */
+:root {
+    color-scheme: dark;
+
+    /* Palette predefinita (sostituita da x-theme-head) */
+    --acc-d: #e8915a; --acc2-d: #f6b88c; --on-acc-d: #1b0e06;
+    --acc-l: #a64b17; --acc2-l: #c4622a; --on-acc-l: #ffffff;
+    --logo-lc-d: #ee9455; --logo-ls-d: #5e2910;
+    --logo-lc-l: #dd7536; --logo-ls-l: #33190d;
+
+    /* Neutri grafite con una punta di blu */
+    --mt-bg: #0c0f14;
+    --mt-bg-2: #10141a;
+    --mt-surface: #151a21;
+    --mt-surface-2: #1c222b;
+    --mt-line: #29303b;
+    --mt-line-soft: rgb(255 255 255 / 0.06);
+    --mt-fg: #e8ebf0;
+    --mt-fg-2: #b6bdc8;
+    --mt-muted: #8c95a3;
+    --mt-glass: rgb(22 27 35 / 0.72);
+    --mt-overlay: rgb(5 7 10 / 0.6);
+
+    --mt-accent: var(--acc-d);
+    --mt-accent-2: var(--acc2-d);
+    --mt-on-accent: var(--on-acc-d);
+    --mt-glow: color-mix(in oklab, var(--acc-d) 22%, transparent);
+
+    /* Stati (colori andon), indipendenti dalla palette */
+    --mt-ok: #3dd68c;
+    --mt-ko: #ff6b6f;
+    --mt-mnt: #6aa6ff;
+    --mt-stop: #a5aebb;
+    --mt-warn: #f2c14e;
+
+    /* Logo */
+    --logo-faccia-chiara: var(--logo-lc-d);
+    --logo-faccia-scura: var(--logo-ls-d);
+    --logo-ombra: 0.55;
+    --logo-testo: #f2f3f5;
+
+    --mt-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 18px 40px -18px rgb(0 0 0 / 0.7);
+    --mt-shadow-pop: 0 24px 60px -20px rgb(0 0 0 / 0.75);
+
+    /* Dimensioni d'interfaccia */
+    --mt-topbar-h: 3.5rem;
+    --mt-bottomnav-h: 4.25rem;
+    --mt-sidebar-w: 15.5rem;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+}
+
+:root[data-theme='light'] {
+    color-scheme: light;
+    --mt-bg: #edeff2;
+    --mt-bg-2: #f4f5f7;
+    --mt-surface: #ffffff;
+    --mt-surface-2: #f5f6f8;
+    --mt-line: #d6dae0;
+    --mt-line-soft: rgb(15 20 30 / 0.07);
+    --mt-fg: #10141a;
+    --mt-fg-2: #39414d;
+    --mt-muted: #5b6472;
+    --mt-glass: rgb(255 255 255 / 0.78);
+    --mt-overlay: rgb(16 20 26 / 0.4);
+
+    --mt-accent: var(--acc-l);
+    --mt-accent-2: var(--acc2-l);
+    --mt-on-accent: var(--on-acc-l);
+    --mt-glow: color-mix(in oklab, var(--acc-l) 12%, transparent);
+
+    --mt-ok: #137443;
+    --mt-ko: #bf1f2a;
+    --mt-mnt: #1a5bcc;
+    --mt-stop: #556070;
+    --mt-warn: #7d5c00;
+
+    --logo-faccia-chiara: var(--logo-lc-l);
+    --logo-faccia-scura: var(--logo-ls-l);
+    --logo-ombra: 0.2;
+    --logo-testo: #10141a;
+
+    --mt-shadow: 0 1px 2px rgb(15 20 30 / 0.06), 0 14px 32px -16px rgb(15 20 30 / 0.22);
+    --mt-shadow-pop: 0 24px 60px -24px rgb(15 20 30 / 0.35);
+}
+
+@theme inline {
+    --font-display: 'Archivo Variable', 'Helvetica Neue', Arial, sans-serif;
+    --font-sans: 'IBM Plex Sans', 'Segoe UI', Roboto, Arial, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --color-bg: var(--mt-bg);
+    --color-bg-2: var(--mt-bg-2);
+    --color-surface: var(--mt-surface);
+    --color-surface-2: var(--mt-surface-2);
+    --color-line: var(--mt-line);
+    --color-line-soft: var(--mt-line-soft);
+    --color-fg: var(--mt-fg);
+    --color-fg-2: var(--mt-fg-2);
+    --color-muted: var(--mt-muted);
+    --color-accent: var(--mt-accent);
+    --color-accent-2: var(--mt-accent-2);
+    --color-on-accent: var(--mt-on-accent);
+    --color-ok: var(--mt-ok);
+    --color-ko: var(--mt-ko);
+    --color-mnt: var(--mt-mnt);
+    --color-stop: var(--mt-stop);
+    --color-warn: var(--mt-warn);
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 14px;
+    --radius-xl: 22px;
+
+    --shadow-card: var(--mt-shadow);
+    --shadow-pop: var(--mt-shadow-pop);
+
+    --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ---------- Base ---------- */
+@layer base {
+    html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        @apply bg-bg text-fg font-sans antialiased;
+        font-size: 15px;
+        line-height: 1.55;
+        min-height: 100dvh;
+        overscroll-behavior-y: none;
+    }
+
+    h1, h2, h3, .font-display {
+        font-family: var(--font-display);
+        font-stretch: 112%;
+        letter-spacing: -0.01em;
+        text-wrap: balance;
+    }
+
+    /* Testo a 16px nei campi: evita lo zoom automatico di Safari su iPhone */
+    input, select, textarea {
+        font-size: 16px;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--mt-accent);
+        outline-offset: 2px;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    ::selection {
+        background: color-mix(in oklab, var(--mt-accent) 35%, transparent);
+    }
+}
+
+/* ---------- Componenti ---------- */
+@layer components {
+    /* Logo */
+    .mt-logo { display: block; height: auto; }
+    .mt-logo-light { fill: var(--logo-faccia-chiara); }
+    .mt-logo-dark { fill: var(--logo-faccia-scura); }
+    .mt-logo-shadow, .mt-logo-shade { opacity: var(--logo-ombra); }
+    .mt-logo-text { fill: var(--logo-testo); }
+    .logo-mono-light { --logo-faccia-chiara: #fff; --logo-faccia-scura: rgb(255 255 255 / 0.52); --logo-testo: #fff; --logo-ombra: 0; }
+    .logo-mono-light .mt-logo-gloss, .logo-mono-dark .mt-logo-gloss { display: none; }
+    .logo-mono-dark { --logo-faccia-chiara: #10141a; --logo-faccia-scura: rgb(16 20 26 / 0.6); --logo-testo: #10141a; --logo-ombra: 0; }
+    .logo-on-dark { --logo-faccia-chiara: var(--logo-lc-d); --logo-faccia-scura: var(--logo-ls-d); --logo-testo: #f2f3f5; --logo-ombra: 0.55; }
+    .logo-on-light { --logo-faccia-chiara: var(--logo-lc-l); --logo-faccia-scura: var(--logo-ls-l); --logo-testo: #10141a; --logo-ombra: 0.2; }
+
+    /* Icone */
+    .mt-icon { width: 1.25rem; height: 1.25rem; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* Superfici */
+    .card {
+        @apply bg-surface rounded-[var(--radius-lg)] border border-line-soft;
+        box-shadow: var(--mt-shadow);
+    }
+    .glass {
+        background: var(--mt-glass);
+        backdrop-filter: blur(14px) saturate(1.3);
+        -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    }
+    .eyebrow {
+        @apply font-mono text-xs uppercase text-accent;
+        letter-spacing: 0.12em;
+    }
+
+    /* Pulsanti: minimo 44px, 56px per le azioni da campo (.btn-xl) */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-[var(--radius-md)] px-4 font-semibold select-none whitespace-nowrap;
+        min-height: 44px;
+        font-size: 15px;
+        transition: transform 0.12s ease, background-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+        touch-action: manipulation;
+    }
+    .btn:active:not(:disabled) { transform: scale(0.97); }
+    .btn:disabled, .btn[aria-disabled='true'] { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary {
+        color: var(--mt-on-accent);
+        background: linear-gradient(180deg, var(--mt-accent-2), var(--mt-accent));
+        box-shadow: 0 8px 20px -10px var(--mt-accent);
+    }
+    .btn-primary:hover:not(:disabled) { box-shadow: 0 10px 26px -10px var(--mt-accent); }
+    .btn-secondary { @apply bg-surface-2 text-fg border border-line; }
+    .btn-secondary:hover:not(:disabled) { border-color: color-mix(in oklab, var(--mt-fg) 25%, var(--mt-line)); }
+    .btn-ghost { @apply text-fg-2; }
+    .btn-ghost:hover:not(:disabled) { @apply bg-surface-2 text-fg; }
+    .btn-danger { background: var(--mt-ko); color: #fff; }
+    .btn-xl { min-height: 56px; font-size: 17px; border-radius: 14px; padding-inline: 1.25rem; }
+    .btn-sm { min-height: 36px; font-size: 14px; padding-inline: 0.75rem; }
+    .btn-icon { padding: 0; width: 44px; }
+
+    /* Campi */
+    .field { @apply flex flex-col gap-1.5; }
+    .field-label { @apply text-[13px] font-semibold text-fg-2; }
+    .field-hint { @apply text-[13px] text-muted; }
+    .field-error { @apply text-[13px] font-semibold text-ko flex items-center gap-1.5; }
+    .input {
+        @apply w-full rounded-[var(--radius-md)] bg-bg-2 text-fg border border-line px-3.5;
+        min-height: 44px;
+        font-size: 16px;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .input::placeholder { color: var(--mt-muted); }
+    .input:focus { outline: none; border-color: var(--mt-accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--mt-accent) 25%, transparent); }
+    .input[aria-invalid='true'] { border-color: var(--mt-ko); }
+    select.input { padding-right: 2.25rem; }
+
+    /* Stati: colore + icona + testo */
+    .status {
+        --c: var(--mt-stop);
+        @apply inline-flex items-center gap-1.5 rounded-full py-1 pr-2.5 pl-2 text-[13px] font-semibold whitespace-nowrap;
+        color: var(--c);
+        background: color-mix(in oklab, var(--c) 14%, transparent);
+        border: 1px solid color-mix(in oklab, var(--c) 35%, transparent);
+    }
+    .status .mt-icon { width: 1rem; height: 1rem; }
+    .status-ok { --c: var(--mt-ok); }
+    .status-ko { --c: var(--mt-ko); }
+    .status-mnt { --c: var(--mt-mnt); }
+    .status-stop { --c: var(--mt-stop); }
+    .status-warn { --c: var(--mt-warn); }
+    .status-accent { --c: var(--mt-accent); }
+
+    /* Avvisi in pagina */
+    .alert {
+        --c: var(--mt-mnt);
+        @apply flex items-start gap-3 rounded-[var(--radius-lg)] p-3.5 text-sm;
+        background: color-mix(in oklab, var(--c) 10%, var(--mt-surface));
+        border: 1px solid color-mix(in oklab, var(--c) 35%, transparent);
+    }
+    .alert > .mt-icon { color: var(--c); margin-top: 1px; }
+    .alert-ok { --c: var(--mt-ok); }
+    .alert-ko { --c: var(--mt-ko); }
+    .alert-warn { --c: var(--mt-warn); }
+
+    /* Scorciatoie */
+    .kbd {
+        @apply inline-flex items-center rounded-md border border-line px-1.5 font-mono text-[11px] text-muted;
+        min-height: 20px;
+    }
+
+    /* Navigazione */
+    .nav-item {
+        @apply flex items-center gap-3 rounded-[10px] px-3 text-sm font-medium text-fg-2;
+        min-height: 40px;
+        transition: background-color 0.15s, color 0.15s;
+    }
+    .nav-item:hover { @apply bg-surface-2 text-fg; }
+    .nav-item[aria-current='page'] { color: var(--mt-fg); background: color-mix(in oklab, var(--mt-accent) 14%, transparent); }
+    .nav-item[aria-current='page'] .mt-icon { color: var(--mt-accent); }
+    .nav-item[aria-disabled='true'] { opacity: 0.5; pointer-events: none; }
+
+    /* Tabelle dense per PC */
+    .table { @apply w-full text-[13px]; border-collapse: collapse; }
+    .table th { @apply px-3 py-2 text-left text-xs font-semibold text-muted whitespace-nowrap border-b border-line; }
+    .table td { @apply px-3 py-2 border-b border-line-soft; }
+    .table tbody tr:hover td { @apply bg-surface-2; }
+
+    /* Dati */
+    .num { font-variant-numeric: tabular-nums; }
+    .code { @apply font-mono text-[12.5px] text-fg-2; }
+}
+
+/* ---------- Struttura dell'app ---------- */
+@layer components {
+    .app-shell { min-height: 100dvh; }
+    .app-sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: calc(var(--mt-sidebar-w) + var(--safe-left));
+        padding-left: var(--safe-left);
+    }
+    .app-main { min-height: 100dvh; }
+    @media (min-width: 1024px) {
+        .app-main { padding-left: calc(var(--mt-sidebar-w) + var(--safe-left)); }
+    }
+    .app-topbar {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        padding-top: var(--safe-top);
+        padding-left: max(1rem, var(--safe-left));
+        padding-right: max(1rem, var(--safe-right));
+    }
+    .app-content {
+        padding-left: max(1rem, var(--safe-left));
+        padding-right: max(1rem, var(--safe-right));
+        padding-bottom: calc(var(--mt-bottomnav-h) + var(--safe-bottom) + 1.5rem);
+    }
+    @media (min-width: 1024px) {
+        .app-content { padding-bottom: 2.5rem; padding-left: 2rem; padding-right: max(2rem, var(--safe-right)); }
+        .app-topbar { padding-left: 2rem; padding-right: max(2rem, var(--safe-right)); }
+    }
+    .bottom-nav {
+        position: fixed;
+        inset: auto 0 0 0;
+        z-index: 40;
+        padding-bottom: var(--safe-bottom);
+        padding-left: var(--safe-left);
+        padding-right: var(--safe-right);
+    }
+    .bottom-nav a {
+        @apply flex flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted;
+        min-height: 52px;
+        min-width: 44px;
+    }
+    .bottom-nav a[aria-current='page'] { color: var(--mt-accent); }
+    .bottom-nav .fab {
+        @apply grid place-items-center rounded-[18px];
+        width: 58px;
+        height: 58px;
+        margin-top: -26px;
+        color: var(--mt-on-accent);
+        background: linear-gradient(180deg, var(--mt-accent-2), var(--mt-accent));
+        box-shadow: 0 10px 24px -8px var(--mt-accent);
+    }
+    .bottom-nav .fab .mt-icon { width: 28px; height: 28px; }
+
+    /* Schede con inclinazione 3D (attivata da Alpine, x-tilt) */
+    .tilt { transform-style: preserve-3d; transition: transform 0.2s ease, box-shadow 0.2s ease; will-change: transform; }
+}
+
+/* ---------- Movimento ---------- */
+@keyframes mt-rise { from { opacity: 0; transform: translateY(6px); } }
+.page-enter { animation: mt-rise 0.35s var(--ease-out-soft) both; }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

@@ -1,0 +1,50 @@
+<?php
+
+use App\Support\Setup\SystemStatus;
+use App\Support\Update\Updater;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schedule;
+
+/*
+|--------------------------------------------------------------------------
+| Pianificazioni
+|--------------------------------------------------------------------------
+|
+| Sul server basta una sola voce di cron, ogni minuto:
+|   * * * * * /usr/local/bin/php /percorso/manutrack/artisan schedule:run >> /dev/null 2>&1
+|
+| Tutti i compiti sono eseguiti dentro lo stesso processo PHP (Schedule::call),
+| perché sugli hosting condivisi proc_open/exec sono spesso disabilitati.
+| Nessun processo resta attivo dopo la fine del minuto.
+|
+*/
+
+// Segnale di vita del cron, mostrato nella pagina Sistema
+Schedule::call(function (): void {
+    Cache::forever(SystemStatus::CRON_KEY, now()->toIso8601String());
+})->everyMinute()->name('manutrack:heartbeat');
+
+// Aggiornamento automatico: solo con pacchetto completo e dopo il tempo di quiete
+Schedule::call(function (): void {
+    app(Updater::class)->runAutomatic();
+})->everyMinute()->name('manutrack:auto-update')->withoutOverlapping(30);
+
+// Code: si svuotano e il processo termina (niente worker permanenti)
+Schedule::call(function (): void {
+    if (config('queue.default') === 'sync') {
+        return;
+    }
+    Artisan::call('queue:work', [
+        '--stop-when-empty' => true,
+        '--max-time' => 50,
+        '--tries' => 3,
+        '--sleep' => 1,
+    ]);
+})->everyMinute()->name('manutrack:queue')->withoutOverlapping(10);
+
+// Pulizie periodiche
+Schedule::call(function (): void {
+    Artisan::call('queue:prune-failed', ['--hours' => 24 * 30]);
+    Artisan::call('queue:prune-batches', ['--hours' => 24 * 7]);
+})->dailyAt('03:30')->name('manutrack:prune');

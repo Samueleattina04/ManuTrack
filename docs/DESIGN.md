@@ -1,0 +1,142 @@
+# Design system di ManuTrack
+
+Riferimento per colori, caratteri, spaziature, componenti e icone. La versione dal vivo è la pagina **Design system** dell'app (`/design`). L'anteprima approvata è in `docs/anteprima/stile.html`.
+
+## Principi
+
+1. **Il colore forte è riservato allo stato.** Come nelle interfacce HMI ad alte prestazioni usate in fabbrica, i fondi sono neutri e calmi. Il colore pieno segnala ciò che richiede attenzione: guasto, scadenza, macchina ferma.
+2. **Mai solo colore.** Ogni stato ha colore + icona + testo. Si legge anche con i guanti, sotto il sole, da chi non distingue i colori o con lo schermo in scala di grigi.
+3. **Telefono e PC hanno compiti diversi:**
+   - telefono: una mano, bersagli grandi, poche scelte a pulsanti;
+   - PC: tabelle dense, filtri, scorciatoie, più colonne.
+4. **Il 3D ha uno scopo:** logo d'ingresso, pianta dello stabilimento, anteprima della macchina. Le schermate operative restano leggere. Il 3D si carica solo dove serve e ha sempre una versione 2D di riserva.
+5. **Movimento misurato.** Transizioni brevi (150–350 ms), nessuna animazione che blocchi un'azione. Con `prefers-reduced-motion` il movimento si ferma.
+
+## Colori
+
+I token sono variabili CSS in `resources/css/app.css`.
+- **Tema scuro (predefinito):** valori su `:root`.
+- **Tema chiaro:** valori su `:root[data-theme="light"]`.
+
+Il tema si sceglie tra *Scuro*, *Chiaro* e *Come il dispositivo* e resta salvato sul dispositivo. Le classi Tailwind usano gli stessi token: `bg-surface`, `text-muted`, `border-line`, `text-ok`, ecc.
+
+### Neutri (grafite con una punta di blu)
+
+| Token | Scuro | Chiaro | Uso |
+|---|---|---|---|
+| `--mt-bg` | `#0C0F14` | `#EDEFF2` | fondo della pagina |
+| `--mt-bg-2` | `#10141A` | `#F4F5F7` | fondo dei campi |
+| `--mt-surface` | `#151A21` | `#FFFFFF` | schede, barra laterale |
+| `--mt-surface-2` | `#1C222B` | `#F5F6F8` | elementi rialzati, righe evidenziate |
+| `--mt-line` | `#29303B` | `#D6DAE0` | bordi |
+| `--mt-fg` | `#E8EBF0` | `#10141A` | testo |
+| `--mt-fg-2` | `#B6BDC8` | `#39414D` | testo secondario |
+| `--mt-muted` | `#8C95A3` | `#5B6472` | etichette e note (AA su fondo) |
+
+### Accento (dalla palette dell'azienda)
+
+La palette si sceglie in installazione e, dalla fase 2, nelle impostazioni. Le variabili `--acc-*` e `--logo-l*` vengono scritte nella pagina da `<x-head>` (vedi `App\Support\Brand\Brand::cssVariables()`).
+
+| Palette | Accento scuro | Accento chiaro | Faccia chiara M | Faccia scura M |
+|---|---|---|---|---|
+| **Grafite e Rame** (predefinita) | `#E8915A` | `#A64B17` | `#EE9455` / `#DD7536` | `#5E2910` / `#33190D` |
+| Acciaio e Ciano | `#3FCBE4` | `#0A6C80` | `#3CC6E0` / `#169FB9` | `#0C3B47` / `#0A2830` |
+| Ardesia e Indaco | `#9C96FF` | `#4B3FCF` | `#9089FF` / `#6A5EEE` | `#28226B` / `#1C184A` |
+
+Il testo sopra l'accento usa `--mt-on-accent`: quasi nero nel tema scuro, bianco nel tema chiaro.
+
+### Stati (indipendenti dalla palette)
+
+| Token | Scuro | Chiaro | Significato | Icona |
+|---|---|---|---|---|
+| `--mt-ok` | `#3DD68C` | `#137443` | operativa, completato | `check-circle` |
+| `--mt-ko` | `#FF6B6F` | `#BF1F2A` | guasto, critico, scaduto | `alert-triangle` |
+| `--mt-mnt` | `#6AA6FF` | `#1A5BCC` | in manutenzione (blu, come le lampade andon) | `wrench` |
+| `--mt-stop` | `#A5AEBB` | `#556070` | ferma, bassa priorità | `pause-circle` |
+| `--mt-warn` | `#F2C14E` | `#7D5C00` | scadenza vicina, in attesa | `clock` |
+
+Tutti i colori di stato hanno contrasto **AA (≥ 4,5:1)** sul proprio fondo, sia da soli sia dentro le etichette di stato.
+
+## Caratteri
+
+Tutti con licenza SIL OFL, ospitati dall'app tramite `@fontsource`. Nessuna richiesta a Google Fonts.
+
+| Ruolo | Carattere | Pesi | Note |
+|---|---|---|---|
+| Titoli (`font-display`, `h1–h3`) | **Archivo** variabile | 600–800 | larghezza 112–115% (`font-stretch`) |
+| Testo e interfaccia (`font-sans`) | **IBM Plex Sans** | 400, 500, 600 | corpo 15 px; **16 px nei campi**, per evitare lo zoom su iPhone |
+| Codici e numeri (`font-mono`, `.code`) | **IBM Plex Mono** | 500 | codici macchina, numeri d'ordine, versioni |
+
+I numeri in colonna usano `.num` (`tabular-nums`). Le etichette in maiuscolo (`.eyebrow`) hanno spaziatura 0,12 em.
+
+## Spaziature, angoli, ombre
+
+- Scala di Tailwind (multipli di 4 px). Tra le schede si usa `gap-3` (12 px), tra le sezioni `gap-6` (24 px), dentro le schede `p-4`/`p-5`.
+- Angoli: `--radius-md` 12 px (campi, pulsanti), `--radius-lg` 14 px (schede), `--radius-xl` 22 px (pannelli grandi).
+- Ombre: `--mt-shadow` (schede), `--mt-shadow-pop` (in rilievo, inclinazione 3D).
+- Vetro smerigliato (`.glass`) solo dove migliora la leggibilità sopra contenuti che scorrono: barra superiore, barra in basso, finestre.
+
+## Struttura delle pagine
+
+| | PC (≥ 1024 px) | Telefono |
+|---|---|---|
+| Navigazione | barra laterale fissa (15,5 rem) con scorciatoie | barra in basso con 4 voci + pulsante centrale "Segnala" |
+| Barra superiore | titolo, ricerca `Ctrl K` | logo, titolo, ricerca |
+| Contenuto | fino a 6xl, più colonne | una colonna |
+
+- **Aree sicure:** le variabili `--safe-top/bottom/left/right` (da `env(safe-area-inset-*)`) proteggono notch e barra Home. Il meta viewport usa `viewport-fit=cover`.
+- **Altezze dinamiche:** `min-height: 100dvh`; nessun `100vh` nelle strutture principali.
+- **Niente rimbalzo:** `overscroll-behavior-y: none` sul body.
+
+## Componenti
+
+| Componente | Uso | Note |
+|---|---|---|
+| `<x-logo variant="full|mark|horizontal" :shadow="true">` | marchio | colori da `--logo-faccia-chiara`, `--logo-faccia-scura`, `--logo-ombra`, `--logo-testo`; classi `logo-mono-light`, `logo-mono-dark`, `logo-on-dark`, `logo-on-light` |
+| `<x-icon name="wrench" />` | icona Lucide | 20 px, tratto 2; `label="…"` per renderla leggibile dagli screen reader |
+| `<x-status :status="$enum" />` o `<x-status tone="ok" icon="check-circle">Testo</x-status>` | stato | sempre icona + testo |
+| `<x-priority :priority="$enum" />` | priorità | 1–4 barre + testo |
+| `.btn` + `.btn-primary`, `.btn-secondary`, `.btn-ghost`, `.btn-danger`, `.btn-xl`, `.btn-sm`, `.btn-icon` | pulsanti | altezza minima **44 px**; **56 px** (`.btn-xl`) per le azioni da campo |
+| `<x-form.input name label hint>` | campo con etichetta, aiuto ed errore | `aria-invalid` e `aria-describedby` automatici |
+| `.card`, `.alert(-ok/-warn/-ko)`, `.kbd`, `.table`, `.eyebrow` | superfici, avvisi, tasti, tabelle dense, sopratitoli | |
+| `<x-theme-switcher />` | scelta del tema | |
+| `x-tilt` (Alpine) | inclinazione 3D al passaggio del mouse | solo puntatori fini, disattivata con movimento ridotto |
+| `x-count-up` (Alpine) | numero che si anima | il valore finale è già nel markup |
+
+## Logo
+
+- **Originale:** `public/images/logo-originale.png`, non modificato.
+- **Geometria:** ricalcata dall'originale in `App\Support\Brand\Brand`, in unità del file 1200×1200 con origine nell'angolo della M:
+  - faccia chiara `0,0 203,202 203,339 90,227 86,377 0,292`;
+  - faccia scura speculare;
+  - ombra portata di 90 unità in diagonale.
+- **Scritta:** Open Sans Bold convertita in tracciati (`npm run brand` → `resources/brand/wordmark.json`). Ha la stessa larghezza (780 unità) e la stessa altezza delle maiuscole (107) dell'originale, così il logo non dipende dai font installati.
+- **Effetto 3D:** due toni della stessa famiglia, una sfumatura scura in alto sulla faccia chiara (come nell'originale), un riflesso leggero e l'ombra.
+- **Varianti:** completa, solo M, orizzontale, monocromatica chiara e scura, su fondo scuro e su fondo chiaro.
+- **Icone dell'app:** `php artisan manutrack:icons` le disegna in PHP (GD) per ogni palette in `public/icons/<palette>/`:
+  - `icon-192/512`, `maskable-192/512` con la M dentro il cerchio sicuro all'80%;
+  - `apple-touch-icon` 180;
+  - `favicon-32`, `favicon.svg`.
+  Lo sfondo è pieno, grafite con un alone del colore della palette.
+
+## Accessibilità
+
+- Contrasto **WCAG AA** per testo e stati, in entrambi i temi.
+- Focus sempre visibile (`:focus-visible`, contorno dell'accento).
+- Navigazione completa da tastiera:
+  - collegamento "Vai al contenuto";
+  - palette comandi con le frecce;
+  - `Esc` chiude le finestre.
+- Etichette per gli screen reader su icone senza testo, logo e finestre di dialogo (`role="dialog"`, `aria-modal`).
+- Bersagli di tocco di almeno 44 × 44 px.
+
+## Movimento
+
+- Ingresso pagina: `mt-rise`, 350 ms.
+- Pulsanti: compressione al tocco (`scale(.97)`).
+- Schede: inclinazione 3D di massimo 8–10°.
+- `prefers-reduced-motion: reduce` porta a zero animazioni e transizioni.
+
+## Icone
+
+Set **Lucide** (ISC), griglia 24 px, tratto 2, angoli arrotondati. Per aggiungerne una basta copiare il contenuto SVG da lucide.dev in `resources/icons/lucide.php`.
