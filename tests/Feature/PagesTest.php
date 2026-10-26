@@ -42,7 +42,7 @@ it('ha le icone pre-generate per ogni palette', function (string $palette) {
     }
     [$w, $h] = getimagesize(public_path("icons/{$palette}/apple-touch-icon.png"));
     expect([$w, $h])->toBe([180, 180]);
-})->with(['rame', 'ciano', 'indaco']);
+})->with(['rame', 'ciano', 'indaco', 'pistacchio']);
 
 it('disegna le icone con GD', function () {
     $png = app(IconRenderer::class)->png(config('manutrack.palettes.rame'), 48, 'maskable');

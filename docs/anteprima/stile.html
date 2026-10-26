@@ -27,9 +27,10 @@
   /* Tema scuro (predefinito) */
   --bg:#0C0F14; --bg-2:#10141A; --surface:#151A21; --surface-2:#1C222B; --line:#29303B; --line-soft:rgba(255,255,255,.06);
   --fg:#E8EBF0; --fg-2:#B6BDC8; --muted:#8C95A3;
-  --accent:var(--acc-d); --accent-2:var(--acc2-d); --on-accent:var(--acc-ink-d); --glow:var(--glow-d);
+  --accfg-d:var(--acc-d); --accfg-l:var(--acc-l);
+  --accent:var(--acc-d); --accent-2:var(--acc2-d); --on-accent:var(--acc-ink-d); --glow:var(--glow-d); --accent-fg:var(--accfg-d);
   --glass:rgba(22,27,35,.66);
-  --ok:#3DD68C; --ko:#FF6B6F; --mnt:#6AA6FF; --stop:#A5AEBB; --warn:#F2C14E;
+  --ok:#2FD3B0; --ko:#FF6B6F; --mnt:#6AA6FF; --stop:#A5AEBB; --warn:#F2C14E;
   --logo-faccia-chiara:var(--lc-d); --logo-faccia-scura:var(--ls-d); --logo-testo:#F2F3F5; --logo-ombra-a:.55;
   --icon-bg-1:#171C24; --icon-bg-2:#0B0E12;
   --shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 18px 40px -18px rgba(0,0,0,.7);
@@ -40,9 +41,9 @@
     color-scheme: light;
     --bg:#EDEFF2; --bg-2:#F4F5F7; --surface:#FFFFFF; --surface-2:#F5F6F8; --line:#D6DAE0; --line-soft:rgba(15,20,30,.06);
     --fg:#10141A; --fg-2:#39414D; --muted:#5B6472;
-    --accent:var(--acc-l); --accent-2:var(--acc2-l); --on-accent:var(--acc-ink-l); --glow:var(--glow-l);
+    --accent:var(--acc-l); --accent-2:var(--acc2-l); --on-accent:var(--acc-ink-l); --glow:var(--glow-l); --accent-fg:var(--accfg-l);
     --glass:rgba(255,255,255,.7);
-    --ok:#137443; --ko:#BF1F2A; --mnt:#1A5BCC; --stop:#556070; --warn:#7D5C00;
+    --ok:#0A7563; --ko:#BF1F2A; --mnt:#1A5BCC; --stop:#556070; --warn:#7D5C00;
     --logo-faccia-chiara:var(--lc-l); --logo-faccia-scura:var(--ls-l); --logo-testo:#10141A; --logo-ombra-a:.2;
     --icon-bg-1:#171C24; --icon-bg-2:#0B0E12;
     --shadow:0 1px 2px rgba(15,20,30,.06), 0 14px 32px -16px rgba(15,20,30,.22);
@@ -52,14 +53,15 @@
   color-scheme: light;
   --bg:#EDEFF2; --bg-2:#F4F5F7; --surface:#FFFFFF; --surface-2:#F5F6F8; --line:#D6DAE0; --line-soft:rgba(15,20,30,.06);
   --fg:#10141A; --fg-2:#39414D; --muted:#5B6472;
-  --accent:var(--acc-l); --accent-2:var(--acc2-l); --on-accent:var(--acc-ink-l); --glow:var(--glow-l);
+  --accent:var(--acc-l); --accent-2:var(--acc2-l); --on-accent:var(--acc-ink-l); --glow:var(--glow-l); --accent-fg:var(--accfg-l);
   --glass:rgba(255,255,255,.7);
-  --ok:#137443; --ko:#BF1F2A; --mnt:#1A5BCC; --stop:#556070; --warn:#7D5C00;
+  --ok:#0A7563; --ko:#BF1F2A; --mnt:#1A5BCC; --stop:#556070; --warn:#7D5C00;
   --logo-faccia-chiara:var(--lc-l); --logo-faccia-scura:var(--ls-l); --logo-testo:#10141A; --logo-ombra-a:.2;
   --icon-bg-1:#171C24; --icon-bg-2:#0B0E12;
   --shadow:0 1px 2px rgba(15,20,30,.06), 0 14px 32px -16px rgba(15,20,30,.22);
 }
 :root[data-palette="ciano"] { --acc-d:#3FCBE4; --acc2-d:#93E5F3; --acc-ink-d:#03161B; --acc-l:#0A6C80; --acc2-l:#0E879F; --lc-d:#3CC6E0; --ls-d:#0C3B47; --lc-l:#169FB9; --ls-l:#0A2830; --glow-d:rgba(63,203,228,.2); --glow-l:rgba(10,108,128,.12); }
+:root[data-palette="pistacchio"] { --acc-d:#3A7D3F; --acc2-d:#3E8343; --acc-ink-d:#FFFFFF; --acc-l:#2A5F2F; --acc2-l:#336E38; --acc-ink-l:#FFFFFF; --accfg-d:#B5D67F; --accfg-l:#2A5F2F; --lc-d:#A8CB6E; --ls-d:#24502A; --lc-l:#8DB451; --ls-l:#1E4224; --glow-d:rgba(168,203,110,.18); --glow-l:rgba(141,180,81,.16); }
 :root[data-palette="indaco"] { --acc-d:#9C96FF; --acc2-d:#C6C2FF; --acc-ink-d:#0E0B2A; --acc-l:#4B3FCF; --acc2-l:#6357E3; --lc-d:#9089FF; --ls-d:#28226B; --lc-l:#6A5EEE; --ls-l:#1C184A; --glow-d:rgba(156,150,255,.2); --glow-l:rgba(75,63,207,.12); }
 
 *{box-sizing:border-box}
@@ -72,12 +74,12 @@ h1{font-size:clamp(30px,5vw,52px);font-weight:750;line-height:1.05}
 h2{font-size:clamp(22px,3vw,30px);font-weight:700}
 h3{font-size:16px;font-weight:650;font-stretch:105%}
 p{margin:0;max-width:65ch;color:var(--fg-2)}
-.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-fg)}
 .sec-head{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
 .mono{font-family:var(--f-mono)}
 .num{font-variant-numeric:tabular-nums}
 svg.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+:focus-visible{outline:2px solid var(--accent-fg);outline-offset:2px;border-radius:6px}
 
 /* Barra superiore */
 .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
@@ -89,7 +91,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
 .seg button{all:unset;cursor:pointer;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:500;color:var(--fg-2);display:inline-flex;gap:6px;align-items:center;min-height:30px}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
-.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.seg button:focus-visible{outline:2px solid var(--accent-fg);outline-offset:1px}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
 
 /* Hero */
@@ -155,7 +157,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .btn{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:12px;font-weight:600;font-size:15px;transition:transform .12s ease, box-shadow .2s ease, background .2s}
 .btn:active{transform:scale(.97)}
-.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:focus-visible{outline:2px solid var(--accent-fg);outline-offset:2px}
 .btn-primary{background:linear-gradient(180deg,var(--accent-2),var(--accent));color:var(--on-accent);box-shadow:0 8px 20px -8px var(--accent)}
 .btn-ghost{background:var(--surface-2);color:var(--fg);border:1px solid var(--line)}
 .btn-danger{background:var(--ko);color:#fff}
@@ -272,6 +274,46 @@ td.code{font-family:var(--f-mono);font-size:12px;color:var(--fg-2)}
 .note{font-size:13px;color:var(--muted)}
 footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line-soft);padding-top:20px}
 
+/* Sezione Pistacchio: token locali, indipendenti dai selettori in alto */
+.pv{--ok:#2FD3B0;--ko:#FF6B6F;--mnt:#6AA6FF;--stop:#A5AEBB;--warn:#F2C14E}
+.pv-d{color-scheme:dark;--bg:#0C0F14;--bg-2:#10141A;--surface:#151A21;--surface-2:#1C222B;--line:#29303B;--line-soft:rgba(255,255,255,.06);--fg:#E8EBF0;--fg-2:#B6BDC8;--muted:#8C95A3;--accent:#3A7D3F;--accent-2:#3E8343;--on-accent:#FFFFFF;--accent-fg:#B5D67F;--soft:#A8CB6E;--glow:rgba(168,203,110,.18);--glass:rgba(22,27,35,.82);--logo-faccia-chiara:#A8CB6E;--logo-faccia-scura:#24502A;--logo-testo:#F2F3F5;--logo-ombra-a:.55;--cl-a:#A8CB6E;--cl-b:#3A7D3F;color:var(--fg);background:var(--bg)}
+.pv-l{color-scheme:light;--ok:#0A7563;--ko:#BF1F2A;--mnt:#1A5BCC;--stop:#556070;--warn:#7D5C00;--bg:#EDEFF2;--bg-2:#F4F5F7;--surface:#FFFFFF;--surface-2:#F5F6F8;--line:#D6DAE0;--line-soft:rgba(15,20,30,.07);--fg:#10141A;--fg-2:#39414D;--muted:#5B6472;--accent:#2A5F2F;--accent-2:#336E38;--on-accent:#FFFFFF;--accent-fg:#2A5F2F;--soft:#8DB451;--glow:rgba(141,180,81,.18);--glass:rgba(255,255,255,.86);--logo-faccia-chiara:#8DB451;--logo-faccia-scura:#1E4224;--logo-testo:#10141A;--logo-ombra-a:.2;--cl-a:#8DB451;--cl-b:#2A5F2F;color:var(--fg);background:var(--bg)}
+.pv .btn-primary{background:linear-gradient(180deg,var(--accent-2),var(--accent));color:var(--on-accent);box-shadow:0 8px 20px -10px var(--accent)}
+.pv .eyebrow,.pv-acc-text{color:var(--accent-fg)}
+.pv-acc-text{font-weight:600;font-size:14px}
+.pv .nav.on{background:color-mix(in oklab,var(--soft) 16%,transparent);color:var(--fg)}
+.pv .nav.on svg{color:var(--accent-fg)}
+.pv .bnav a.on{color:var(--accent-fg)}
+.pv .bnav .fab{color:var(--on-accent)}
+.pv-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:8px}
+.pv-strip .note{grid-column:1/-1}
+.pv-chipbox{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:16px;border-radius:var(--radius-lg);border:1px solid var(--line)}
+.pv-tag{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);width:100%}
+.pv-pcs{display:grid;gap:16px}
+.phones-4{gap:18px}
+.phones-4 .phone{width:268px;border-radius:40px}
+.phones-4 .screen{height:560px;border-radius:30px}
+.phones-4 .wo .t{font-size:13px}
+.pv .app{min-height:0}
+.pv .side .client{display:flex;align-items:center;min-height:44px;padding:4px 8px 14px}
+.pv .side .client svg{height:36px;width:auto}
+.pv .side .foot{margin-top:auto;display:flex;align-items:center;gap:8px;padding:12px 8px 0;border-top:1px solid var(--line-soft);font-size:11.5px;color:var(--muted)}
+.pv .side .foot svg{width:18px;height:auto}
+.pv .tb{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line-soft);background:var(--glass)}
+.pv .tb h3{font-size:18px;flex:1}
+.pv .mini-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pv .phone-top{display:flex;align-items:center;gap:10px;padding:6px 16px 10px;border-bottom:1px solid var(--line-soft)}
+.pv .phone-top svg.cl{height:26px;width:auto}
+.pv .phone-top b{font-family:var(--f-display);font-stretch:110%;font-size:17px;margin-left:auto}
+.pv .login{flex:1;display:flex;flex-direction:column;gap:14px;padding:26px 22px 12px;background:radial-gradient(420px 260px at 50% 0%,var(--glow),transparent 70%)}
+.pv .login .cl-big{display:flex;justify-content:center;padding:18px 0 6px}
+.pv .login .cl-big svg{height:56px;width:auto}
+.pv .login h3{font-size:22px;text-align:center}
+.pv .login .powered{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted)}
+.pv .login .powered svg{width:16px;height:auto}
+.pv .field input{background:var(--bg-2)}
+@media (max-width:960px){.pv-strip{grid-template-columns:1fr}.pv .mini-kpis{grid-template-columns:1fr}}
+
 @media (max-width: 960px){
   .hero{grid-template-columns:1fr}
   .variants{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -320,12 +362,13 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line-soft);p
 
 <div class="wrap">
   <header class="topbar">
-    <div class="brand"><svg data-logo="horizontal" role="img" aria-label="ManuTrack"></svg><span class="mono" style="font-size:12px;color:var(--muted);font-weight:500">Direzione visiva · bozza 2</span></div>
+    <div class="brand"><svg data-logo="horizontal" role="img" aria-label="ManuTrack"></svg><span class="mono" style="font-size:12px;color:var(--muted);font-weight:500">Direzione visiva · bozza 3</span></div>
     <div class="controls">
       <div class="seg" role="group" aria-label="Palette">
         <button type="button" data-pal="rame" aria-pressed="true"><span class="dot" style="background:#E8915A"></span>Grafite e Rame</button>
         <button type="button" data-pal="ciano" aria-pressed="false"><span class="dot" style="background:#3FCBE4"></span>Acciaio e Ciano</button>
         <button type="button" data-pal="indaco" aria-pressed="false"><span class="dot" style="background:#9C96FF"></span>Ardesia e Indaco</button>
+        <button type="button" data-pal="pistacchio" aria-pressed="false"><span class="dot" style="background:#A8CB6E"></span>Pistacchio</button>
       </div>
       <div class="seg" role="group" aria-label="Tema">
         <button type="button" data-th="dark" aria-pressed="true"><svg class="ic" style="width:16px;height:16px"><use href="#i-moon"/></svg>Scuro</button>
@@ -348,7 +391,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line-soft);p
         <div class="fact"><b>Logo a variabili</b><span>cambia con il tema e con i colori del cliente</span></div>
         <div class="fact"><b>WCAG AA</b><span>contrasti verificati qui sotto</span></div>
       </div>
-      <p class="note">Usa i selettori in alto per confrontare le tre palette e i due temi: tutta la pagina, logo e icone compresi, si ricolora dagli stessi token.</p>
+      <p class="note">Usa i selettori in alto per confrontare le quattro palette e i due temi: tutta la pagina, logo e icone compresi, si ricolora dagli stessi token.</p>
     </div>
   </section>
 
@@ -549,6 +592,39 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line-soft);p
     </div>
   </section>
 
+  <section aria-labelledby="h-pist">
+    <div class="sec-head"><span class="eyebrow">08 · Pistacchio e logo del cliente</span><h2 id="h-pist">Quarta preimpostazione: Pistacchio</h2>
+      <p>Pulsanti in verde foglia scuro con testo bianco (contrasto 5,0:1 nel tema scuro, 7,6:1 nel chiaro). Il pistacchio chiaro resta per testi d'accento sul fondo scuro, aloni, evidenziazioni e la faccia chiara della M. Il logo qui sotto è un <b>segnaposto di prova</b>: quello vero lo carica l'amministratore in Impostazioni › Azienda, e i colori definitivi verranno campionati da lì.</p></div>
+
+    <div class="pv-strip">
+      <div class="pv pv-d pv-chipbox"><span class="pv-tag">Scuro</span>
+        <button class="btn btn-primary" type="button">Nuovo ordine</button>
+        <span class="status s-ok"><svg class="ic"><use href="#i-ok"/></svg>Operativa</span>
+        <span class="pv-acc-text">Testo d'accento</span>
+      </div>
+      <div class="pv pv-l pv-chipbox"><span class="pv-tag">Chiaro</span>
+        <button class="btn btn-primary" type="button">Nuovo ordine</button>
+        <span class="status s-ok"><svg class="ic"><use href="#i-ok"/></svg>Operativa</span>
+        <span class="pv-acc-text">Testo d'accento</span>
+      </div>
+      <p class="note">Lo stato "Operativa" passa, per tutte le palette, a un verde acqua (tonalità 167–170°) distinto dal verde foglia dell'accento (124–126°) anche per luminosità; resta sempre con icona e testo, e ha la forma di etichetta, non di pulsante pieno.</p>
+    </div>
+
+    <div class="sub">PC · tema scuro e chiaro</div>
+    <div class="pv-pcs">
+      <div class="pv pv-d window" data-pv-pc></div>
+      <div class="pv pv-l window" data-pv-pc></div>
+    </div>
+
+    <div class="sub">Telefono · intestazione e pagina di accesso</div>
+    <div class="phones phones-4">
+      <div class="phone"><div class="screen pv pv-d" data-pv-phone></div></div>
+      <div class="phone"><div class="screen pv pv-l" data-pv-phone></div></div>
+      <div class="phone"><div class="screen pv pv-d" data-pv-login></div></div>
+      <div class="phone"><div class="screen pv pv-l" data-pv-login></div></div>
+    </div>
+  </section>
+
   <footer>Anteprima di stile per l'approvazione. Tutti i nomi di macchine, persone e aziende sono inventati. Nell'app finale i font saranno ospitati localmente e il logo sarà un componente Blade con le stesse variabili.</footer>
 </div>
 
@@ -622,7 +698,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line-soft);p
   function lum(rgb){ return rgb.map(function(v){ v/=255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4); }).reduce(function(a,v,i){ return a + v*[.2126,.7152,.0722][i]; }, 0); }
   function ratio(a,b){ var x = lum(hexToRgb(a)), y = lum(hexToRgb(b)); return (Math.max(x,y)+.05)/(Math.min(x,y)+.05); }
   function tok(n){ return getComputedStyle(root).getPropertyValue(n).trim(); }
-  var brand = [["--bg","Fondo"],["--surface","Superficie"],["--surface-2","Superficie rialzata"],["--line","Bordo"],["--fg","Testo"],["--muted","Testo secondario"],["--accent","Accento"],["--accent-2","Accento chiaro"]];
+  var brand = [["--bg","Fondo"],["--surface","Superficie"],["--surface-2","Superficie rialzata"],["--line","Bordo"],["--fg","Testo"],["--muted","Testo secondario"],["--accent","Accento (pulsanti)"],["--accent-2","Accento chiaro"],["--accent-fg","Accento per testi"]];
   var stat = [["--ok","Operativa"],["--ko","In guasto / critica"],["--mnt","In manutenzione"],["--stop","Ferma"],["--warn","Scadenza / attesa"]];
   function swatches(){
     function render(list, host, onBg){
@@ -750,6 +826,46 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line-soft);p
   document.querySelectorAll("[data-th]").forEach(function(b){ b.addEventListener("click", function(){ setTheme(b.getAttribute("data-th")); }); });
   var initial = root.getAttribute("data-theme") || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
   document.querySelectorAll("[data-th]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-th") === initial)); });
+
+  // Sezione Pistacchio: logo cliente di prova (segnaposto inventato) e mock
+  function clientLogo(cls){
+    return '<svg class="'+(cls||'')+'" viewBox="0 0 330 64" role="img" aria-label="Logo cliente di prova">'+
+      '<path d="M30 6C14 14 8 30 14 50c18-2 30-14 30-32 0-5-1-9-3-12-4 0-8 0-11 0z" style="fill:var(--cl-a)"/>'+
+      '<path d="M14 50C22 36 30 24 41 14" fill="none" style="stroke:var(--cl-b)" stroke-width="3" stroke-linecap="round"/>'+
+      '<path d="M44 58c-2-14 6-26 20-30 4 12-4 26-20 30z" style="fill:var(--cl-b)"/>'+
+      '<text x="76" y="32" style="fill:var(--fg);font-family:var(--f-display);font-weight:750;font-size:25px;font-stretch:108%">Cliente Demo</text>'+
+      '<text x="77" y="52" style="fill:var(--muted);font-family:var(--f-body);font-size:12.5px;letter-spacing:.14em">FRUTTA SECCA · LOGO DI PROVA</text></svg>';
+  }
+  function miniM(){ return '<svg viewBox="0 0 406 378" aria-hidden="true"><polygon points="'+L+'" style="fill:var(--logo-faccia-chiara)"/><polygon points="'+R+'" style="fill:var(--logo-faccia-scura)"/></svg>'; }
+  var nav = [["i-gauge","Panoramica",1],["i-list","Ordini di lavoro"],["i-factory","Macchine"],["i-cal","Preventiva"],["i-box","Magazzino"],["i-bell","Avvisi"]];
+  document.querySelectorAll("[data-pv-pc]").forEach(function(el){
+    el.innerHTML = '<div class="chrome"><i></i><i></i><i></i></div><div class="app">'+
+      '<aside class="side"><div class="client">'+clientLogo()+'</div>'+
+      nav.map(function(n){ return '<div class="nav'+(n[2]?' on':'')+'"><svg class="ic"><use href="#'+n[0]+'"/></svg>'+n[1]+'</div>'; }).join('')+
+      '<div class="foot">'+miniM()+'<span>ManuTrack 0.2.0</span></div></aside>'+
+      '<div><div class="tb"><h3>Panoramica</h3><div class="search" style="max-width:280px"><svg class="ic" style="width:16px;height:16px"><use href="#i-search"/></svg>Cerca…<kbd>Ctrl K</kbd></div><button class="btn btn-primary" type="button"><svg class="ic"><use href="#i-plus"/></svg>Nuovo ordine</button></div>'+
+      '<div class="main"><div class="mini-kpis">'+
+        '<div class="kpi"><div class="lbl">Macchine operative</div><div class="val">118<small>/142</small></div><span class="status s-ok"><svg class="ic"><use href="#i-ok"/></svg>Operativa</span></div>'+
+        '<div class="kpi"><div class="lbl">In guasto</div><div class="val">6</div><span class="status s-ko"><svg class="ic"><use href="#i-ko"/></svg>In guasto</span></div>'+
+        '<div class="kpi"><div class="lbl">Preventivi in scadenza</div><div class="val">4</div><span class="status s-warn"><svg class="ic"><use href="#i-clock"/></svg>Entro 7 giorni</span></div>'+
+      '</div><div class="card"><span class="eyebrow">Linea 1 · Sgusciatura</span><p style="margin-top:6px;font-size:14px">Il logo del cliente sta in alto nella barra laterale; ManuTrack resta in piccolo nel piè di pagina.</p></div></div></div></div>';
+  });
+  document.querySelectorAll("[data-pv-phone]").forEach(function(el){
+    el.innerHTML = '<div class="sbar"><span>9:41</span><span class="island"></span><span>100%</span></div>'+
+      '<div class="phone-top">'+clientLogo('cl')+'<b>Home</b></div>'+
+      '<div class="scr-body"><div class="wo" style="--c:var(--ko)"><div class="b"><div class="t">Sgusciatrice bloccata</div><div class="m"><span class="mono">SG-02</span><span>scaduto ieri</span></div><div class="row"><span class="status s-ko"><svg class="ic"><use href="#i-ko"/></svg>Critica</span></div></div></div>'+
+      '<div class="wo" style="--c:var(--ok)"><div class="b"><div class="t">Tostatrice a nastro</div><div class="m"><span class="mono">TS-01</span><span>nessun ordine aperto</span></div><div class="row"><span class="status s-ok"><svg class="ic"><use href="#i-ok"/></svg>Operativa</span></div></div></div>'+
+      '<button class="btn btn-primary btn-xl" type="button"><svg class="ic"><use href="#i-qr"/></svg>Inquadra il QR</button></div>'+
+      '<nav class="bnav"><a class="on"><svg class="ic"><use href="#i-home"/></svg>Home</a><a><svg class="ic"><use href="#i-list"/></svg>Ordini</a><a aria-label="Segnala"><span class="fab"><svg class="ic"><use href="#i-plus"/></svg></span></a><a><svg class="ic"><use href="#i-bell"/></svg>Avvisi<span class="badge">2</span></a><a><svg class="ic"><use href="#i-user"/></svg>Profilo</a></nav>';
+  });
+  document.querySelectorAll("[data-pv-login]").forEach(function(el){
+    el.innerHTML = '<div class="sbar"><span>9:41</span><span class="island"></span><span>100%</span></div>'+
+      '<div class="login"><div class="cl-big">'+clientLogo()+'</div><h3>Accedi</h3>'+
+      '<div class="field"><label>Email</label><input value="m.bianchi@example.com" readonly></div>'+
+      '<div class="field"><label>Password</label><input type="password" value="password-di-prova" readonly></div>'+
+      '<button class="btn btn-primary btn-xl" type="button">Accedi</button>'+
+      '<div class="powered">'+miniM()+'<span>con ManuTrack</span></div></div>';
+  });
 
   swatches(); sparks(); bars(); donut(); drawIso(); select(machines[0]); counters();
 })();

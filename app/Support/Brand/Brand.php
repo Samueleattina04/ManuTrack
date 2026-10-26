@@ -79,6 +79,8 @@ class Brand
         $map = [
             '--acc-d' => $p['accent_d'], '--acc2-d' => $p['accent2_d'], '--on-acc-d' => $p['on_accent_d'],
             '--acc-l' => $p['accent_l'], '--acc2-l' => $p['accent2_l'], '--on-acc-l' => $p['on_accent_l'],
+            '--acc-fg-d' => $p['accent_fg_d'] ?? $p['accent_d'], '--acc-fg-l' => $p['accent_fg_l'] ?? $p['accent_l'],
+            '--acc-soft-d' => $p['soft_d'] ?? $p['accent_d'], '--acc-soft-l' => $p['soft_l'] ?? $p['accent_l'],
             '--logo-lc-d' => $p['logo_light_d'], '--logo-ls-d' => $p['logo_dark_d'],
             '--logo-lc-l' => $p['logo_light_l'], '--logo-ls-l' => $p['logo_dark_l'],
         ];

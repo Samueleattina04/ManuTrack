@@ -2,7 +2,22 @@
 
 Stato: **approvata** con le correzioni sotto. Sviluppo in corso dalla fase 1. Palette: Grafite e Rame, con Acciaio e Ciano e Ardesia e Indaco come preimpostazioni.
 
-### Correzioni approvate (prevalgono sul resto del documento)
+### Revisione 3: palette Pistacchio e logo del cliente (prevale sul resto del documento)
+- **Quarta preimpostazione "Pistacchio"**, accanto a Grafite e Rame, Acciaio e Ciano, Ardesia e Indaco.
+  - Accento principale (pulsanti, superfici piene): verde foglia scuro con testo bianco. Contrasto 5,0:1 nel tema scuro (`#3A7D3F`) e 7,6:1 nel chiaro (`#2A5F2F`).
+  - Il pistacchio chiaro (`#A8CB6E` / `#8DB451`) serve per aloni, evidenziazioni, la faccia chiara della M e i testi d'accento sul fondo scuro (`#B5D67F`, 11,8:1).
+  - I valori sono **provvisori**: verranno ricampionati dal logo del cliente, che non è arrivato con il messaggio. La campionatura automatica dal logo caricato è prevista nella schermata Impostazioni › Azienda.
+- **Nuovi token** del design system per tutte le palette:
+  - `--mt-accent-fg`: testi e icone d'accento, distinti dal colore dei pulsanti;
+  - `--mt-accent-soft`: aloni ed evidenziazioni.
+- **Stato "operativa" distinguibile dall'accento.** Per tutte le palette passa da verde a verde acqua: `#2FD3B0` nel tema scuro, `#0A7563` nel chiaro, tonalità 167–170° contro 124–126° del verde foglia, con luminosità diversa. Resta sempre con icona e testo e ha la forma di un'etichetta, non di un pulsante pieno.
+- **La M di ManuTrack usa la palette scelta.**
+- **Il logo del cliente non è nel codice dell'app**: lo carica l'amministratore in Impostazioni › Azienda, insieme al colore.
+  - Nell'intestazione (barra laterale su PC, barra superiore su telefono) compare il logo del cliente.
+  - "ManuTrack" compare in piccolo nella pagina di accesso ("con ManuTrack") e nel piè di pagina.
+  - Senza logo caricato si mostra il nome dell'azienda accanto alla M.
+
+### Correzioni approvate in revisione 2
 1. **Aggiornamento automatico dal cron, solo su caricamenti completi.**
    - Lo script di rilascio scrive per ultimo il file `release.json` (versione, data, hash). Senza questo file il cron non aggiorna.
    - Lock su file (`flock`) contro le esecuzioni doppie.

@@ -21,6 +21,9 @@ return [
     ],
 
     // Preimpostazioni di colore. "d" = tema scuro, "l" = tema chiaro.
+    // accent = pulsanti e superfici piene (testo sopra: on_accent);
+    // accent_fg = testi e icone d'accento sul fondo (facoltativo, predefinito = accent);
+    // soft = aloni ed evidenziazioni (facoltativo, predefinito = accent);
     // logo_light/logo_dark sono le due facce della M.
     'palettes' => [
         'rame' => [
@@ -43,6 +46,16 @@ return [
             'accent_l' => '#4B3FCF', 'accent2_l' => '#6357E3', 'on_accent_l' => '#FFFFFF',
             'logo_light_d' => '#9089FF', 'logo_dark_d' => '#28226B',
             'logo_light_l' => '#6A5EEE', 'logo_dark_l' => '#1C184A',
+        ],
+        // Valori provvisori: da ricampionare dal logo del cliente (pistacchio chiaro e verde foglia)
+        'pistacchio' => [
+            'label' => 'Pistacchio',
+            'accent_d' => '#3A7D3F', 'accent2_d' => '#3E8343', 'on_accent_d' => '#FFFFFF',
+            'accent_l' => '#2A5F2F', 'accent2_l' => '#336E38', 'on_accent_l' => '#FFFFFF',
+            'accent_fg_d' => '#B5D67F', 'accent_fg_l' => '#2A5F2F',
+            'soft_d' => '#A8CB6E', 'soft_l' => '#8DB451',
+            'logo_light_d' => '#A8CB6E', 'logo_dark_d' => '#24502A',
+            'logo_light_l' => '#8DB451', 'logo_dark_l' => '#1E4224',
         ],
     ],
 
