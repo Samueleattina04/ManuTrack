@@ -220,6 +220,15 @@ php artisan manutrack:install --company="Nome cliente" --name="Mario Rossi" \
 ```
 Senza `--password` il comando la chiede in modo nascosto (consigliato): una password scritta nel comando resta nella cronologia della shell.
 
+### Dopo l'installazione
+1. Apri `https://<dominio>/login` ed entra con l'email e la password dell'amministratore.
+2. In **Impostazioni** carica il logo dell'azienda (ed eventualmente la versione per il tema scuro) e scegli i colori.
+3. In **Persone** invita i colleghi: ricevono un'email con un link valido 7 giorni.
+
+Per gli inviti e per "password dimenticata" la posta deve funzionare: compila i valori `MAIL_*` di `.env` con la casella creata in DirectAdmin (*E-Mail Accounts*).
+
+Consigliato: attiva la **verifica in due passaggi** dal tuo profilo.
+
 ## 11. Notifiche push (chiavi VAPID)
 
 Le chiavi identificano il tuo server presso i servizi push di Apple, Google e Mozilla:

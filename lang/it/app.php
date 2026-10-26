@@ -7,6 +7,11 @@ return [
     'search_placeholder' => 'Cerca o vai a…',
     'soon' => 'in arrivo',
     'close' => 'Chiudi',
+    'powered_by' => 'con ManuTrack',
+    'pagination' => 'Pagine',
+    'pagination_info' => ':from–:to di :total',
+    'previous' => 'Precedente',
+    'next' => 'Successiva',
 
     'nav' => [
         'label' => 'Navigazione principale',
@@ -20,6 +25,11 @@ return [
         'system' => 'Sistema',
         'design' => 'Design system',
         'report' => 'Segnala guasto',
+        'users' => 'Persone',
+        'settings' => 'Impostazioni',
+        'audit' => 'Registro attività',
+        'profile' => 'Profilo',
+        'admin_group' => 'Amministrazione',
     ],
 
     // Etichette brevi per la barra in basso del telefono
@@ -28,6 +38,7 @@ return [
         'work_orders' => 'Ordini',
         'notifications' => 'Avvisi',
         'system' => 'Sistema',
+        'profile' => 'Profilo',
     ],
 
     'theme' => [
@@ -53,6 +64,8 @@ return [
             'G M' => 'Vai alle macchine',
             'G P' => 'Vai alla preventiva',
             'G R' => 'Vai al magazzino',
+            'G U' => 'Vai a Persone',
+            'G I' => 'Vai alle impostazioni',
             'G S' => 'Vai a Sistema',
             '?' => 'Mostra questo elenco',
             'Esc' => 'Chiudi finestre e menu',
@@ -62,7 +75,10 @@ return [
     'home' => [
         'title' => 'Panoramica',
         'welcome' => 'Benvenuto in ManuTrack',
-        'intro' => 'L\'installazione per :company è attiva. Le sezioni operative (macchine, ordini di lavoro, preventiva, magazzino) arrivano con le prossime versioni; qui sotto trovi lo stato del sistema.',
+        'welcome_user' => 'Ciao :name',
+        'open_users' => 'Invita le persone',
+        'open_settings' => 'Logo e colori',
+        'intro' => 'ManuTrack per :company è attivo. Le sezioni operative (macchine, ordini di lavoro, preventiva, magazzino) arrivano con le prossime versioni.',
         'version' => 'Versione',
         'cron' => 'Cron',
         'cron_ok' => 'attivo, ultimo giro :time',

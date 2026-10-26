@@ -6,11 +6,11 @@ Software per la gestione della manutenzione di macchine e impianti (CMMS): ordin
 
 **Un'installazione per cliente:** ogni azienda ha la sua cartella con una copia dell'app e un suo database MySQL. Gira su un normale hosting condiviso con **PHP 8.3 e MySQL**, anche senza SSH (pannello DirectAdmin).
 
-> Stato: **fase 1 di 11** (versione 0.1.0): fondamenta, design system, installazione, aggiornamenti e pacchetto di rilascio. Il piano completo è in [`docs/PROPOSTA.md`](docs/PROPOSTA.md).
+> Stato: **fase 2 di 11** (versione 0.2.0): accesso con verifica in due passaggi, ruoli e permessi, inviti, impostazioni dell'azienda con logo e colori, registro attività. Il piano completo è in [`docs/PROPOSTA.md`](docs/PROPOSTA.md).
 
 ## Tecnologie
 
-Laravel 12 · Livewire 3 · Alpine.js · Tailwind CSS 4 · Vite · MySQL 8 / MariaDB · Pest · Larastan · Pint. Three.js arriverà nelle pagine 3D, caricato solo dove serve.
+Laravel 12 · Fortify · spatie/laravel-permission · Livewire 3 · Alpine.js · Tailwind CSS 4 · Vite · MySQL 8 / MariaDB · Pest · Larastan · Pint. Three.js arriverà nelle pagine 3D, caricato solo dove serve.
 
 ## Avvio rapido (sviluppo)
 

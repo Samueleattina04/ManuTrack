@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\SystemVersion;
+use App\Models\User;
 use App\Support\AppVersion;
 use App\Support\FileLock;
 use App\Support\Setup\SystemSync;
@@ -68,8 +69,9 @@ it('se fallisce lascia l\'app utilizzabile e registra l\'errore', function () {
         ->and(AppVersion::installed())->not->toBe('9.2.0')
         ->and(settings(Updater::ERROR_SETTING)['message'])->toContain('migrazione di prova rotta');
 
-    // L'avviso compare nelle pagine
-    $this->get('/')->assertOk()->assertSee(__('system.banner.failed_title', ['version' => '9.2.0']));
+    // L'avviso compare nelle pagine, ma solo a chi gestisce il sistema
+    $admin = User::query()->first();
+    $this->actingAs($admin)->get('/')->assertOk()->assertSee(__('system.banner.failed_title', ['version' => '9.2.0']));
 });
 
 it('non parte se un altro aggiornamento è in corso', function () {

@@ -3,8 +3,9 @@
     $icon = ['ok' => 'check-circle', 'warning' => 'alert-triangle', 'error' => 'x-circle'];
     $problems = collect($checks)->where('status', '!=', 'ok');
 @endphp
-<x-layouts.guest :title="__('install.title')">
-    <div class="flex flex-col gap-6">
+<x-layouts.guest :title="__('install.title')" :brand="false" :wide="true">
+    <div class="mx-auto flex max-w-xl flex-col gap-6">
+        <x-logo variant="horizontal" class="h-9 w-auto self-start" />
         <div class="flex flex-col gap-2">
             <span class="eyebrow">ManuTrack {{ manutrack_version() }}</span>
             <h1 class="text-3xl font-bold">{{ __('install.heading') }}</h1>
@@ -53,7 +54,7 @@
                     <x-form.input name="company" :label="__('install.field.company')" autocomplete="organization" required />
                     <div class="field">
                         <span class="field-label" id="palette-label">{{ __('install.field.palette') }}</span>
-                        <div class="grid gap-2 sm:grid-cols-3" role="radiogroup" aria-labelledby="palette-label">
+                        <div class="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-labelledby="palette-label">
                             @foreach($palettes as $key => $p)
                                 <label class="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-line bg-bg-2 px-3 has-[:checked]:border-accent has-[:checked]:bg-surface-2">
                                     <input type="radio" name="palette" value="{{ $key }}" class="h-5 w-5 accent-[var(--mt-accent)]" @checked(old('palette', 'rame') === $key)>

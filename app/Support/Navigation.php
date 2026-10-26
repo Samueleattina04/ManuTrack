@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\Route;
 
 /**
  * Voci di navigazione condivise da barra laterale, barra in basso e palette comandi.
- * Le sezioni non ancora disponibili restano visibili ma disattivate ("in arrivo").
+ * Ogni voce compare solo a chi ha il permesso; le sezioni non ancora disponibili
+ * restano visibili ma disattivate ("in arrivo").
  */
 class Navigation
 {
@@ -15,19 +16,31 @@ class Navigation
      */
     public static function main(): array
     {
-        $items = [
-            ['dashboard', 'gauge', 'home', 'g d', 'cruscotto panoramica'],
-            ['work_orders', 'clipboard-list', null, 'g o', 'odl interventi lavori'],
-            ['assets', 'factory', null, 'g m', 'macchine impianti'],
-            ['plant', 'cube', null, null, 'stabilimento 3d gemello'],
-            ['preventive', 'calendar', null, 'g p', 'piani calendario'],
-            ['inventory', 'box', null, 'g r', 'ricambi magazzino'],
-            ['notifications', 'bell', null, 'g n', 'avvisi'],
-            ['system', 'server', 'system', 'g s', 'sistema versione aggiornamento copie'],
-            ['design', 'palette', 'design', null, 'design system stile componenti'],
-        ];
+        return self::build([
+            ['dashboard', 'gauge', 'home', 'g d', 'cruscotto panoramica', null],
+            ['work_orders', 'clipboard-list', null, 'g o', 'odl interventi lavori', 'work_orders.view'],
+            ['assets', 'factory', null, 'g m', 'macchine impianti', 'assets.view'],
+            ['plant', 'cube', null, null, 'stabilimento 3d gemello', 'assets.view'],
+            ['preventive', 'calendar', null, 'g p', 'piani calendario', 'preventive.view'],
+            ['inventory', 'box', null, 'g r', 'ricambi magazzino', 'inventory.view'],
+            ['notifications', 'bell', null, 'g n', 'avvisi', null],
+        ]);
+    }
 
-        return array_map(fn (array $i) => self::item(...$i), $items);
+    /**
+     * Voci di amministrazione (gruppo separato nella barra laterale).
+     *
+     * @return list<array{key: string, label: string, icon: string, route: string|null, url: string|null, shortcut: string|null, keywords: string, active: bool, disabled: bool}>
+     */
+    public static function admin(): array
+    {
+        return self::build([
+            ['users', 'users', 'users.index', 'g u', 'persone utenti inviti ruoli permessi', 'users.view'],
+            ['settings', 'settings', 'settings.company', 'g i', 'impostazioni azienda logo colori', 'settings.manage'],
+            ['audit', 'clipboard-list', 'audit.index', null, 'registro attività log', 'audit.view'],
+            ['system', 'server', 'system', 'g s', 'sistema versione aggiornamento copie', 'system.view'],
+            ['design', 'palette', 'design', null, 'design system stile componenti', 'settings.manage'],
+        ]);
     }
 
     /**
@@ -42,8 +55,26 @@ class Navigation
             self::item('work_orders', 'clipboard-list', null, short: true),
             self::item('report', 'plus', null),
             self::item('notifications', 'bell', null, short: true),
-            self::item('system', 'server', 'system', short: true),
+            self::item('profile', 'user', 'profile', short: true),
         ];
+    }
+
+    /**
+     * @param  list<array{0: string, 1: string, 2: string|null, 3: string|null, 4: string, 5: string|null}>  $rows
+     * @return list<array{key: string, label: string, icon: string, route: string|null, url: string|null, shortcut: string|null, keywords: string, active: bool, disabled: bool}>
+     */
+    private static function build(array $rows): array
+    {
+        $user = auth()->user();
+        $items = [];
+        foreach ($rows as [$key, $icon, $route, $shortcut, $keywords, $permission]) {
+            if ($permission !== null && ! $user?->can($permission)) {
+                continue;
+            }
+            $items[] = self::item($key, $icon, $route, $shortcut, $keywords);
+        }
+
+        return $items;
     }
 
     /**

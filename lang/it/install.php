@@ -51,7 +51,7 @@ return [
     'done_cli' => 'ManuTrack :version installato. Amministratore: :email',
     'done_token_removed' => 'Il codice di installazione è stato cancellato dal file .env.',
     'done_token_manual' => 'Il file .env non è scrivibile: cancella a mano il valore di MANUTRACK_INSTALL_TOKEN.',
-    'done_go' => 'Vai all\'app',
+    'done_go' => 'Accedi a ManuTrack',
     'next' => [
         'title' => 'Ultimi passi',
         'cron' => 'Aggiungi il cron di Laravel (una voce, ogni minuto): vedi docs/INSTALLAZIONE.md.',

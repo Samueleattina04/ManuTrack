@@ -9,17 +9,20 @@
             <div class="relative grid items-center gap-6 lg:grid-cols-[1fr_auto]">
                 <div class="flex flex-col gap-3">
                     <span class="eyebrow">{{ $company }}</span>
-                    <h2 class="text-2xl font-bold lg:text-3xl">{{ __('app.home.welcome') }}</h2>
+                    <h2 class="text-2xl font-bold lg:text-3xl">{{ __('app.home.welcome_user', ['name' => \Illuminate\Support\Str::before(auth()->user()->name, ' ')]) }}</h2>
                     <p class="max-w-prose text-fg-2">{{ __('app.home.intro', ['company' => $company]) }}</p>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        <a href="{{ route('system') }}" class="btn btn-primary"><x-icon name="server" />{{ __('app.home.open_system') }}</a>
-                        <a href="{{ route('design') }}" class="btn btn-secondary"><x-icon name="palette" />{{ __('app.home.open_design') }}</a>
-                    </div>
+                    @can('users.manage')
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <a href="{{ route('users.index') }}" class="btn btn-primary"><x-icon name="users" />{{ __('app.home.open_users') }}</a>
+                            <a href="{{ route('settings.company') }}" class="btn btn-secondary"><x-icon name="settings" />{{ __('app.home.open_settings') }}</a>
+                        </div>
+                    @endcan
                 </div>
                 <x-logo variant="mark" class="hidden w-40 lg:block" :label="null" />
             </div>
         </section>
 
+        @can('system.view')
         <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="{{ __('system.title') }}">
             <div class="card tilt p-4" x-tilt>
                 <div class="flex items-center justify-between text-xs text-muted"><span>{{ __('app.home.version') }}</span><x-icon name="sparkles" class="!w-4 !h-4" /></div>
@@ -60,5 +63,6 @@
         @if($status['image_driver'] === null)
             <div class="alert alert-warn"><x-icon name="info" /><span>{{ __('app.home.images_none') }}</span></div>
         @endif
+        @endcan
     </div>
 </x-layouts.app>

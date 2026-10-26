@@ -2,6 +2,8 @@
 
 namespace App\Support\Brand;
 
+use Illuminate\Support\Facades\Storage;
+
 /**
  * Geometria del logo ManuTrack e colori dell'azienda.
  *
@@ -22,6 +24,16 @@ class Brand
     public const MARK_WIDTH = 406;
 
     public const MARK_HEIGHT = 378;
+
+    public const CUSTOM = 'custom';
+
+    public const CUSTOM_SETTING = 'company.custom_palette';
+
+    /** Impostazione con la versione delle icone generate per la palette personalizzata */
+    public const CUSTOM_ICONS_SETTING = 'company.custom_icons';
+
+    /** Nomi dei file delle icone dell'app */
+    public const ICON_FILES = ['icon-192.png', 'icon-512.png', 'maskable-192.png', 'maskable-512.png', 'apple-touch-icon.png', 'favicon-32.png', 'favicon.svg'];
 
     /**
      * @param  list<array{0: int|float, 1: int|float}>  $points
@@ -50,7 +62,7 @@ class Brand
     }
 
     /**
-     * Palette attiva dell'azienda, con le varianti per tema scuro e chiaro.
+     * Palette attiva: una preimpostazione oppure quella personalizzata dall'azienda.
      *
      * @return array<string, string>
      */
@@ -59,6 +71,13 @@ class Brand
         $palettes = (array) config('manutrack.palettes');
         $key = (string) settings('company.palette', 'rame');
 
+        if ($key === self::CUSTOM) {
+            $custom = settings(self::CUSTOM_SETTING);
+            if (is_array($custom) && isset($custom['accent_l'], $custom['logo_light_d'])) {
+                return $custom;
+            }
+        }
+
         return $palettes[$key] ?? $palettes['rame'];
     }
 
@@ -66,7 +85,32 @@ class Brand
     {
         $key = (string) settings('company.palette', 'rame');
 
+        if ($key === self::CUSTOM && is_array(settings(self::CUSTOM_SETTING))) {
+            return self::CUSTOM;
+        }
+
         return array_key_exists($key, (array) config('manutrack.palettes')) ? $key : 'rame';
+    }
+
+    /**
+     * Indirizzo di un'icona dell'app per la palette attiva. Per la palette
+     * personalizzata si usano le icone generate (se c'è GD), altrimenti
+     * quelle della preimpostazione più vicina.
+     */
+    public static function iconUrl(string $file): string
+    {
+        $key = self::paletteKey();
+
+        if ($key === self::CUSTOM) {
+            $version = settings(self::CUSTOM_ICONS_SETTING);
+            if (is_string($version) && Storage::disk('local')->exists("branding/icons/{$version}/{$file}")) {
+                return route('branding.icon', ['version' => $version, 'file' => $file]);
+            }
+
+            $key = PaletteBuilder::nearestPreset(self::palette());
+        }
+
+        return asset("icons/{$key}/{$file}");
     }
 
     /**

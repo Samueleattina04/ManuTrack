@@ -42,6 +42,14 @@ La palette si sceglie in installazione e, dalla fase 2, nelle impostazioni. Le v
 | **Grafite e Rame** (predefinita) | `#E8915A` | `#A64B17` | `#EE9455` / `#DD7536` | `#5E2910` / `#33190D` |
 | Acciaio e Ciano | `#3FCBE4` | `#0A6C80` | `#3CC6E0` / `#169FB9` | `#0C3B47` / `#0A2830` |
 | Ardesia e Indaco | `#9C96FF` | `#4B3FCF` | `#9089FF` / `#6A5EEE` | `#28226B` / `#1C184A` |
+| Pistacchio (provvisoria) | `#3A7D3F` | `#2A5F2F` | `#A8CB6E` / `#8DB451` | `#24502A` / `#1E4224` |
+| Personalizzata | calcolata da `PaletteBuilder` partendo dal colore principale e da quello chiaro | | | |
+
+Oltre all'accento dei pulsanti, la palette definisce due colori:
+- **`--mt-accent-fg`** per testi e icone d'accento sul fondo (Pistacchio: `#B5D67F` nel tema scuro, 11,8:1);
+- **`--mt-accent-soft`** per aloni ed evidenziazioni.
+
+Se non sono indicati, coincidono con l'accento.
 
 Il testo sopra l'accento usa `--mt-on-accent`: quasi nero nel tema scuro, bianco nel tema chiaro.
 
@@ -49,13 +57,22 @@ Il testo sopra l'accento usa `--mt-on-accent`: quasi nero nel tema scuro, bianco
 
 | Token | Scuro | Chiaro | Significato | Icona |
 |---|---|---|---|---|
-| `--mt-ok` | `#3DD68C` | `#137443` | operativa, completato | `check-circle` |
+| `--mt-ok` | `#2FD3B0` | `#0A7563` | operativa, completato (verde acqua: distinto dagli accenti verdi) | `check-circle` |
 | `--mt-ko` | `#FF6B6F` | `#BF1F2A` | guasto, critico, scaduto | `alert-triangle` |
 | `--mt-mnt` | `#6AA6FF` | `#1A5BCC` | in manutenzione (blu, come le lampade andon) | `wrench` |
 | `--mt-stop` | `#A5AEBB` | `#556070` | ferma, bassa priorità | `pause-circle` |
 | `--mt-warn` | `#F2C14E` | `#7D5C00` | scadenza vicina, in attesa | `clock` |
 
 Tutti i colori di stato hanno contrasto **AA (≥ 4,5:1)** sul proprio fondo, sia da soli sia dentro le etichette di stato.
+
+## Logo del cliente
+
+Il logo dell'azienda cliente non è nel codice: lo carica l'amministratore. Il componente `<x-company-logo size="sm|md|lg" />`:
+- mostra la versione adatta al tema (`company-logo-light` / `company-logo-dark`);
+- se manca la versione scura, nel tema scuro appoggia il logo su una targhetta chiara (`company-logo-plate`);
+- se non c'è nessun logo, mostra la M e il nome dell'azienda.
+
+`<x-powered-by :version="true" />` mostra "con ManuTrack" in piccolo.
 
 ## Caratteri
 

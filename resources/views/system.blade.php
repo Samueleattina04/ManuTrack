@@ -18,14 +18,22 @@
                     @if(!empty($error['backup']))
                         <p class="mt-1 text-fg-2">{{ __('system.update.restore_hint', ['file' => $error['backup']]) }}</p>
                     @endif
-                    <p class="mt-1 text-fg-2">{{ __('system.update.failed_before', ['version' => $error['version'] ?? '']) }}</p>
+                    @can('system.update')
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <form method="POST" action="{{ route('system.update') }}" x-data="{ busy: false }" @submit="busy = true">@csrf<button class="btn btn-primary btn-sm" :disabled="busy"><x-icon name="refresh" />{{ __('system.actions.apply_now') }}</button></form>
+                            <form method="POST" action="{{ route('system.retry') }}">@csrf<button class="btn btn-secondary btn-sm">{{ __('system.actions.retry_cron') }}</button></form>
+                        </div>
+                    @endcan
                 </div>
             </div>
         @elseif($status['update_pending'])
             <div class="alert alert-warn" role="status">
                 <x-icon name="refresh" />
-                <div><strong>{{ __('system.banner.pending_title', ['version' => $status['code_version']]) }}</strong>
+                <div class="min-w-0 flex-1"><strong>{{ __('system.banner.pending_title', ['version' => $status['code_version']]) }}</strong>
                     @if($status['auto_blocker'])<p class="text-fg-2">{{ $status['auto_blocker'] }}</p>@endif</div>
+                @can('system.update')
+                    <form method="POST" action="{{ route('system.update') }}" x-data="{ busy: false }" @submit="busy = true">@csrf<button class="btn btn-primary btn-sm" :disabled="busy"><x-icon name="refresh" />{{ __('system.actions.apply_now') }}</button></form>
+                @endcan
             </div>
         @endif
 
@@ -99,7 +107,12 @@
                 @empty
                     <p class="p-4 text-muted">{{ __('system.backups.empty') }}</p>
                 @endforelse
-                <p class="px-4 py-3 font-mono text-xs text-muted">{{ __('system.backups.restore_hint') }}</p>
+                <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                    <p class="font-mono text-xs text-muted">{{ __('system.backups.restore_hint') }}</p>
+                    @can('system.update')
+                        <form method="POST" action="{{ route('system.backup') }}" x-data="{ busy: false }" @submit="busy = true">@csrf<button class="btn btn-secondary btn-sm" :disabled="busy"><x-icon name="database" />{{ __('system.actions.backup_now') }}</button></form>
+                    @endcan
+                </div>
             </section>
 
             <section class="card overflow-hidden">

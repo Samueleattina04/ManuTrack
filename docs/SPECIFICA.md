@@ -2,12 +2,12 @@
 
 Documento scritto man mano, fase per fase. Descrive cosa fa l'app dal punto di vista di chi la usa e di chi la gestisce. Le decisioni di progetto sono in `docs/PROPOSTA.md`.
 
-**Stato:** fase 1 completata (versione 0.1.0).
+**Stato:** fase 2 completata (versione 0.2.0).
 
 | Fase | Contenuto | Stato |
 |---|---|---|
 | 1 | Fondamenta, design system, installazione, aggiornamenti, rilascio | ✅ |
-| 2 | Accesso, ruoli, impostazioni azienda | — |
+| 2 | Accesso, ruoli, impostazioni azienda | ✅ |
 | 3 | Prova di app installabile e notifiche push | — |
 | 4–11 | Macchine, ordini di lavoro, magazzino, preventiva, notifiche, dashboard, 3D, GDPR e demo | — |
 
@@ -198,3 +198,102 @@ Una sola voce di cron (`schedule:run` ogni minuto). Tutti i compiti girano nello
 | `manutrack:restore [file] [--force] [--no-safety]` | ripristino |
 | `manutrack:vapid [--force] [--show]` | chiavi per le notifiche push |
 | `manutrack:icons [--palette=] [--path=]` | icone dell'app dal logo |
+
+---
+
+## 9. Accesso (fase 2)
+
+- **Solo su invito**: non esiste la registrazione libera (`/register` risponde 404).
+- **Login** con email (non distingue maiuscole e minuscole) e password, con l'opzione "Ricordami".
+  - Limite: 5 tentativi al minuto per email e indirizzo IP, 30 al minuto per indirizzo IP; oltre si riceve 429.
+  - Ogni accesso, uscita e tentativo fallito finisce nel registro attività; all'accesso si aggiorna "ultimo accesso".
+- **Account disattivati**: non possono entrare (messaggio "Questo account è stato disattivato") e una sessione già aperta viene chiusa alla richiesta successiva.
+- **Password dimenticata**: link via email (Fortify) valido 60 minuti.
+- **Regola delle password**, valida ovunque: almeno 10 caratteri, con lettere e numeri.
+- **Verifica in due passaggi** (TOTP, ad esempio Google Authenticator o 1Password):
+  - si attiva dal profilo confermando la password, poi si inquadra il QR e si inserisce il primo codice;
+  - vengono mostrati 8 codici di recupero, rigenerabili;
+  - al login, dopo la password, si chiede il codice o un codice di recupero;
+  - un codice già usato non vale due volte;
+  - l'amministratore può azzerarla a una persona che ha perso il telefono.
+- **Conferma della password** (valida 3 ore) per la pagina Sistema e le sue azioni.
+- **Indirizzi**: prima dell'installazione ogni pagina porta a `/install`; dopo, chi non ha fatto l'accesso va a `/login`.
+
+## 10. Ruoli e permessi
+
+| Ruolo | Permessi predefiniti |
+|---|---|
+| Amministratore | tutti, sempre (non modificabile) |
+| Responsabile manutenzione | vedere le persone; macchine; segnalazioni (creare, vedere tutte, accettare); ordini (tutto, compresi costi e chiusura); preventiva; magazzino in lettura e prelievo; indicatori ed esportazioni |
+| Tecnico | vedere le macchine; segnalare e vedere tutte le segnalazioni; vedere, creare ed eseguire ordini; vedere la preventiva; magazzino in lettura e prelievo |
+| Magazziniere | vedere le macchine; segnalare; vedere gli ordini; magazzino completo; vedere gli indicatori |
+| Richiedente | vedere le macchine; segnalare guasti |
+| Osservatore | sola lettura di macchine, segnalazioni, ordini (con costi), preventiva, magazzino; indicatori ed esportazioni |
+
+- **Permessi per modulo**: persone, impostazioni, sistema e dati, macchine, segnalazioni, ordini di lavoro, preventiva, magazzino, indicatori. Quelli dei moduli futuri sono già definiti, così i ruoli si possono preparare in anticipo.
+- **Matrice ruoli × permessi** (`/ruoli`, solo amministratori): ogni casella si attiva o disattiva subito; "Ripristina predefiniti" riporta un ruolo ai valori di fabbrica.
+- **Aggiornamenti**: il sincronizzatore crea ruoli e permessi mancanti; ai ruoli esistenti aggiunge solo i permessi nuovi della versione, senza togliere le modifiche dell'amministratore; garantisce almeno un amministratore attivo.
+- **Menu e pagine** seguono i permessi: una voce non consentita non compare e la pagina risponde 403.
+
+## 11. Persone e inviti (`/utenti`)
+
+- **Elenco**: ricerca per nome, email o mansione; filtro per ruolo e stato (attive, disattivate, tutte).
+  - PC: tabella con ruolo modificabile, stato, verifica in due passaggi, ultimo accesso e menu azioni.
+  - Telefono: schede compatte.
+- **Invito** (permesso "Invitare persone…"):
+  - email, nome facoltativo e ruolo;
+  - email con link valido **7 giorni**; nel database c'è solo l'impronta SHA-256 del codice;
+  - un nuovo invito alla stessa email annulla il precedente;
+  - non si invita un'email già registrata;
+  - gli inviti in attesa si possono inviare di nuovo o annullare.
+- **Accettazione** (`/invito/{codice}`, solo per chi non ha fatto l'accesso, 10 richieste al minuto):
+  - la persona sceglie nome e password ed entra con il ruolo deciso, con email già verificata;
+  - inviti scaduti, usati o annullati mostrano "Invito non valido".
+- **Azioni sulle persone**: cambio ruolo, disattivazione e riattivazione, azzeramento della verifica in due passaggi, invio del link per una nuova password.
+  - Non si può disattivare se stessi.
+  - Non si può togliere il ruolo di amministratore, né disattivare, l'ultimo amministratore attivo.
+- **Registro**: ogni azione viene registrata.
+
+## 12. Impostazioni dell'azienda (`/impostazioni/azienda`)
+
+- **Dati generali**: nome dell'azienda, fuso orario, lingua dell'interfaccia (le lingue disponibili sono le cartelle in `lang/`). Lingua e fuso orario valgono per tutte le pagine.
+- **Logo del cliente** (non incluso nel codice dell'app):
+  - versione principale per fondi chiari e versione facoltativa per il tema scuro;
+  - formati PNG, JPEG o WebP fino a 2 MB; SVG rifiutato, perché può contenere script; il tipo del file viene controllato sul contenuto, non sull'estensione;
+  - con GD o Imagick l'immagine viene ricodificata in PNG e ridotta a 720×240 px al massimo, il che elimina anche eventuali dati nascosti;
+  - salvato sul disco privato e servito da `/marchio/logo` con cache lunga e `nosniff`.
+- **Dove compare il logo**:
+  - in alto nella barra laterale (PC), nella barra superiore (telefono) e nella pagina di accesso;
+  - nel tema scuro si usa la versione scura; se manca, il logo principale appare su una targhetta chiara;
+  - senza logo compaiono la M di ManuTrack e il nome dell'azienda;
+  - "con ManuTrack" e la versione compaiono in piccolo nella pagina di accesso e in fondo alla barra laterale o alla pagina.
+- **Colori**: Grafite e Rame, Acciaio e Ciano, Ardesia e Indaco, **Pistacchio**, oppure **Personalizzata**.
+  - La palette personalizzata parte da due colori (principale e chiaro) e calcola le varianti per i due temi:
+    - pulsanti con testo bianco ≥ 4,5:1;
+    - testi d'accento ≥ 7:1 sul fondo scuro e ≥ 4,5:1 sul chiaro.
+  - L'anteprima dal vivo mostra pulsante, stato "Operativa", testo d'accento e la M, con i rapporti di contrasto.
+  - **"Prendi i colori dal logo"**: individua il colore scuro e quello chiaro più presenti nel logo, ignorando bianchi, neri e grigi.
+- **Icone**: le icone dell'app (192/512, maskable, apple-touch, favicon) si rigenerano per la palette personalizzata e vengono servite da `/marchio/icone/…`; senza GD si usano quelle della preimpostazione più vicina. Il manifest punta alle icone giuste.
+
+## 13. Profilo (`/profilo`)
+
+- **Dati**: nome, email (unica), mansione, telefono.
+- **Password**: per cambiarla serve quella attuale.
+- **Verifica in due passaggi**: attivazione, conferma, codici di recupero, disattivazione (§9).
+- **Altro**: tema, collegamento a Sistema per chi ha il permesso, pulsante "Esci".
+
+## 14. Registro attività (`/registro`, permesso "Vedere il registro")
+
+- Ogni voce registra data e ora, persona, azione, oggetto, dettaglio, modifiche prima → dopo, indirizzo IP e browser.
+- Password, codici e segreti non vengono **mai** salvati.
+- Ricerca per persona, dettaglio o indirizzo IP; filtro per area (accessi, persone, ruoli, impostazioni, sistema, profilo).
+- Le voci non si modificano.
+
+## 15. Pagina Sistema (aggiornamento)
+
+- Riservata a chi ha il permesso "Vedere la pagina Sistema" (di norma solo l'amministratore), con conferma della password.
+- **Azioni** (permesso "Applicare aggiornamenti e creare copie"):
+  - **Applica ora**: esegue l'aggiornamento in attesa dal browser, con avvio "pannello";
+  - **Fai ritentare al cron**: dopo un errore;
+  - **Crea una copia ora**.
+- L'avviso di aggiornamento in attesa o fallito compare in tutte le pagine solo a chi gestisce il sistema.

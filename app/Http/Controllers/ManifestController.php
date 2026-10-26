@@ -13,7 +13,6 @@ class ManifestController extends Controller
     public function __invoke(): JsonResponse
     {
         $company = (string) settings('company.name', config('app.name'));
-        $dir = 'icons/'.Brand::paletteKey();
 
         $manifest = [
             'id' => '/',
@@ -31,10 +30,10 @@ class ManifestController extends Controller
             'background_color' => '#0c0f14',
             'categories' => ['business', 'productivity', 'utilities'],
             'icons' => [
-                ['src' => asset($dir.'/icon-192.png'), 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
-                ['src' => asset($dir.'/icon-512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],
-                ['src' => asset($dir.'/maskable-192.png'), 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'maskable'],
-                ['src' => asset($dir.'/maskable-512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
+                ['src' => Brand::iconUrl('icon-192.png'), 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
+                ['src' => Brand::iconUrl('icon-512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],
+                ['src' => Brand::iconUrl('maskable-192.png'), 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'maskable'],
+                ['src' => Brand::iconUrl('maskable-512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
             ],
         ];
 

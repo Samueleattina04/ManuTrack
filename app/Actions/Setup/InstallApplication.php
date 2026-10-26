@@ -4,6 +4,7 @@ namespace App\Actions\Setup;
 
 use App\Models\SystemVersion;
 use App\Models\User;
+use App\Support\Access\Access;
 use App\Support\AppVersion;
 use App\Support\FileLock;
 use App\Support\Settings;
@@ -80,6 +81,7 @@ class InstallApplication
                 'password' => Hash::make($data['password']),
             ]);
             $user->forceFill(['email_verified_at' => now()])->save();
+            $user->assignRole(Access::ADMIN);
             $this->settings->set('install.admin_user_id', $user->id);
 
             $vapid = null;

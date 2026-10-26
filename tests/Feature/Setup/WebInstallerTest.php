@@ -56,7 +56,8 @@ it('installa, cancella il codice da .env e poi si disattiva', function () {
     $this->get('/install')->assertNotFound();
     $this->post('/install', installForm(['email' => 'intruso@example.test']))->assertNotFound();
     expect(User::query()->count())->toBe(1);
-    $this->get('/')->assertOk();
+    $this->get('/')->assertRedirect(route('login'));
+    $this->actingAs(User::query()->sole())->get('/')->assertOk();
 });
 
 it('resta disattivata se il file di blocco viene cancellato', function () {

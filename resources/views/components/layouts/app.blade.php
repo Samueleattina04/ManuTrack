@@ -1,9 +1,13 @@
 @props(['title' => null, 'heading' => null])
 @php
     $nav = \App\Support\Navigation::main();
+    $admin = \App\Support\Navigation::admin();
     $mobile = \App\Support\Navigation::mobile();
-    $company = (string) settings('company.name', config('app.name'));
-    $paletteItems = collect($nav)->map(fn ($i) => ['label' => $i['label'], 'url' => $i['url'], 'icon' => $i['icon'], 'keywords' => $i['keywords'], 'disabled' => $i['disabled']])->values();
+    $user = auth()->user();
+    $paletteItems = collect([...$nav, ...$admin])
+        ->map(fn ($i) => ['label' => $i['label'], 'url' => $i['url'], 'keywords' => $i['keywords'], 'disabled' => $i['disabled']])
+        ->push(['label' => __('profile.title'), 'url' => route('profile'), 'keywords' => 'profilo password tema', 'disabled' => false])
+        ->values();
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="dark">
@@ -13,31 +17,32 @@
 <body x-data="shortcuts" @keydown.window="onKey($event)" class="app-shell">
     <a href="#contenuto" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 btn btn-primary">{{ __('app.skip_to_content') }}</a>
 
-    {{-- Barra laterale (PC) --}}
+    {{-- Barra laterale (PC): logo del cliente in alto, ManuTrack in piccolo in fondo --}}
     <aside class="app-sidebar hidden lg:flex flex-col gap-1 bg-surface border-r border-line-soft px-3 pb-4 z-40" aria-label="{{ __('app.nav.label') }}">
-        <a href="{{ route('home') }}" class="flex items-center gap-2 px-2 pt-5 pb-5" aria-label="{{ __('app.nav.dashboard') }}">
-            <x-logo variant="horizontal" class="h-7 w-auto" :label="'ManuTrack'" />
+        <a href="{{ route('home') }}" class="flex min-h-[4.5rem] items-center px-2 pt-3 pb-3" aria-label="{{ __('app.nav.dashboard') }}">
+            <x-company-logo />
         </a>
-        <nav class="flex flex-col gap-0.5">
+        <nav class="flex flex-col gap-0.5 overflow-y-auto">
             @foreach($nav as $item)
-                <a href="{{ $item['url'] ?? '#' }}" class="nav-item"
-                   @if($item['active']) aria-current="page" @endif
-                   @if($item['disabled']) aria-disabled="true" tabindex="-1" @endif
-                   @if($item['shortcut']) data-shortcut="{{ $item['shortcut'] }}" @endif>
-                    <x-icon :name="$item['icon']" />
-                    <span class="flex-1 truncate">{{ $item['label'] }}</span>
-                    @if($item['disabled'])
-                        <span class="text-[11px] text-muted">{{ __('app.soon') }}</span>
-                    @elseif($item['shortcut'])
-                        <span class="kbd uppercase">{{ $item['shortcut'] }}</span>
-                    @endif
-                </a>
+                <x-nav-link :item="$item" />
             @endforeach
+            @if($admin !== [])
+                <div class="mt-4 mb-1 px-3 font-mono text-[11px] uppercase tracking-wider text-muted">{{ __('app.nav.admin_group') }}</div>
+                @foreach($admin as $item)
+                    <x-nav-link :item="$item" />
+                @endforeach
+            @endif
         </nav>
-        <div class="mt-auto flex flex-col gap-3 px-2 pt-4 border-t border-line-soft">
-            <div class="text-xs text-muted truncate" title="{{ $company }}">{{ $company }}</div>
-            <x-theme-switcher />
-            <div class="text-[11px] text-muted">ManuTrack <span class="font-mono">{{ manutrack_version() }}</span> · <button type="button" class="underline-offset-2 hover:underline" @click="helpOpen = true">{{ __('app.shortcuts.title') }} <span class="kbd">?</span></button></div>
+        <div class="mt-auto flex flex-col gap-3 border-t border-line-soft px-1 pt-3">
+            <a href="{{ route('profile') }}" class="flex items-center gap-3 rounded-[10px] p-2 hover:bg-surface-2" @if(request()->routeIs('profile')) aria-current="page" @endif>
+                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-surface-2 text-xs font-bold" aria-hidden="true">{{ $user->initials() }}</span>
+                <span class="min-w-0"><span class="block truncate text-sm font-medium">{{ $user->name }}</span><span class="block truncate text-xs text-muted">{{ $user->roleName() ? __('access.roles.'.$user->roleName()) : '' }}</span></span>
+            </a>
+            <div class="flex items-center justify-between gap-2 px-1">
+                <x-theme-switcher />
+                <button type="button" class="kbd" @click="helpOpen = true" title="{{ __('app.shortcuts.title') }}">?</button>
+            </div>
+            <x-powered-by :version="true" class="px-1" />
         </div>
     </aside>
 
@@ -45,16 +50,15 @@
         {{-- Barra superiore --}}
         <header class="app-topbar glass border-b border-line-soft">
             <div class="flex items-center gap-3" style="min-height: var(--mt-topbar-h)">
-                <a href="{{ route('home') }}" class="lg:hidden" aria-label="{{ __('app.nav.dashboard') }}">
-                    <x-logo variant="mark" :shadow="false" class="h-7 w-auto" :label="null" />
+                <a href="{{ route('home') }}" class="lg:hidden shrink-0" aria-label="{{ __('app.nav.dashboard') }}">
+                    <x-company-logo size="sm" />
                 </a>
                 <div class="min-w-0 flex-1">
                     @if($heading)
-                        <h1 class="truncate text-lg font-bold lg:text-xl">{{ $heading }}</h1>
+                        <h1 class="truncate text-right text-base font-bold lg:text-left lg:text-xl">{{ $heading }}</h1>
                     @endif
                 </div>
-                <button type="button" class="btn btn-secondary btn-sm hidden md:inline-flex min-w-[15rem] justify-start text-muted font-normal"
-                        @click="$dispatch('palette-open')">
+                <button type="button" class="btn btn-secondary btn-sm hidden md:inline-flex min-w-[15rem] justify-start text-muted font-normal" @click="$dispatch('palette-open')">
                     <x-icon name="search" class="!w-4 !h-4" />
                     <span class="flex-1 text-left">{{ __('app.search_placeholder') }}</span>
                     <span class="kbd">Ctrl K</span>
@@ -69,7 +73,14 @@
         <x-system-banner />
 
         <main id="contenuto" class="app-content pt-5 lg:pt-7 page-enter" tabindex="-1">
+            @if(session('status') && ! request()->routeIs('settings.company'))
+                <div class="mx-auto mb-5 max-w-6xl alert alert-ok" role="status"><x-icon name="check-circle" /><span>{{ session('status') }}</span></div>
+            @endif
+            @if(session('error'))
+                <div class="mx-auto mb-5 max-w-6xl alert alert-ko" role="alert"><x-icon name="alert-triangle" /><span>{{ session('error') }}</span></div>
+            @endif
             {{ $slot }}
+            <footer class="mx-auto mt-10 flex max-w-6xl justify-center lg:hidden"><x-powered-by :version="true" /></footer>
         </main>
     </div>
 
@@ -131,6 +142,7 @@
         </div>
     </div>
 
+    <x-toasts />
     @livewireScriptConfig
 </body>
 </html>

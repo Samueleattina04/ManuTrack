@@ -1,5 +1,6 @@
-<x-layouts.guest :title="__('install.done_title')">
+<x-layouts.guest :title="__('install.done_title')" :brand="false">
     <div class="card flex flex-col gap-5 p-6">
+        <x-logo variant="horizontal" class="h-8 w-auto self-start" />
         <x-status tone="ok" icon="check-circle" class="self-start">{{ __('install.done_title') }}</x-status>
         <h1 class="text-3xl font-bold">{{ __('install.done_title') }}</h1>
         <p class="text-fg-2">{{ __('install.done_text', ['version' => $version]) }}</p>
@@ -21,6 +22,6 @@
             </ul>
         </div>
 
-        <a href="{{ route('home') }}" class="btn btn-primary btn-xl"><x-icon name="arrow-right" />{{ __('install.done_go') }}</a>
+        <a href="{{ route('login') }}" class="btn btn-primary btn-xl"><x-icon name="arrow-right" />{{ __('install.done_go') }}</a>
     </div>
 </x-layouts.guest>

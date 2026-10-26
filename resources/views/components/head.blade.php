@@ -1,7 +1,6 @@
 @props(['title' => null])
 @php
     $company = (string) settings('company.name', config('app.name'));
-    $palette = \App\Support\Brand\Brand::paletteKey();
     $pageTitle = $title ? $title.' · ManuTrack' : 'ManuTrack · '.$company;
 @endphp
 <meta charset="utf-8">
@@ -20,7 +19,6 @@
         document.documentElement.dataset.themeMode = mode;
     })();
 </script>
-<style>{!! \App\Support\Brand\Brand::cssVariables() !!}</style>
 
 {{-- PWA e iOS --}}
 <link rel="manifest" href="{{ route('manifest') }}">
@@ -31,10 +29,12 @@
 <meta name="apple-mobile-web-app-title" content="ManuTrack">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<link rel="icon" href="{{ asset('icons/'.$palette.'/favicon.svg') }}" type="image/svg+xml">
-<link rel="icon" href="{{ asset('icons/'.$palette.'/favicon-32.png') }}" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="{{ asset('icons/'.$palette.'/apple-touch-icon.png') }}">
+<link rel="icon" href="{{ \App\Support\Brand\Brand::iconUrl('favicon.svg') }}" type="image/svg+xml">
+<link rel="icon" href="{{ \App\Support\Brand\Brand::iconUrl('favicon-32.png') }}" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="{{ \App\Support\Brand\Brand::iconUrl('apple-touch-icon.png') }}">
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+{{-- Dopo il CSS principale: la palette dell'azienda sostituisce quella predefinita --}}
+<style>{!! \App\Support\Brand\Brand::cssVariables() !!}</style>
 @livewireStyles
 {{ $slot }}

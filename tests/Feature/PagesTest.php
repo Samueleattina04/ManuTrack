@@ -3,14 +3,19 @@
 use App\Support\Brand\IconRenderer;
 
 beforeEach(function () {
-    installManuTrack(['company' => 'Officine Pagine']);
+    $this->admin = installManuTrack(['company' => 'Officine Pagine']);
+    $this->actingAs($this->admin);
 });
 
 it('mostra le pagine principali in italiano', function (string $url, string $text) {
     $this->get($url)->assertOk()->assertSee($text)->assertSee('lang="it"', false);
 })->with([
-    'panoramica' => ['/', 'Benvenuto in ManuTrack'],
-    'sistema' => ['/sistema', 'Copie del database'],
+    'panoramica' => ['/', 'Ciao Amministratore'],
+    'persone' => ['/utenti', 'Persone'],
+    'ruoli' => ['/ruoli', 'Ruoli e permessi'],
+    'impostazioni' => ['/impostazioni/azienda', 'Logo dell\'azienda'],
+    'registro' => ['/registro', 'Registro attività'],
+    'profilo' => ['/profilo', 'Verifica in due passaggi'],
     'design system' => ['/design', 'Elementi base'],
 ]);
 
@@ -50,6 +55,11 @@ it('disegna le icone con GD', function () {
 
     expect($info[0])->toBe(48)->and($info['mime'])->toBe('image/png');
 })->skip(fn () => ! function_exists('imagecreatetruecolor'), 'GD non disponibile');
+
+it('mostra la pagina Sistema dopo la conferma della password', function () {
+    $this->get('/sistema')->assertRedirect(route('password.confirm'));
+    $this->withSession(['auth.password_confirmed_at' => time()])->get('/sistema')->assertOk()->assertSee('Copie del database');
+});
 
 it('mostra la pagina di manutenzione durante un aggiornamento', function () {
     $this->artisan('down', ['--render' => 'errors::503']);

@@ -3,6 +3,7 @@
 namespace App\Support\Setup;
 
 use App\Support\Setup\Synchronizers\DefaultSettings;
+use App\Support\Setup\Synchronizers\RolesAndPermissions;
 
 /**
  * Esegue in ordine tutti i sincronizzatori registrati.
@@ -16,6 +17,7 @@ class SystemSync
      */
     public const SYNCHRONIZERS = [
         DefaultSettings::class,
+        RolesAndPermissions::class,
     ];
 
     /**

@@ -1,6 +1,8 @@
 // Screenshot di controllo a fine fase (PC e telefono) con Playwright.
 // Uso: node scripts/screenshots/capture.cjs <url-base> <cartella-output> [pagine...]
 // Ogni pagina: "nome=/percorso". Esempio: home=/ sistema=/sistema
+// Con LOGIN_EMAIL e LOGIN_PASSWORD le pagine dopo "@login" vengono aperte dopo l'accesso
+// (la conferma della password viene compilata da sola se richiesta).
 const { chromium } = require('playwright');
 
 const base = process.argv[2] || 'http://127.0.0.1:8000';
@@ -26,7 +28,19 @@ const devices = {
             page.on('console', (m) => m.type() === 'error' && problems.push(`${device} ${m.text()}`));
             page.on('pageerror', (e) => problems.push(`${device} ${e.message}`));
             for (const [name, path] of pages) {
+                if (name === '@login') {
+                    await page.goto(base + '/login', { waitUntil: 'networkidle' });
+                    await page.fill('#f-email', process.env.LOGIN_EMAIL);
+                    await page.fill('#f-password', process.env.LOGIN_PASSWORD);
+                    await Promise.all([page.waitForNavigation(), page.click('button[type=submit]')]);
+                    continue;
+                }
                 await page.goto(base + path, { waitUntil: 'networkidle' });
+                if (page.url().includes('/user/confirm-password')) {
+                    await page.fill('#f-password', process.env.LOGIN_PASSWORD);
+                    await Promise.all([page.waitForNavigation(), page.click('button[type=submit]')]);
+                    await page.waitForLoadState('networkidle');
+                }
                 await page.waitForTimeout(1200);
                 const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
                 if (overflow > 0) problems.push(`${device} ${name}: scorrimento orizzontale di ${overflow}px`);

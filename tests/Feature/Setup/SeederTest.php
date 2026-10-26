@@ -9,7 +9,8 @@ it('prepara un\'installazione di sviluppo con migrate --seed', function () {
     expect(InstallState::isInstalled())->toBeTrue()
         ->and(User::query()->where('email', 'admin@example.com')->exists())->toBeTrue();
 
-    $this->get('/')->assertOk();
+    $this->get('/')->assertRedirect(route('login'));
+    $this->actingAs(User::query()->where('email', 'admin@example.com')->sole())->get('/')->assertOk();
     // Ripetibile senza errori
     $this->artisan('db:seed', ['--force' => true])->assertSuccessful();
 });

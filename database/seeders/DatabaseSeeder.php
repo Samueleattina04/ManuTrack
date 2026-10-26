@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\SystemVersion;
 use App\Models\User;
+use App\Support\Access\Access;
 use App\Support\AppVersion;
 use App\Support\Settings;
 use App\Support\Setup\InstallState;
@@ -40,6 +41,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Amministratore Demo', 'password' => Hash::make(self::DEMO_PASSWORD)],
         );
         $admin->forceFill(['email_verified_at' => now()])->save();
+        $admin->syncRoles([Access::ADMIN]);
         settings()->set('install.admin_user_id', $admin->id);
 
         if (! SystemVersion::query()->where('status', SystemVersion::SUCCESS)->exists()) {

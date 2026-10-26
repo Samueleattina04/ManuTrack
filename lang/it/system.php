@@ -4,6 +4,12 @@ return [
     'title' => 'Sistema',
     'intro' => 'Versione, aggiornamenti, copie del database e stato del server di questa installazione.',
 
+    'actions' => [
+        'apply_now' => 'Applica ora',
+        'retry_cron' => 'Fai ritentare al cron',
+        'backup_now' => 'Crea una copia ora',
+    ],
+
     'version' => [
         'title' => 'Versione',
         'code' => 'Codice caricato',

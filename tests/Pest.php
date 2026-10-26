@@ -22,3 +22,14 @@ function installManuTrack(array $overrides = []): User
 
     return User::query()->findOrFail($result['user_id']);
 }
+
+/**
+ * Crea una persona attiva con il ruolo indicato (richiede ruoli già sincronizzati).
+ */
+function userWithRole(string $role, array $attributes = []): User
+{
+    $user = User::factory()->create($attributes);
+    $user->syncRoles([$role]);
+
+    return $user;
+}
