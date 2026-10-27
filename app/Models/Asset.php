@@ -116,6 +116,24 @@ class Asset extends Model
         return $this->hasMany(Meter::class)->orderBy('name');
     }
 
+    /** @return HasMany<WorkOrder, $this> */
+    public function workOrders(): HasMany
+    {
+        return $this->hasMany(WorkOrder::class);
+    }
+
+    /** @return HasMany<WorkRequest, $this> */
+    public function workRequests(): HasMany
+    {
+        return $this->hasMany(WorkRequest::class);
+    }
+
+    /** @return HasMany<DowntimeEvent, $this> */
+    public function downtimes(): HasMany
+    {
+        return $this->hasMany(DowntimeEvent::class);
+    }
+
     /** @return MorphMany<Attachment, $this> */
     public function attachments(): MorphMany
     {

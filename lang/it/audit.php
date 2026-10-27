@@ -22,6 +22,8 @@ return [
         'profile' => 'Profilo',
         'assets' => 'Macchine',
         'push' => 'Notifiche',
+        'requests' => 'Segnalazioni',
+        'work_orders' => 'Ordini di lavoro',
     ],
 
     'actions' => [
@@ -52,6 +54,7 @@ return [
             'company_updated' => 'Impostazioni dell\'azienda modificate',
             'logo_uploaded' => 'Logo caricato',
             'logo_removed' => 'Logo rimosso',
+            'hourly_rate' => 'Costo orario cambiato',
         ],
         'assets' => [
             'created' => 'Macchina creata',
@@ -70,6 +73,20 @@ return [
             'category_created' => 'Categoria creata',
             'category_updated' => 'Categoria modificata',
             'category_deleted' => 'Categoria eliminata',
+        ],
+        'requests' => [
+            'created' => 'Segnalazione inviata',
+            'accepted' => 'Segnalazione accettata',
+            'rejected' => 'Segnalazione respinta',
+            'duplicate' => 'Segnalazione segnata come duplicata',
+        ],
+        'work_orders' => [
+            'created' => 'Ordine di lavoro creato',
+            'updated' => 'Ordine di lavoro modificato',
+            'assigned' => 'Assegnatari cambiati',
+            'status_changed' => 'Stato dell\'ordine cambiato',
+            'template_saved' => 'Modello di checklist salvato',
+            'template_deleted' => 'Modello di checklist eliminato',
         ],
         'push' => [
             'device_added' => 'Notifiche attivate su un dispositivo',

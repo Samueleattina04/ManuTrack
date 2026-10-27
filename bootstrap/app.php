@@ -26,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->web(append: [ApplyCompanyPreferences::class]);
         // Il rinnovo push arriva dal service worker, che non ha il token CSRF (verifica interna)
-        $middleware->validateCsrfTokens(except: ['push/rinnova']);
+        $middleware->validateCsrfTokens(except: ['push/rinnova', 'segnalazioni/invia']);
         // Prima dell'installazione si va all'installazione, non alla pagina di accesso
         $middleware->prependToPriorityList(before: AuthenticatesRequests::class, prepend: EnsureAppInstalled::class);
 

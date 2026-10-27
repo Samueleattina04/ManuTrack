@@ -22,7 +22,7 @@ class ChangeAssetStatus
 {
     public function __construct(private PushDispatcher $push) {}
 
-    public function handle(Asset $asset, AssetStatus $status, User $actor, ?string $note = null): void
+    public function handle(Asset $asset, AssetStatus $status, User $actor, ?string $note = null, bool $notify = true): void
     {
         $previous = $asset->status;
         if ($previous === $status) {
@@ -31,6 +31,11 @@ class ChangeAssetStatus
 
         $asset->forceFill(['status' => $status, 'status_changed_at' => now()])->save();
         Audit::log('assets.status_changed', $asset, trim($asset->code.' · '.$status->label().($note ? ' · '.$note : '')), ['status' => [$previous->value, $status->value]], $actor);
+
+        // Chi chiama può mandare un avviso suo (es. la segnalazione, che ne dice di più)
+        if (! $notify) {
+            return;
+        }
 
         $down = in_array($status, [AssetStatus::Fault, AssetStatus::Stopped], true);
         $backUp = $status === AssetStatus::Operational && in_array($previous, [AssetStatus::Fault, AssetStatus::Stopped], true);

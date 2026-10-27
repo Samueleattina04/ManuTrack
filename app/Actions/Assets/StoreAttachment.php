@@ -5,6 +5,7 @@ namespace App\Actions\Assets;
 use App\Enums\AttachmentKind;
 use App\Models\Attachment;
 use App\Support\Audit\Audit;
+use App\Support\Files\PhotoException;
 use App\Support\Files\PhotoProcessor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
@@ -14,7 +15,10 @@ use RuntimeException;
 
 /**
  * Salva una foto o un documento sul disco privato e lo collega a un oggetto
- * (per ora le macchine; in seguito ordini di lavoro e segnalazioni).
+ * (macchine, segnalazioni, ordini di lavoro).
+ *
+ * Una foto HEIC che il server non sa convertire non va persa: si conserva
+ * tra i documenti e $attachment->notice spiega cosa è successo.
  */
 class StoreAttachment
 {
@@ -32,13 +36,27 @@ class StoreAttachment
         $name = Str::lower(Str::random(20));
         $original = $this->cleanName($file->getClientOriginalName());
 
+        $notice = null;
+        $photo = null;
         if ($kind === AttachmentKind::Photo) {
-            $photo = $this->photos->process((string) $file->getRealPath());
+            try {
+                $photo = $this->photos->process((string) $file->getRealPath());
+            } catch (PhotoException $e) {
+                if (! $e->keepOriginal) {
+                    throw $e;
+                }
+                // Foto valida ma non convertibile qui (HEIC): si conserva com'è, tra i documenti
+                $kind = AttachmentKind::Document;
+                $notice = $e->getMessage();
+            }
+        }
+
+        if ($photo !== null) {
             $path = "{$folder}/{$name}.{$photo['ext']}";
             Storage::disk($disk)->put($path, $photo['main']);
             $variants = null;
             if ($photo['thumb'] !== null) {
-                $variants = ['thumb' => "{$folder}/{$name}-400.jpg"];
+                $variants = ['thumb' => "{$folder}/{$name}-400.{$photo['thumb_ext']}"];
                 Storage::disk($disk)->put($variants['thumb'], $photo['thumb']);
             }
             $data = [
@@ -52,9 +70,11 @@ class StoreAttachment
             ];
         } else {
             $ext = strtolower($file->getClientOriginalExtension());
-            if (! in_array($ext, (array) config('manutrack.attachments.documents'), true)) {
-                throw new RuntimeException(__('assets.files.document_invalid', ['types' => implode(', ', (array) config('manutrack.attachments.documents'))]));
+            $allowed = (array) config('manutrack.attachments.documents');
+            if ($notice === null && ! in_array($ext, $allowed, true)) {
+                throw new RuntimeException(__('assets.files.document_invalid', ['types' => implode(', ', $allowed)]));
             }
+            $ext = preg_match('/^[a-z0-9]{1,8}$/', $ext) ? $ext : 'bin';
             $path = "{$folder}/{$name}.{$ext}";
             Storage::disk($disk)->putFileAs($folder, $file, "{$name}.{$ext}");
             $data = [
@@ -74,6 +94,7 @@ class StoreAttachment
         ]);
 
         Audit::log('assets.file_added', $owner, $attachment->original_name);
+        $attachment->notice = $notice;
 
         return $attachment;
     }

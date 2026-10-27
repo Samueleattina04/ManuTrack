@@ -90,6 +90,8 @@ return [
         'max_mb' => (int) env('MANUTRACK_UPLOAD_MAX_MB', 20),
         // Lato lungo delle foto salvate e delle miniature
         'photo_max' => 1600,
+        // Formato delle foto salvate: "auto" (WebP se il server lo supporta, altrimenti JPEG) o "jpeg"
+        'format' => env('MANUTRACK_PHOTO_FORMAT', 'auto'),
         'thumb_max' => 400,
         'documents' => ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'odt', 'ods', 'txt', 'csv', 'jpg', 'jpeg', 'png', 'webp', 'dwg', 'dxf'],
     ],

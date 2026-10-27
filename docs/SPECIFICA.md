@@ -2,7 +2,7 @@
 
 Documento scritto man mano, fase per fase. Descrive cosa fa l'app dal punto di vista di chi la usa e di chi la gestisce. Le decisioni di progetto sono in `docs/PROPOSTA.md`.
 
-**Stato:** fase 4 completata (versione 0.4.0).
+**Stato:** fase 5 completata (versione 0.5.0).
 
 | Fase | Contenuto | Stato |
 |---|---|---|
@@ -431,10 +431,7 @@ Con l'aggiornamento vengono aggiunti ai ruoli esistenti senza toccare le altre m
 ## 24. Foto e documenti
 
 - **Disco privato** (`storage/app/private/attachments/...`), nomi casuali. Si scaricano solo da `/allegati/{id}`, che controlla il permesso sull'oggetto (macchine: "Vedere le macchine").
-- **Foto** (JPEG, PNG, WebP):
-  - raddrizzate secondo l'orientamento del telefono;
-  - lato lungo 1600 px più miniatura da 400 px;
-  - ricodificate in JPEG, quindi **senza metadati e senza posizione GPS**.
+- **Foto** (JPEG, PNG, WebP): vedi il paragrafo 27, che vale per macchine, segnalazioni e ordini di lavoro.
   - Senza GD né Imagick si salvano senza ridimensionare, ma dai JPEG si tolgono comunque EXIF e GPS.
   - La prima foto è la principale; si può cambiare.
 - **Documenti:** pdf, doc(x), xls(x), odt, ods, txt, csv, immagini, dwg, dxf.
@@ -482,3 +479,180 @@ Con l'aggiornamento vengono aggiunti ai ruoli esistenti senza toccare le altre m
   - la macchina padre può essere nello stesso file;
   - date gg/mm/aaaa (anche le date di Excel), numeri all'italiana.
 - **Conferma:** tutto in una transazione, una voce nel registro attività.
+
+## 27. Foto in WebP (fase 5, per tutta l'app)
+
+- **Sul telefono, prima dell'invio** (`resources/js/media/photo.js`):
+  - lato lungo al massimo 1600 px e compressione;
+  - WebP (qualità 0,8) se il browser lo sa generare, altrimenti JPEG (0,82), come su Safari per iPhone;
+  - le foto HEIC dell'iPhone diventano JPEG, perché Safari le sa aprire;
+  - la ricodifica applica l'orientamento e toglie EXIF e GPS.
+  - Vale per la segnalazione rapida e per i campi foto delle schede di macchine e ordini.
+  - Se il browser non riesce ad aprire la foto, si invia l'originale.
+- **Sul server** (`PhotoProcessor`):
+  - sempre WebP qualità 80, lato lungo 1600 px, miniatura WebP da 400 px per gli elenchi;
+  - metadati tolti, compresi EXIF e GPS;
+  - orientamento EXIF letto in PHP puro, quindi funziona anche senza l'estensione `exif`;
+  - limite di 50 megapixel.
+- **Senza supporto WebP** in GD/Imagick, oppure con `MANUTRACK_PHOTO_FORMAT=jpeg`, le foto si salvano in JPEG ridotto. Lo segnalano l'installazione (requisito "Foto in formato WebP") e la pagina Sistema (voce "Foto").
+- **Senza GD né Imagick** le foto si salvano com'erano, togliendo comunque EXIF e GPS dai JPEG.
+- **File non validi o HEIC:**
+  - un file che non è un'immagine dà l'errore "Il file non è una foto leggibile" e non si salva nulla;
+  - una foto HEIC che il server non sa convertire **non si perde**: si conserva tra i documenti, con un avviso che spiega cosa fare.
+- **`php artisan manutrack:foto-ottimizza`** converte le foto già salvate nel formato attuale.
+  - `--prova` mostra lo spazio risparmiato senza cambiare nulla;
+  - `--limite=N` limita il numero di foto.
+  - Per ogni foto scrive i file nuovi e li rilegge per verificarli. Solo dopo aggiorna l'archivio e cancella l'originale; in caso di errore l'originale resta.
+
+## 28. Segnalazioni
+
+- **Ciclo di vita:** `nuova` (da valutare) → `accettata` (nasce l'ordine di lavoro), `respinta` (con motivo) oppure `duplicata` (di un'altra, eredita il suo ordine).
+- **Numerazione:** `SEG-AAAA-NNNNN` per anno, con blocco di riga (tabella `sequences`).
+- **Contenuto:**
+  - macchina, oppure ubicazione se non è una macchina;
+  - cosa succede;
+  - macchina ferma sì/no;
+  - urgenza bassa/media/alta/critica;
+  - foto (fino a 6);
+  - autore;
+  - ora di scrittura sul telefono (`reported_at`) e ora d'arrivo.
+- **Macchina ferma:** la macchina passa "in guasto" e si apre un **fermo** dall'ora della segnalazione.
+- **Urgente** = priorità critica, oppure macchina ferma di criticità A. Chi valuta riceve una notifica **subito dopo la risposta**, ad alta priorità (vedi §20). Le altre vanno in coda.
+- **Chi le vede:**
+  - chi segnala vede sempre le proprie;
+  - tutte con "Vedere tutte le segnalazioni";
+  - valutare richiede "Accettare o respingere".
+- **Elenco:** chi valuta parte da quelle da valutare, con le urgenti in cima; filtri per stato e ricerca.
+- **Valutazione:**
+  - accettando si scelgono priorità, tipo, titolo, assegnatari, scadenza e checklist;
+  - chi ha segnalato riceve l'esito (presa in carico, respinta con il motivo, già nota).
+
+## 29. Segnalazione rapida (`/segnala`)
+
+Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per il telefono, in pochi tocchi:
+1. **Macchina:**
+   - **Inquadra il QR** (fotocamera dal vivo, lettore a tutto schermo);
+   - "Usa una foto" del QR;
+   - ricerca per codice o nome;
+   - le ultime segnalate;
+   - "Non è una macchina" con l'ubicazione.
+   - Dal QR stampato (`/q/<codice>`) chi può solo segnalare arriva direttamente qui con la macchina scelta.
+2. **Cosa succede:**
+   - testo con frasi rapide;
+   - "La macchina è ferma?" con due pulsanti grandi;
+   - urgenza;
+   - foto (preparate sul telefono, §27).
+   - Avviso rosso quando la segnalazione sarà urgente.
+3. **Invio:** numero della segnalazione, oppure "Salvata sul telefono".
+
+**Lettore QR:** `BarcodeDetector` dove esiste (Chrome su Android), altrimenti `jsQR`, caricato solo quando serve e tenuto in cache per l'uso offline. La fotocamera si spegne appena il codice è letto.
+
+**Senza rete (invio differito):**
+- La pagina resta disponibile offline:
+  - il service worker la salva a ogni visita (cache `mt-pages`) e la prepara una volta per sessione;
+  - contiene l'elenco delle macchine, quindi ricerca e QR funzionano senza rete.
+- La segnalazione si salva **prima** in IndexedDB, con un identificativo creato sul telefono, poi si prova l'invio.
+- **Android:** Background Sync, quindi parte anche ad app chiusa.
+- **iPhone (e come ripiego):** parte all'apertura dell'app, al ritorno della rete o quando l'app torna in primo piano.
+- In ogni pagina un avviso indica le segnalazioni in attesa, con "Invia ora".
+- **Doppioni:** il server riconosce un invio ripetuto dall'identificativo e non duplica.
+- **Ora:** si conserva quella di scrittura, se plausibile (non futura, non più vecchia di 30 giorni).
+- **Mai cancellate da sole:**
+  - quelle rifiutate per un motivo che non si risolve riprovando restano "da controllare" in fondo a `/segnala`, con "Riprova" ed "Elimina";
+  - quelle con la sessione scaduta partono dopo il nuovo accesso;
+  - quelle scritte da un'altra persona sullo stesso telefono partono quando quella persona accede.
+- **Sicurezza dell'invio** (`POST /segnalazioni/invia`):
+  - è escluso dal controllo CSRF perché lo usa anche il service worker;
+  - accetta solo richieste autenticate dello stesso sito con l'intestazione `X-ManuTrack: 1`, che un altro sito non può inviare senza CORS;
+  - origine verificata, cookie di sessione SameSite=Lax;
+  - limite di 30 invii al minuto per persona.
+- **All'uscita** la risposta invia `Clear-Site-Data: "cache"` e la pagina cancella la cache `mt-pages`: sul telefono condiviso non restano dati della persona uscita. Le segnalazioni non inviate restano a chi le ha scritte.
+
+## 30. Ordini di lavoro (`/ordini`)
+
+- **Numerazione:** `OdL-AAAA-NNNNN`.
+- **Tipi:** correttivo, preventivo, miglioramento.
+- **Priorità:** bassa, media, alta, critica.
+- **Ciclo di vita** (come da proposta):
+
+| Da | A | Permesso | Note |
+|---|---|---|---|
+| aperto | pianificato | Pianificare e assegnare | automatico assegnando qualcuno |
+| aperto, pianificato | in corso | Eseguire (ed essere assegnatario, o poter assegnare) | data di inizio, parte il cronometro di chi inizia, macchina in guasto/ferma → "in manutenzione" |
+| aperto, pianificato | annullato | Pianificare e assegnare | motivo obbligatorio |
+| in corso | in attesa | Eseguire | motivo: ricambi, fornitore esterno, produzione; cronometri fermati |
+| in attesa | in corso | Eseguire | "Riprendi" |
+| in corso | completato | Eseguire | checklist obbligatoria completa, note di chiusura, codici guasto, cronometri fermati, macchina di nuovo operativa (a scelta) e fermo chiuso |
+| completato | chiuso | Chiudere e riaprire | il costo orario del momento resta fissato |
+| completato | in corso | Chiudere e riaprire | riapertura, motivo obbligatorio, contatore riaperture |
+
+  Nessun altro passaggio è possibile, **nemmeno per l'amministratore**: il ciclo si controlla nell'azione, non solo nei permessi.
+- **Prendo io:** chi esegue gli ordini può prendere in carico un ordine senza assegnatari.
+- **Assegnatari:** solo persone che possono eseguire gli ordini. Chi viene aggiunto riceve una notifica, urgente se l'ordine è critico.
+- **Checklist:**
+  - voci a spunta o con un valore misurato (con unità);
+  - obbligatorie o facoltative;
+  - da modelli (Impostazioni manutenzione) o aggiunte al momento.
+- **Tempi:**
+  - cronometro (uno solo acceso per persona: avviarne uno ferma quello su un altro ordine; sotto i 30 secondi non si conserva);
+  - inserimento a mano (minuti e giorno);
+  - si elimina il proprio tempo, oppure tutti con "Pianificare e assegnare".
+- **Fermo macchina:** aperto dalla segnalazione o a mano, chiuso al completamento, orari correggibili. È la base di MTTR e MTBF (fase 9).
+- **Codici guasto:**
+  - problema, causa e rimedio, scelti al completamento;
+  - gestiti nelle impostazioni;
+  - quelli già usati si disattivano, non si cancellano.
+- **Foto, commenti e storico:**
+  - foto dell'ordine e della segnalazione d'origine;
+  - commenti e cambi di stato in un'unica cronologia.
+- **Costi** (visibili con "Vedere i costi"):
+  - manodopera = minuti × costo orario;
+  - più i costi esterni;
+  - i ricambi arriveranno con il magazzino.
+- **Elenco:**
+  - schede Da fare, In corso, Da chiudere, Chiusi, Tutti, con i conteggi;
+  - "Solo i miei", attivo di default per chi non assegna;
+  - filtri per priorità, tipo e macchina, ricerca;
+  - ordinamento per urgenza e scadenza;
+  - avviso degli ordini scaduti.
+- **Scorciatoie da tastiera** (PC): `N` nuovo ordine, `F` cerca, `M` solo i miei, `G O` vai agli ordini, `G E` vai alle segnalazioni.
+
+### 30.1 Permessi
+
+| Permesso | Amministratore | Responsabile | Tecnico | Magazziniere | Richiedente | Osservatore |
+|---|---|---|---|---|---|---|
+| Segnalare | ✓ | ✓ | ✓ | ✓ | ✓ | — |
+| Vedere tutte le segnalazioni | ✓ | ✓ | ✓ | solo proprie | solo proprie | ✓ |
+| Valutare le segnalazioni | ✓ | ✓ | — | — | — | — |
+| Vedere gli ordini | ✓ | ✓ | ✓ | ✓ | — | ✓ |
+| Creare ordini | ✓ | ✓ | ✓ (assegnati a sé) | — | — | — |
+| Eseguire | ✓ | ✓ | solo assegnati, o "Prendo io" | — | — | — |
+| Assegnare, pianificare, annullare | ✓ | ✓ | — | — | — | — |
+| Chiudere e riaprire | ✓ | ✓ | — | — | — | — |
+| Vedere i costi | ✓ | ✓ | — | — | — | ✓ |
+| Commentare | ✓ | ✓ | ✓ | — | — | — |
+| Impostazioni manutenzione (nuovo) | ✓ | ✓ | — | — | — | — |
+
+È verificata dai test `tests/Feature/Maintenance/RolePermissionsTest.php`, una riga per ruolo.
+
+## 31. Impostazioni manutenzione (`/ordini/impostazioni`)
+
+- **Modelli di checklist:**
+  - una voce per riga;
+  - `Pressione [bar]` crea una voce con un valore da misurare;
+  - `?` all'inizio rende la voce facoltativa.
+- **Codici guasto** per problema, causa e rimedio.
+- **Costo orario** della manodopera.
+
+## 32. Panoramica e scheda macchina
+
+- **Panoramica:**
+  - "Segnala un guasto" in evidenza sul telefono;
+  - segnalazioni da valutare, con le urgenti in cima;
+  - "I miei ordini";
+  - macchine ferme.
+- **Scheda macchina:**
+  - "Segnala un guasto";
+  - **storico interventi** (ordini e segnalazioni aperte) con le ore di fermo degli ultimi 90 giorni;
+  - "Nuovo ordine" per quella macchina.
+

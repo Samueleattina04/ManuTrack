@@ -35,6 +35,53 @@
             </div>
         </section>
 
+        {{-- Segnala: il gesto più frequente in reparto --}}
+        @can('requests.create')
+            <a href="{{ route('requests.create') }}" class="card flex items-center gap-4 p-4 hover:bg-surface-2 lg:hidden">
+                <span class="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] bg-[var(--mt-accent)] text-[var(--mt-on-accent)]"><x-icon name="alert-triangle" class="!h-6 !w-6" /></span>
+                <span class="flex-1"><strong class="block">{{ __('maintenance.quick.title') }}</strong><span class="text-sm text-fg-2">{{ __('app.home.report_hint') }}</span></span>
+                <x-icon name="chevron-right" class="text-muted" />
+            </a>
+        @endcan
+
+        @if($toTriage !== null && $triageCount > 0)
+            <section class="card overflow-hidden" aria-labelledby="home-triage">
+                <div class="flex items-center gap-2 border-b border-line-soft px-4 py-3">
+                    <h2 id="home-triage" class="flex-1 text-base font-bold">{{ trans_choice('app.home.triage_title', $triageCount, ['count' => $triageCount]) }}</h2>
+                    <a href="{{ route('requests.index') }}" class="btn btn-ghost btn-sm shrink-0">{{ __('app.home.see_all') }}<x-icon name="chevron-right" class="!w-4 !h-4" /></a>
+                </div>
+                <ul>
+                    @foreach($toTriage as $r)
+                        <li class="border-b border-line-soft last:border-0"><a href="{{ route('requests.show', $r) }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2">
+                            <span @class(['h-9 w-1.5 shrink-0 rounded-full', 'bg-[var(--mt-ko)]' => $r->isUrgent(), 'bg-line' => ! $r->isUrgent()]) aria-hidden="true"></span>
+                            <span class="min-w-0 flex-1"><span class="block truncate font-medium">{{ $r->summary(80) }}</span><span class="block truncate text-xs text-muted">{{ $r->asset ? $r->asset->code.' · ' : '' }}{{ $r->reported_at?->diffForHumans() }}</span></span>
+                            @if($r->isUrgent())<x-status tone="ko" icon="bell">{{ __('maintenance.request.urgent') }}</x-status>@endif
+                        </a></li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
+        @if($myOrders !== null)
+            <section class="card overflow-hidden" aria-labelledby="home-mine">
+                <div class="flex items-center gap-2 border-b border-line-soft px-4 py-3">
+                    <h2 id="home-mine" class="flex-1 text-base font-bold">{{ __('app.home.my_orders') }}</h2>
+                    <a href="{{ route('work-orders.index', ['miei' => 1]) }}" class="btn btn-ghost btn-sm shrink-0">{{ __('app.home.see_all') }}<x-icon name="chevron-right" class="!w-4 !h-4" /></a>
+                </div>
+                <ul>
+                    @forelse($myOrders as $o)
+                        <li class="border-b border-line-soft last:border-0"><a href="{{ route('work-orders.show', $o) }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2">
+                            <x-priority :priority="$o->priority" class="[&>span:last-child]:sr-only" />
+                            <span class="min-w-0 flex-1"><span class="block truncate font-medium">{{ $o->title }}</span><span class="block truncate text-xs text-muted"><span class="font-mono">{{ $o->number }}</span>@if($o->asset) · {{ $o->asset->code }}@endif @if($o->due_at)<span @class(['text-ko font-semibold' => $o->isOverdue()])>· {{ __('maintenance.order.due', ['date' => $o->due_at->translatedFormat('j M')]) }}</span>@endif</span></span>
+                            <x-status :status="$o->status" />
+                        </a></li>
+                    @empty
+                        <li class="px-4 py-4 text-sm text-fg-2"><x-icon name="check-circle" class="text-ok" /> {{ __('app.home.no_orders') }}</li>
+                    @endforelse
+                </ul>
+            </section>
+        @endif
+
         @if($down !== null)
             <section class="card overflow-hidden" aria-labelledby="home-down">
                 <div class="flex items-center gap-2 border-b border-line-soft px-4 py-3">

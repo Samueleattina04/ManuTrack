@@ -148,6 +148,24 @@ I numeri in colonna usano `.num` (`tabular-nums`). Le etichette in maiuscolo (`.
 - **Scheda:** in alto la foto (sul telefono una miniatura quadrata accanto al nome), poi il cambio di stato con schede grandi da toccare; le macchine A mostrano un avviso rosso "notifica urgente" prima della conferma. Contatori con il valore in grande e il campo della lettura con l'unità dentro (`inputmode="decimal"`).
 - **Etichette QR:** pagina di stampa a sé, sempre chiara, misure in millimetri, codice in IBM Plex Mono; tratteggio di taglio solo a schermo.
 
+## Segnalazioni e ordini
+
+- **Segnalazione rapida:**
+  - una colonna, pulsanti da 56 px;
+  - il primo gesto è "Inquadra il QR", su tutta la larghezza;
+  - lettore a tutto schermo con riquadro bianco e fondo oscurato, e due pulsanti grandi in basso ("Usa una foto", "Annulla") sopra la barra Home dell'iPhone;
+  - "La macchina è ferma?" come due pulsanti grandi (rosso / accento);
+  - urgenza come quattro schede con le barre di priorità;
+  - pulsante d'invio fisso sopra la barra in basso;
+  - stato senza rete sempre visibile (avviso giallo, testo del pulsante che cambia).
+- **Avviso della coda offline:** striscia gialla sotto la barra superiore in tutte le pagine; diventa verde per qualche secondo dopo l'invio.
+- **Elenchi:** a sinistra una barra rossa per le segnalazioni urgenti e le barre di priorità per gli ordini; a destra lo stato, sempre con icona e testo; schede di stato a pastiglia con i conteggi.
+- **Ordine di lavoro:**
+  - azioni del ciclo di vita come pulsanti grandi, quella principale piena;
+  - i passaggi che chiedono dati (attesa, completamento, annullamento, riapertura) aprono un riquadro sotto i pulsanti;
+  - checklist con caselle da 24 px e barra di avanzamento verde;
+  - cronometro con il tempo che scorre nel pulsante "Ferma".
+
 ## App installabile
 
 - **Procedura guidata** (`/app`):

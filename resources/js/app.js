@@ -12,15 +12,22 @@ import registerServiceWorker, { updateBanner } from './pwa/register';
 import installWizard from './pwa/wizard';
 import pushDiagnostics from './pwa/diagnostics';
 import { environment } from './pwa/core';
+import { photoUploadDirective } from './media/photo';
+import quickReport from './requests/quick';
+import { outboxBanner } from './requests/outbox';
 
 Alpine.data('theme', theme);
 Alpine.data('shortcuts', shortcuts);
 Alpine.data('commandPalette', commandPalette);
 Alpine.directive('tilt', tilt);
 Alpine.directive('count-up', countUp);
+// Foto ridotte e convertite sul telefono prima del caricamento (vedi media/photo.js)
+Alpine.directive('photo-upload', photoUploadDirective);
 Alpine.data('swUpdate', updateBanner);
 Alpine.data('installWizard', installWizard);
 Alpine.data('pushDiagnostics', pushDiagnostics);
+Alpine.data('quickReport', quickReport);
+Alpine.data('outboxBanner', outboxBanner);
 // Invito all'installazione in panoramica: compare sul telefono finché l'app non è installata
 Alpine.data('appPrompt', () => ({
     env: environment(),

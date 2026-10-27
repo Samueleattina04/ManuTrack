@@ -13,6 +13,7 @@ Indice:
 7. In alternativa: tunnel HTTPS verso il PC
 8. Cosa è già stato verificato e cosa no
 9. Fase 4: avvisi urgenti, QR e foto dal telefono
+10. Fase 5: segnalazione rapida, invio senza rete, ordini di lavoro
 
 Negli esempi `prova.example.com` è il sottodominio di prova: sostituiscilo con il tuo.
 
@@ -305,3 +306,78 @@ Crea due macchine di prova (*Macchine › Nuova macchina*):
 - [ ] Aggiungi un PDF (manuale) con **Aggiungi documenti** e riaprilo.
 - [ ] Registra una lettura del contatore scrivendo "1.250,5". Poi prova una lettura più bassa: viene rifiutata con la spiegazione.
 - [ ] Su iPhone, se la foto viene rifiutata come HEIC: *Impostazioni › Fotocamera › Formati › Più compatibile*.
+
+---
+
+## 10. Fase 5: segnalazione rapida, invio senza rete, ordini di lavoro
+
+Servono tre persone, una per ruolo (*Persone › Invita*):
+- un **richiedente** (operatore) con il telefono da provare;
+- un **responsabile** con l'app installata e le notifiche attive (paragrafi 4 e 5);
+- un **tecnico** con l'app installata e le notifiche attive.
+
+Prima stampa le etichette QR di due macchine (paragrafo 9.3):
+- una di criticità **A** (es. `PRS-01`);
+- una di criticità **C**.
+
+### 10.1 Segnalazione rapida (richiedente)
+- [ ] Apri ManuTrack dall'icona › pulsante centrale **+** (Segnala).
+- [ ] **Inquadra il QR**: il telefono chiede la fotocamera (consenti).
+  - Inquadrando l'etichetta, la macchina viene scelta da sola con una breve vibrazione su Android.
+  - Su iPhone la lettura usa un lettore incluso nell'app: tieni il telefono fermo a 15–25 cm.
+- [ ] Tocca una frase rapida ("Perdita d'olio"), poi **No, funziona** e urgenza **Media**.
+- [ ] **Aggiungi** una foto scattata al momento: compare la miniatura dopo un attimo.
+  - Su iPhone le foto HEIC vengono convertite in JPEG dal telefono.
+- [ ] **Invia segnalazione**: compare il numero `SEG-…`.
+  - Tutto il giro deve richiedere meno di 30 secondi.
+- [ ] Sul telefono del responsabile arriva "Nuova segnalazione" entro circa un minuto (passa dalla coda del cron).
+
+### 10.2 Segnalazione urgente
+- [ ] Il richiedente segnala la macchina **A** con **Sì, è ferma**.
+  - Compare l'avviso rosso "Segnalazione urgente".
+  - Invia.
+- [ ] Sul telefono **bloccato** del responsabile arriva **subito** "Segnalazione urgente · PRS-01 …" con "macchina ferma".
+- [ ] La macchina risulta "In guasto" e, nella scheda, lo storico mostra la segnalazione.
+- [ ] Ripeti con una macchina C e urgenza **Critica**: anche questa arriva subito.
+
+### 10.3 Senza rete (il punto più importante)
+- [ ] Apri una volta Segnala con la rete, poi attiva **Uso in aereo**.
+- [ ] Apri ManuTrack dall'icona › **+**:
+  - la pagina si apre anche senza rete;
+  - compare "Sei senza rete";
+  - la ricerca delle macchine funziona, e anche il QR.
+- [ ] Scrivi una segnalazione con una foto › **Salva: verrà inviata appena c'è rete** › "Salvata sul telefono".
+- [ ] In ogni pagina compare "1 segnalazione è sul telefono in attesa di invio".
+- [ ] **Android:**
+  1. chiudi l'app;
+  2. togli Uso in aereo;
+  3. entro qualche minuto la segnalazione arriva al responsabile, senza riaprire l'app (Background Sync).
+- [ ] **iPhone:**
+  1. togli Uso in aereo;
+  2. riapri l'app: l'avviso diventa "Segnalazioni inviate: 1".
+- [ ] Nella segnalazione, *Quando* riporta l'ora in cui l'hai scritta, con "arrivata il … (inviata senza rete)".
+- [ ] La segnalazione è arrivata **una volta sola**, anche riaprendo più volte l'app.
+
+### 10.4 Valutazione e ordine di lavoro
+- [ ] Il responsabile apre la notifica › **Accetta**:
+  1. sceglie il tecnico e la checklist "Rimessa in servizio dopo intervento";
+  2. **Crea l'ordine di lavoro**.
+- [ ] Il tecnico riceve "Ordine … assegnato a te". Se l'ordine è critico, la notifica arriva subito.
+- [ ] Il richiedente riceve "Segnalazione … presa in carico" e nella sua segnalazione vede numero e stato dell'ordine.
+- [ ] Il tecnico, dall'ordine:
+  1. **Inizia** (parte il cronometro);
+  2. spunta le voci;
+  3. scrive la pressione;
+  4. aggiunge una foto e un commento;
+  5. **Metti in attesa › Ricambi**, poi **Riprendi**;
+  6. **Completa** con le note e i codici guasto, lasciando spuntato "di nuovo operativa".
+- [ ] La macchina torna "Operativa" e il fermo si chiude.
+- [ ] Il richiedente riceve "intervento completato".
+- [ ] Il responsabile **Chiude** l'ordine; nei costi vede la manodopera.
+
+### 10.5 Permessi (con il telefono del richiedente)
+- [ ] Il richiedente non vede la voce "Ordini" e aprendo `/ordini` riceve "Accesso negato".
+- [ ] Vede solo le proprie segnalazioni.
+- [ ] Il tecnico non vede i costi e non può chiudere l'ordine.
+- [ ] All'uscita dal profilo, sullo stesso telefono, la pagina Segnala non resta in cache: con Uso in aereo si vede la pagina offline generica.
+

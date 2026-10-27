@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Laravel\Fortify\Contracts\LogoutResponse;
 use Laravel\Fortify\Fortify;
 
 /**
@@ -18,6 +19,11 @@ use Laravel\Fortify\Fortify;
  */
 class FortifyServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        $this->app->singleton(LogoutResponse::class, \App\Http\Responses\LogoutResponse::class);
+    }
+
     public function boot(): void
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);

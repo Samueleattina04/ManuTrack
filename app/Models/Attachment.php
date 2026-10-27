@@ -32,6 +32,9 @@ use Illuminate\Support\Facades\Storage;
  */
 class Attachment extends Model
 {
+    /** Avviso per chi ha caricato il file (non salvato), es. foto HEIC conservata come documento */
+    public ?string $notice = null;
+
     protected $fillable = ['kind', 'disk', 'path', 'original_name', 'mime', 'size', 'width', 'height', 'variants', 'position', 'user_id'];
 
     protected function casts(): array

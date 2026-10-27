@@ -2,14 +2,14 @@
 
 Elenco delle librerie usate da ManuTrack e delle loro licenze, con la verifica di compatibilità per un **uso commerciale** (software installato presso clienti e venduto come servizio).
 
-Aggiornato alla versione **0.4.0** (fase 4: aggiunta `openspout/openspout`, MIT, per leggere i file Excel). Il service worker è generato da Laravel, quindi `vite-plugin-pwa` e Workbox non servono. Le fasi successive aggiungono le librerie previste in `docs/PROPOSTA.md`, ciascuna verificata prima dell'uso.
+Aggiornato alla versione **0.5.0**. Fase 4: aggiunta `openspout/openspout` (MIT) per leggere i file Excel. Fase 5: aggiunta `jsqr` (Apache-2.0) per leggere i codici QR sui telefoni senza lettore nativo (iPhone). Il service worker è generato da Laravel, quindi `vite-plugin-pwa` e Workbox non servono. Le fasi successive aggiungono le librerie previste in `docs/PROPOSTA.md`, ciascuna verificata prima dell'uso.
 
 ## In sintesi
 
 | Licenza | Dove | Uso commerciale | Obblighi |
 |---|---|---|---|
 | MIT, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD | quasi tutte le librerie PHP e JavaScript | ✅ sì | conservare l'avviso di copyright e il testo di licenza (già presenti nei pacchetti in `vendor/`) |
-| Apache-2.0 | `phpoption/phpoption`; alcuni strumenti di sviluppo | ✅ sì | conservare il file NOTICE, se presente |
+| Apache-2.0 | `phpoption/phpoption`, `jsqr` (nel pacchetto compilato); alcuni strumenti di sviluppo | ✅ sì | conservare l'avviso di licenza e il file NOTICE, se presente (`jsqr` non ne ha). Nel pacchetto compilato il codice di jsQR è in `public/build/assets/jsQR-*.js`; l'elenco completo degli avvisi delle librerie è previsto nella fase 11 |
 | BSD-3-Clause **oppure** GPL-2.0/3.0 | `nette/schema`, `nette/utils` (dipendenze di Laravel) | ✅ sì, scegliendo la BSD-3-Clause | doppia licenza a scelta: ManuTrack usa la BSD-3-Clause |
 | SIL OFL 1.1 | caratteri Archivo, IBM Plex Sans, IBM Plex Mono, Open Sans | ✅ sì | i font non si vendono da soli; ospitarli nell'app è consentito |
 | MPL-2.0 | `lightningcss` (usato da Tailwind **solo durante la compilazione**) | ✅ sì | non è incluso nel pacchetto distribuito |
@@ -37,6 +37,7 @@ Le icone sono di **Lucide** (licenza ISC): il contenuto SVG è copiato in `resou
 | Open Sans (solo per generare la scritta del logo) | 5.x | OFL-1.1 | la scritta è convertita in tracciati in `resources/brand/wordmark.json` |
 | opentype.js | 1.x | MIT | lettura del font per la scritta del logo (solo sviluppo) |
 | Lucide | — | ISC | icone |
+| jsQR | 1.4 | Apache-2.0 | lettura dei codici QR dalla fotocamera dove manca `BarcodeDetector` (iPhone); caricato solo quando serve |
 
 ### Strumenti di sviluppo (non inclusi nel pacchetto)
 

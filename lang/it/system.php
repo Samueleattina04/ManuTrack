@@ -22,6 +22,7 @@ return [
         'queue' => 'Coda',
         'push' => 'Notifiche push',
         'push_urgent' => 'Push urgenti',
+        'photos' => 'Foto',
         'php' => 'PHP',
         'database' => 'Database',
         'images' => 'Immagini',
@@ -113,5 +114,10 @@ return [
         'fpm' => 'subito dopo la risposta (PHP-FPM)',
         'litespeed' => 'subito dopo la risposta (LiteSpeed)',
         'none' => 'subito, ma la pagina può attendere qualche secondo l\'invio',
+    ],
+    'photos' => [
+        'webp' => 'WebP, 1600 px, senza GPS',
+        'jpeg' => 'JPEG ridotto: GD/Imagick senza supporto WebP',
+        'none' => 'originali, non ridotte: mancano GD e Imagick',
     ],
 ];

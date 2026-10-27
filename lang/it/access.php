@@ -62,6 +62,7 @@ return [
         'work_orders.assign' => 'Pianificare e assegnare gli ordini',
         'work_orders.close' => 'Chiudere e riaprire gli ordini',
         'work_orders.view_costs' => 'Vedere i costi',
+        'work_orders.settings' => 'Gestire checklist, codici guasto e costo orario',
         'preventive.view' => 'Vedere i piani preventivi',
         'preventive.manage' => 'Creare e modificare i piani preventivi',
         'inventory.view' => 'Vedere il magazzino',

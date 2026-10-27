@@ -74,6 +74,8 @@ return [
         'recommended_for' => 'consigliata per :why',
         'image' => 'Elaborazione immagini (GD o Imagick)',
         'image_fallback' => 'assente: si useranno le icone pre-generate e le foto non verranno ridimensionate',
+        'webp' => 'Foto in formato WebP',
+        'webp_fallback' => 'non supportato da GD/Imagick: le foto si salveranno in JPEG ridotto (file più pesanti)',
         'writable' => 'Cartella :path scrivibile',
         'writable_file' => 'File :path scrivibile',
         'yes' => 'sì',

@@ -2,6 +2,7 @@
 
 namespace App\Support\Setup;
 
+use App\Support\Files\PhotoProcessor;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -68,6 +69,17 @@ class Requirements
             $image !== null ? self::OK : self::WARNING,
             $image !== null ? strtoupper($image) : __('install.req.image_fallback'),
         );
+
+        // Formato delle foto: WebP se la libreria lo sa scrivere, altrimenti JPEG ridotto
+        if ($image !== null) {
+            $webp = PhotoProcessor::outputFormat() === 'webp';
+            $checks[] = $this->check(
+                'image-webp',
+                __('install.req.webp'),
+                $webp ? self::OK : self::WARNING,
+                $webp ? __('install.req.yes') : __('install.req.webp_fallback'),
+            );
+        }
 
         foreach (['storage' => storage_path(), 'bootstrap/cache' => base_path('bootstrap/cache')] as $label => $path) {
             $checks[] = $this->check(

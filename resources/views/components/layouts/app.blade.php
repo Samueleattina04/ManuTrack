@@ -72,6 +72,16 @@
 
         <x-system-banner />
 
+        {{-- Segnalazioni scritte senza rete e non ancora inviate --}}
+        <div x-data="outboxBanner({{ (int) $user->id }})" x-show="pending || justSent" x-cloak class="mx-auto mt-3 w-full max-w-6xl px-4 lg:px-8">
+            <div class="alert" :class="justSent && !pending ? 'alert-ok' : 'alert-warn'" role="status">
+                <x-icon name="clock" />
+                <span class="flex-1" x-text="pending ? (pending === 1 ? @js(__('maintenance.outbox.one')) : @js(__('maintenance.outbox.many')).replace(':count', pending)) : @js(__('maintenance.outbox.sent')).replace(':count', justSent)"></span>
+                <button x-show="pending" type="button" class="btn btn-ghost btn-sm" @click="trySend()" :disabled="sending || !navigator.onLine">{{ __('maintenance.outbox.send_now') }}</button>
+                <a x-show="pending" href="{{ route('requests.create') }}" class="btn btn-ghost btn-sm">{{ __('maintenance.outbox.open') }}</a>
+            </div>
+        </div>
+
         <main id="contenuto" class="app-content pt-5 lg:pt-7 page-enter" tabindex="-1">
             @if(session('status') && ! request()->routeIs('settings.company'))
                 <div class="mx-auto mb-5 max-w-6xl alert alert-ok" role="status"><x-icon name="check-circle" /><span>{{ session('status') }}</span></div>

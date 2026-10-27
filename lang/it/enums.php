@@ -24,4 +24,34 @@ return [
         'B' => 'B · rallenta',
         'C' => 'C · non blocca',
     ],
+    'work_order_status' => [
+        'aperto' => 'Aperto',
+        'pianificato' => 'Pianificato',
+        'in_corso' => 'In corso',
+        'in_attesa' => 'In attesa',
+        'completato' => 'Completato',
+        'chiuso' => 'Chiuso',
+        'annullato' => 'Annullato',
+    ],
+    'work_order_type' => [
+        'correttivo' => 'Correttivo',
+        'preventivo' => 'Preventivo',
+        'miglioramento' => 'Miglioramento',
+    ],
+    'waiting_reason' => [
+        'ricambi' => 'Ricambi',
+        'fornitore' => 'Fornitore esterno',
+        'produzione' => 'Produzione (macchina non disponibile)',
+    ],
+    'request_status' => [
+        'nuova' => 'Da valutare',
+        'accettata' => 'Accettata',
+        'respinta' => 'Respinta',
+        'duplicata' => 'Duplicata',
+    ],
+    'failure_kind' => [
+        'problema' => 'Problema',
+        'causa' => 'Causa',
+        'rimedio' => 'Rimedio',
+    ],
 ];

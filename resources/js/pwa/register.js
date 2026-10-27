@@ -38,9 +38,23 @@ export default function registerServiceWorker() {
             });
         });
 
+        // Copia della pagina Segnala per usarla anche senza rete (una volta per sessione)
+        if (document.querySelector('meta[name="mt-can-report"]') && 'caches' in window) {
+            try {
+                if (!sessionStorage.getItem('mt-warm')) {
+                    caches.open('mt-pages').then((c) => c.add('/segnala')).then(() => sessionStorage.setItem('mt-warm', '1')).catch(() => {});
+                }
+            } catch (e) { /* sessionStorage non disponibile */ }
+        }
+
         // Controlla gli aggiornamenti ogni ora e quando l'app torna in primo piano
         setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);
         document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && reg.update().catch(() => {}));
+    });
+
+    // Il service worker avvisa quando ha inviato (o no) le segnalazioni in coda
+    navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data?.type === 'outbox-changed') window.dispatchEvent(new CustomEvent('outbox-changed'));
     });
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {

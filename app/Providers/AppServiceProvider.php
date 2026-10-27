@@ -40,6 +40,8 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('install', fn (Request $request) => Limit::perMinute(5)->by((string) $request->ip()));
         RateLimiter::for('invitation', fn (Request $request) => Limit::perMinute(10)->by((string) $request->ip()));
+        // Segnalazioni: abbastanza per svuotare una coda offline, non per inondare
+        RateLimiter::for('reports', fn (Request $request) => Limit::perMinute(30)->by('u'.$request->user()?->id));
         RateLimiter::for('push-test', fn (Request $request) => Limit::perMinute(10)->by((string) $request->user()?->id));
         RateLimiter::for('push', fn (Request $request) => Limit::perMinute(30)->by($request->user() ? 'u'.$request->user()->id : (string) $request->ip()));
 

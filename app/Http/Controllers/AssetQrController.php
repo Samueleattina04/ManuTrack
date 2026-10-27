@@ -28,8 +28,16 @@ class AssetQrController extends Controller
         abort_unless(preg_match('/^[a-z0-9]{16,40}$/', $token) === 1, 404);
         $asset = Asset::query()->where('qr_token', $token)->first();
 
+        if (! $asset && ! request()->user()?->can('assets.view')) {
+            return redirect()->route('requests.create')->with('error', __('assets.qr.unknown'));
+        }
         if (! $asset) {
             return redirect()->route('assets.index')->with('error', __('assets.qr.unknown'));
+        }
+
+        // Chi può solo segnalare finisce direttamente sulla segnalazione di quella macchina
+        if (! request()->user()?->can('assets.view') && request()->user()?->can('requests.create')) {
+            return redirect()->route('requests.create', ['macchina' => $asset->qr_token]);
         }
 
         return redirect()->route('assets.show', $asset);

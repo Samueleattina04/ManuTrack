@@ -30,7 +30,7 @@ Questa guida spiega come creare una **nuova installazione per un cliente** su un
 |---|---|
 | PHP **8.3** | In DirectAdmin: *Account Manager › Domain Setup › PHP Version* (o *Select PHP Version*). |
 | Estensioni PHP indispensabili | `pdo_mysql`, `mbstring`, `openssl`, `curl`, `fileinfo`, `tokenizer`, `xml`, `ctype`, `json`, `filter` |
-| Estensioni consigliate | `gd` **o** `imagick` (foto e icone), `zip` (importazione da Excel ed esportazioni), `intl`, `bcmath` o `gmp` (facoltative: velocizzano la cifratura delle notifiche push, che funzionano anche senza) |
+| Estensioni consigliate | `gd` **o** `imagick` con supporto **WebP** (foto e icone; senza WebP le foto si salvano in JPEG, più pesanti), `zip` (importazione da Excel ed esportazioni), `intl`, `bcmath` o `gmp` (facoltative: velocizzano la cifratura delle notifiche push, che funzionano anche senza) |
 | Database | MySQL 8 o MariaDB 10.6+, con charset `utf8mb4` |
 | HTTPS | Obbligatorio: senza HTTPS l'app non si installa sui telefoni e le notifiche non funzionano |
 | Cron | Una voce ogni minuto (*Advanced Features › Cron Jobs*) |
@@ -252,6 +252,27 @@ Non c'è niente da configurare. La pagina **Sistema** mostra alla voce "Push urg
 
 Se l'invio immediato fallisce per un problema di rete, la notifica viene ritentata dalla coda al giro di cron successivo.
 
+### Foto
+
+Le foto (macchine, segnalazioni, ordini) si salvano in **WebP**:
+- lato lungo 1600 px, miniatura da 400 px;
+- senza dati EXIF né posizione GPS.
+
+Il requisito "Foto in formato WebP" dell'installazione e la voce **Foto** della pagina Sistema dicono se il server lo supporta. Se GD o Imagick non sanno scrivere WebP, le foto si salvano in JPEG ridotto.
+
+**Dopo l'aggiornamento alla 0.5.0** le foto caricate prima sono ancora in JPEG. Per convertirle:
+1. Prova, che non cambia nulla e mostra quanto spazio si risparmia:
+   ```bash
+   php artisan manutrack:foto-ottimizza --prova
+   ```
+2. Conversione:
+   ```bash
+   php artisan manutrack:foto-ottimizza
+   ```
+   Ogni foto viene verificata prima di cancellare l'originale. `--limite=200` converte a blocchi.
+
+Senza SSH: una voce di cron da eseguire una sola volta, come per le chiavi VAPID.
+
 ## 12. Verifica finale
 
 - [ ] `https://<dominio>` apre ManuTrack con il lucchetto e `http://` reindirizza su `https://`.
@@ -336,6 +357,8 @@ Le copie non sostituiscono il backup dell'hosting: tieni attivo anche quello di 
 | Le icone non hanno i colori dell'azienda | Manca GD/Imagick: si usano le icone della palette più vicina. Attiva GD dal pannello. |
 | Le foto o i documenti non si caricano | Il file supera il limite di PHP: il limite effettivo è scritto sotto i documenti della macchina. Alza `upload_max_filesize` e `post_max_size` dal pannello. |
 | Le foto grandi danno errore | Memoria insufficiente per ridimensionarle: porta `memory_limit` a 256M. |
+| Le foto restano in JPEG | GD o Imagick senza supporto WebP: scegli dal pannello una versione di PHP con GD completa, poi `manutrack:foto-ottimizza`. |
+| Una foto dell'iPhone finisce tra i documenti | È in formato HEIC e il telefono non l'ha convertita: su iPhone *Impostazioni › Fotocamera › Formati › Più compatibile*. |
 | L'importazione accetta solo CSV | Manca l'estensione `zip`: attivala dal selettore della versione PHP, oppure salva da Excel in "CSV UTF-8". |
 | Le notifiche non arrivano su iPhone | L'app deve essere aggiunta alla schermata Home (iOS 16.4+) e il permesso concesso da lì. Vedi la pagina diagnostica (dalla fase 3). |
 

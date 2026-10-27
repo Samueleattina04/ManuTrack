@@ -5,6 +5,7 @@ namespace App\Support\Setup;
 use App\Models\SystemVersion;
 use App\Support\AppVersion;
 use App\Support\Backup\DatabaseBackup;
+use App\Support\Files\PhotoProcessor;
 use App\Support\Push\PushDispatcher;
 use App\Support\Update\Updater;
 use Illuminate\Support\Carbon;
@@ -90,6 +91,7 @@ class SystemStatus
             'push_configured' => $this->pushConfigured(),
             'push_early_response' => PushDispatcher::earlyResponseMode(),
             'image_driver' => Requirements::imageDriver(),
+            'photo_format' => PhotoProcessor::outputFormat(),
             'php' => PHP_VERSION,
             'database' => $this->requirements->databaseCheck()['detail'],
         ];

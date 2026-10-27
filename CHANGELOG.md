@@ -3,6 +3,50 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.5.0] - Fase 5: segnalazioni e ordini di lavoro
+
+### Aggiunto
+- **Segnalazione rapida dal telefono** (`/segnala`, pulsante centrale): pochi tocchi.
+  - Macchina da QR inquadrato dal vivo, da foto del QR, da ricerca, dalle recenti, oppure "non è una macchina".
+  - Cosa succede (con frasi rapide), macchina ferma sì/no, urgenza, foto.
+- **Lettore QR nell'app:** `BarcodeDetector` su Android, `jsQR` su iPhone, caricato solo quando serve.
+- **Invio differito senza rete:**
+  - pagina disponibile offline;
+  - segnalazione salvata sul telefono (IndexedDB) e inviata da sola al ritorno della rete (Background Sync su Android, alla riapertura su iPhone);
+  - senza doppioni e con l'ora di scrittura;
+  - mai cancellata da sola;
+  - avviso "in attesa di invio" in tutte le pagine.
+- **Notifica urgente immediata** per le segnalazioni critiche e per le macchine di criticità A ferme; le altre in coda.
+- **Valutazione delle segnalazioni:** accetta (crea l'ordine di lavoro con assegnatari, scadenza, checklist), respingi con motivo, duplicata; esito notificato a chi ha segnalato.
+- **Ordini di lavoro:**
+  - numerazione `OdL-AAAA-NNNNN`;
+  - tipi e priorità;
+  - ciclo di vita completo come da proposta (aperto, pianificato, in corso, in attesa con motivo, completato, chiuso, riaperto, annullato), controllato anche per l'amministratore;
+  - storico degli stati.
+- "Prendo io", assegnatari con notifica (urgente se critico), checklist da modelli con voci a spunta o a valore, cronometro (uno per persona) e tempi a mano.
+- Fermi macchina aperti dalla segnalazione e chiusi al completamento, con macchina di nuovo operativa.
+- Codici guasto (problema, causa, rimedio), note di chiusura, foto, commenti, costi (manodopera × costo orario + esterni).
+- Elenchi con schede per fase, "Solo i miei", filtri, ordine per urgenza, scaduti; scorciatoie `N`, `F`, `M`, `G E`.
+- Impostazioni manutenzione: modelli di checklist, codici guasto, costo orario.
+- Panoramica con segnalazioni da valutare e "I miei ordini"; scheda macchina con storico interventi e "Segnala un guasto".
+- **Foto in WebP in tutta l'app** (richiesta durante la fase):
+  - sul telefono si riducono a 1600 px in WebP, o in JPEG su Safari;
+  - sul server WebP qualità 80, 1600 px più miniatura 400 px, senza EXIF né GPS, raddrizzate anche senza l'estensione `exif`;
+  - ripiego JPEG segnalato in installazione e nella pagina Sistema;
+  - le foto HEIC non convertibili si conservano tra i documenti con un avviso.
+- Comando `php artisan manutrack:foto-ottimizza` (con `--prova`) per convertire le foto già salvate, verificandole prima di cancellare gli originali.
+- All'uscita si svuotano le pagine salvate sul telefono (`Clear-Site-Data`).
+- Test della matrice dei permessi per ogni ruolo; controlli nel browser `scripts/e2e/report-check.cjs`.
+- Persone, segnalazioni e ordini dimostrativi inventati.
+- Libreria `jsqr` (Apache-2.0).
+
+### Modificato
+- Il richiedente trova "Segnalazioni" al posto di "Ordini" nella barra in basso.
+- Dal QR stampato, chi può solo segnalare arriva direttamente alla segnalazione di quella macchina.
+
+### Corretto
+- Un nome di variabile duplicato avrebbe nascosto lo storico delle letture dei contatori nella scheda macchina (trovato dall'analisi statica prima del rilascio).
+
 ## [0.4.0] - Fase 4: macchine e impianti
 
 ### Aggiunto

@@ -121,7 +121,7 @@ it('le foto vengono ridimensionate, ricodificate senza GPS e con la miniatura', 
     expect($stored)->not->toContain('GPSLatitude')->not->toContain('Exif')
         ->and([$w, $h])->toBe([1600, 1067])
         ->and($tw)->toBe(400)
-        ->and($attachment->mime)->toBe('image/jpeg')
+        ->and($attachment->mime)->toBe('image/webp')
         ->and($attachment->path)->toStartWith('attachments/asset/'.$this->asset->id.'/')
         ->and($this->asset->fresh()->cover->id)->toBe($attachment->id);
 });
@@ -149,7 +149,7 @@ it('gli allegati si scaricano solo con il permesso di vedere le macchine', funct
         ->assertDownload('manuale.pdf');
 
     $thumb = $this->actingAs($this->admin)->get(route('attachments.show', ['attachment' => $photo->id, 'v' => 'thumb']));
-    $thumb->assertOk()->assertHeader('Content-Type', 'image/jpeg');
+    $thumb->assertOk()->assertHeader('Content-Type', 'image/webp');
     expect($thumb->headers->get('Content-Security-Policy'))->toContain('sandbox')
         ->and($thumb->headers->get('Cache-Control'))->toContain('private');
 });
@@ -215,4 +215,14 @@ it('dalla scheda il tecnico carica foto e documenti', function () {
 
     Livewire::actingAs(userWithRole(Access::REQUESTER))->test(Show::class, ['asset' => $this->asset])
         ->set('photos', [UploadedFile::fake()->image('altra.jpg')])->assertForbidden();
+});
+
+it('lo storico delle letture si apre dalla scheda', function () {
+    $meter = meterFor($this->asset);
+    app(RecordMeterReading::class)->handle($meter, 1234, $this->admin);
+
+    Livewire::actingAs($this->admin)->test(Show::class, ['asset' => $this->asset])
+        ->call('toggleHistory', $meter->id)
+        ->assertViewHas('history', fn ($h) => $h !== null && $h->count() === 1)
+        ->assertSee('1.234');
 });

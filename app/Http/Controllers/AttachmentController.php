@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\Attachment;
+use App\Models\WorkOrder;
+use App\Models\WorkRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,7 +38,8 @@ class AttachmentController extends Controller
     {
         $disk = Storage::disk($attachment->disk);
         abort_unless($disk->exists($path), 404);
-        $mime = $path === $attachment->path ? $attachment->mime : 'image/jpeg';
+        // Le miniature hanno lo stesso formato della foto (WebP o JPEG)
+        $mime = $path === $attachment->path ? $attachment->mime : (str_ends_with($path, '.webp') ? 'image/webp' : 'image/jpeg');
 
         $headers = [
             'Content-Type' => $inline ? $mime : 'application/octet-stream',
@@ -53,13 +56,21 @@ class AttachmentController extends Controller
         return $disk->response($path, $attachment->original_name, $headers, $inline ? 'inline' : 'attachment');
     }
 
+    /**
+     * Macchine: "Vedere le macchine". Segnalazioni e ordini: le stesse regole delle loro schede
+     * (chi ha fatto la segnalazione vede le proprie foto).
+     */
     private function authorizeAttachment(Request $request, Attachment $attachment): void
     {
-        $permission = match ($attachment->attachable_type) {
-            (new Asset)->getMorphClass() => 'assets.view',
-            default => null,
+        $user = $request->user();
+        $owner = $attachment->attachable;
+
+        $allowed = match (true) {
+            $owner instanceof Asset => $user?->can('assets.view'),
+            $owner instanceof WorkRequest, $owner instanceof WorkOrder => $user?->can('view', $owner),
+            default => false,
         };
 
-        abort_unless($permission !== null && $request->user()?->can($permission), 403);
+        abort_unless((bool) $allowed, 403);
     }
 }

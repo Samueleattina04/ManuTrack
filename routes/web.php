@@ -7,6 +7,7 @@ use App\Http\Controllers\DesignController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\Maintenance\QuickReportController;
 use App\Http\Controllers\ManifestController;
 use App\Http\Controllers\Push\PushSubscriptionController;
 use App\Http\Controllers\Push\PushTestController;
@@ -21,10 +22,16 @@ use App\Livewire\Assets\Index as AssetsIndex;
 use App\Livewire\Assets\Locations as AssetLocations;
 use App\Livewire\Assets\Show as AssetShow;
 use App\Livewire\Audit\Index as AuditIndex;
+use App\Livewire\Maintenance\Settings as MaintenanceSettings;
 use App\Livewire\Profile;
+use App\Livewire\Requests\Index as RequestsIndex;
+use App\Livewire\Requests\Show as RequestShow;
 use App\Livewire\Settings\Company;
 use App\Livewire\Users\Index as UsersIndex;
 use App\Livewire\Users\Roles;
+use App\Livewire\WorkOrders\Create as WorkOrderCreate;
+use App\Livewire\WorkOrders\Index as WorkOrdersIndex;
+use App\Livewire\WorkOrders\Show as WorkOrderShow;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
@@ -92,8 +99,6 @@ Route::middleware(['installed', 'auth', 'active'])->group(function () {
         Route::get('/macchine/etichette', [AssetQrController::class, 'labels'])->name('assets.labels');
         Route::get('/macchine/{asset}', AssetShow::class)->whereNumber('asset')->name('assets.show');
         Route::get('/macchine/{asset}/qr.svg', [AssetQrController::class, 'svg'])->whereNumber('asset')->name('assets.qr.svg');
-        // Indirizzo stampato sulle etichette: chi non ha fatto l'accesso ci torna dopo il login
-        Route::get('/q/{token}', [AssetQrController::class, 'resolve'])->name('assets.qr');
     });
     Route::middleware('can:assets.manage')->group(function () {
         Route::get('/macchine/nuova', AssetForm::class)->name('assets.create');
@@ -102,6 +107,23 @@ Route::middleware(['installed', 'auth', 'active'])->group(function () {
         Route::get('/macchine/importa', AssetImport::class)->name('assets.import');
         Route::get('/macchine/importa/modello.csv', [AssetQrController::class, 'template'])->name('assets.import.template');
     });
+
+    // Indirizzo stampato sulle etichette QR: chi non ha fatto l'accesso ci torna dopo il login
+    Route::get('/q/{token}', [AssetQrController::class, 'resolve'])->name('assets.qr');
+
+    // Segnalazioni: pagina rapida (anche offline) e invio, poi elenco e valutazione
+    Route::get('/segnala', [QuickReportController::class, 'show'])->middleware('can:requests.create')->name('requests.create');
+    Route::post('/segnalazioni/invia', [QuickReportController::class, 'store'])->middleware(['can:requests.create', 'throttle:reports'])->name('requests.store');
+    Route::get('/segnalazioni', RequestsIndex::class)->name('requests.index');
+    Route::get('/segnalazioni/{workRequest}', RequestShow::class)->whereNumber('workRequest')->name('requests.show');
+
+    // Ordini di lavoro
+    Route::middleware('can:work_orders.view')->group(function () {
+        Route::get('/ordini', WorkOrdersIndex::class)->name('work-orders.index');
+        Route::get('/ordini/{workOrder}', WorkOrderShow::class)->whereNumber('workOrder')->name('work-orders.show');
+    });
+    Route::get('/ordini/nuovo', WorkOrderCreate::class)->middleware('can:work_orders.create')->name('work-orders.create');
+    Route::get('/ordini/impostazioni', MaintenanceSettings::class)->middleware('can:work_orders.settings')->name('work-orders.settings');
 
     // Allegati (il controllo dei permessi dipende dall'oggetto a cui appartengono)
     Route::get('/allegati/{attachment}', [AttachmentController::class, 'show'])->whereNumber('attachment')->name('attachments.show');

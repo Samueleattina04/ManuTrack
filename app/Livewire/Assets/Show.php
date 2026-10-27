@@ -12,6 +12,7 @@ use App\Models\Attachment;
 use App\Models\Meter;
 use App\Support\Assets\QrCode;
 use App\Support\Audit\Audit;
+use App\Support\Files\PhotoProcessor;
 use App\Support\Numbers;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -167,8 +168,11 @@ class Show extends Component
         $saved = 0;
         foreach ($files as $file) {
             try {
-                $store->handle($this->asset, $file, $kind);
+                $attachment = $store->handle($this->asset, $file, $kind);
                 $saved++;
+                if ($attachment->notice) {
+                    $this->addError($field, $file->getClientOriginalName().': '.$attachment->notice);
+                }
             } catch (RuntimeException $e) {
                 $this->addError($field, $file->getClientOriginalName().': '.$e->getMessage());
             } finally {
@@ -254,6 +258,14 @@ class Show extends Component
             'statuses' => AssetStatus::cases(),
             'qr' => QrCode::svg($this->asset->qrUrl(), title: __('assets.qr.title').' '.$this->asset->code),
             'maxMb' => StoreAttachment::maxMegabytes(),
+            'photoFormat' => PhotoProcessor::outputFormat(),
+            // Storico: ultimi ordini e segnalazioni ancora da valutare
+            'orderHistory' => $user->can('work_orders.view')
+                ? $this->asset->workOrders()->with('assignees')->latest('id')->limit(8)->get()
+                : collect(),
+            'historyCount' => $user->can('work_orders.view') ? $this->asset->workOrders()->count() : 0,
+            'openRequests' => $this->asset->workRequests()->where('status', 'nuova')->when(! $user->can('requests.view_all'), fn ($q) => $q->where('user_id', $user->id))->latest('id')->get(),
+            'downtimeMinutes' => (int) $this->asset->downtimes()->where('started_at', '>=', now()->subDays(90))->get()->sum(fn ($d) => $d->minutes()),
             'warrantyExpired' => $this->asset->warranty_until?->isPast() ?? false,
             'can' => [
                 'manage' => $user->can('assets.manage'),

@@ -37,6 +37,7 @@
 @endforeach
 @auth
 <meta name="vapid-public-key" content="{{ config('manutrack.webpush.public_key') }}">
+@can('requests.create')<meta name="mt-can-report" content="1">@endcan
 @endauth
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])

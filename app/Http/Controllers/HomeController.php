@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AssetStatus;
+use App\Enums\RequestStatus;
+use App\Enums\WorkOrderStatus;
 use App\Models\Asset;
+use App\Models\WorkOrder;
+use App\Models\WorkRequest;
 use App\Support\Setup\SystemStatus;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -24,6 +28,16 @@ class HomeController extends Controller
                     ->limit(6)->get()
                 : null,
             'assetCount' => $canSeeAssets ? Asset::query()->count() : 0,
+            // Da valutare: prima le urgenti
+            'toTriage' => $request->user()->can('requests.triage')
+                ? WorkRequest::query()->with('asset')->where('status', RequestStatus::New->value)
+                    ->orderByRaw("case priority when 'critica' then 0 when 'alta' then 1 else 2 end")->orderByDesc('machine_stopped')->latest('reported_at')->limit(5)->get()
+                : null,
+            'triageCount' => $request->user()->can('requests.triage') ? WorkRequest::query()->where('status', RequestStatus::New->value)->count() : 0,
+            // I miei ordini ancora da fare
+            'myOrders' => $request->user()->can('work_orders.execute')
+                ? WorkOrder::query()->assignedTo($request->user())->whereIn('status', array_map(fn ($s) => $s->value, WorkOrderStatus::active()))->with('asset')->byUrgency()->limit(6)->get()
+                : null,
         ]);
     }
 }

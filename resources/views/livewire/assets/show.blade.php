@@ -40,6 +40,7 @@
                 @endif
             </dl>
             <div class="flex flex-wrap gap-2">
+                @can('requests.create')<a href="{{ route('requests.create', ['id' => $asset->id]) }}" class="btn btn-primary"><x-icon name="alert-triangle" />{{ __('maintenance.quick.title') }}</a>@endcan
                 @if($can['manage'])<a href="{{ route('assets.edit', $asset) }}" class="btn btn-secondary"><x-icon name="pencil" />{{ __('app.edit') }}</a>@endif
                 <a href="{{ route('assets.labels', ['ids' => $asset->id, 'formato' => 'grandi']) }}" target="_blank" rel="noopener" class="btn btn-secondary"><x-icon name="printer" />{{ __('assets.qr.print_one') }}</a>
                 @if($can['manage'])<a href="{{ route('assets.create', ['padre' => $asset->id]) }}" class="btn btn-ghost"><x-icon name="plus" />{{ __('assets.add_child') }}</a>@endif
@@ -83,6 +84,36 @@
 
     <div class="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div class="flex min-w-0 flex-col gap-5">
+            {{-- Storico interventi --}}
+            @if($orderHistory->isNotEmpty() || $openRequests->isNotEmpty() || auth()->user()->can('work_orders.view'))
+                <section class="card overflow-hidden" aria-labelledby="s-history">
+                    <div class="flex flex-wrap items-center gap-2 border-b border-line-soft px-4 py-3">
+                        <h2 id="s-history" class="flex-1 text-base font-bold">{{ __('maintenance.asset.history') }}</h2>
+                        @if($downtimeMinutes > 0)<span class="text-sm text-muted">{{ __('maintenance.asset.downtime_90', ['hours' => number_format($downtimeMinutes / 60, 1, ',', '.')]) }}</span>@endif
+                        @can('work_orders.create')<a href="{{ route('work-orders.create', ['macchina' => $asset->id]) }}" class="btn btn-ghost btn-sm"><x-icon name="plus" class="!w-4 !h-4" />{{ __('maintenance.order.new') }}</a>@endcan
+                    </div>
+                    <ul>
+                        @foreach($openRequests as $r)
+                            <li class="border-b border-line-soft"><a href="{{ route('requests.show', $r) }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2">
+                                <x-icon name="bell" class="text-warn" /><span class="min-w-0 flex-1"><span class="block truncate font-medium">{{ $r->summary(80) }}</span><span class="block text-xs text-muted"><span class="font-mono">{{ $r->number }}</span> · {{ $r->reported_at?->diffForHumans() }}</span></span><x-status :status="$r->status" />
+                            </a></li>
+                        @endforeach
+                        @forelse($orderHistory as $wo)
+                            <li class="border-b border-line-soft last:border-0"><a href="{{ route('work-orders.show', $wo) }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2">
+                                <x-icon :name="$wo->type->icon()" class="text-muted" />
+                                <span class="min-w-0 flex-1"><span class="block truncate font-medium">{{ $wo->title }}</span><span class="block text-xs text-muted"><span class="font-mono">{{ $wo->number }}</span> · {{ ($wo->completed_at ?? $wo->created_at)->translatedFormat('j M Y') }}@if($wo->assignees->isNotEmpty()) · {{ $wo->assignees->pluck('name')->implode(', ') }}@endif</span></span>
+                                <x-status :status="$wo->status" />
+                            </a></li>
+                        @empty
+                            @if($openRequests->isEmpty())<li class="px-4 py-3 text-sm text-muted">{{ __('maintenance.asset.no_history') }}</li>@endif
+                        @endforelse
+                    </ul>
+                    @if($historyCount > $orderHistory->count())
+                        <a href="{{ route('work-orders.index', ['macchina' => $asset->id, 'vista' => 'tutti', 'miei' => 0]) }}" class="block border-t border-line-soft px-4 py-2.5 text-sm font-medium text-accent-fg hover:bg-surface-2">{{ __('maintenance.asset.all_orders', ['count' => $historyCount]) }}</a>
+                    @endif
+                </section>
+            @endif
+
             {{-- Contatori --}}
             <section class="card overflow-hidden" aria-labelledby="s-meters">
                 <div class="flex items-center gap-2 border-b border-line-soft px-4 py-3">
@@ -169,10 +200,11 @@
                     @if($can['attach'])
                         <label class="btn btn-secondary btn-sm cursor-pointer">
                             <x-icon name="camera" class="!w-4 !h-4" />{{ __('assets.files.add_photos') }}
-                            <input type="file" class="sr-only" wire:model="photos" accept="image/jpeg,image/png,image/webp" multiple>
+                            <input type="file" class="sr-only" x-data x-photo-upload="photos" accept="image/*" multiple>
                         </label>
                     @endif
                 </div>
+                <div x-data="{ busy: false }" x-show="busy" x-cloak @photo-preparing.window="busy = true" @photo-uploaded.window="busy = false" class="px-4 pt-3 text-sm text-muted">{{ __('assets.files.preparing') }}</div>
                 <div wire:loading wire:target="photos" class="px-4 pt-3 text-sm text-muted">{{ __('assets.files.uploading') }}</div>
                 @error('photos')<div class="px-4 pt-3"><span class="field-error"><x-icon name="alert-circle" class="!w-4 !h-4" />{{ $message }}</span></div>@enderror
                 @error('photos.*')<div class="px-4 pt-3"><span class="field-error"><x-icon name="alert-circle" class="!w-4 !h-4" />{{ $message }}</span></div>@enderror
@@ -233,7 +265,7 @@
                         @endforeach
                     </ul>
                 @endif
-                @if($can['attach'])<p class="border-t border-line-soft px-4 py-2 text-xs text-muted">{{ __('assets.files.limits', ['max' => $maxMb]) }}</p>@endif
+                @if($can['attach'])<p class="border-t border-line-soft px-4 py-2 text-xs text-muted">{{ __('assets.files.limits', ['max' => $maxMb, 'format' => strtoupper($photoFormat === 'none' ? 'originale' : $photoFormat)]) }}</p>@endif
             </section>
 
             {{-- Sottogruppi --}}

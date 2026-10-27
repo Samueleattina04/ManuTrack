@@ -18,7 +18,8 @@ class Navigation
     {
         return self::build([
             ['dashboard', 'gauge', 'home', 'g d', 'cruscotto panoramica', null],
-            ['work_orders', 'clipboard-list', null, 'g o', 'odl interventi lavori', 'work_orders.view'],
+            ['work_orders', 'clipboard-list', 'work-orders.index', 'g o', 'odl interventi lavori ordini', 'work_orders.view'],
+            ['requests', 'alert-triangle', 'requests.index', 'g e', 'segnalazioni guasti richieste', null],
             ['assets', 'factory', 'assets.index', 'g m', 'macchine impianti ubicazioni categorie qr etichette contatori', 'assets.view'],
             ['plant', 'cube', null, null, 'stabilimento 3d gemello', 'assets.view'],
             ['preventive', 'calendar', null, 'g p', 'piani calendario', 'preventive.view'],
@@ -51,10 +52,15 @@ class Navigation
      */
     public static function mobile(): array
     {
+        // Chi non vede gli ordini (es. il richiedente) trova al loro posto le proprie segnalazioni
+        $second = auth()->user()?->can('work_orders.view')
+            ? self::item('work_orders', 'clipboard-list', 'work-orders.index', short: true)
+            : self::item('requests', 'alert-triangle', 'requests.index', short: true);
+
         return [
             self::item('dashboard', 'home', 'home', short: true),
-            self::item('work_orders', 'clipboard-list', null, short: true),
-            self::item('report', 'plus', null),
+            $second,
+            self::item('report', 'plus', 'requests.create'),
             self::item('notifications', 'bell', null, short: true),
             self::item('profile', 'user', 'profile', short: true),
         ];

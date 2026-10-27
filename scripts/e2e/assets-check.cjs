@@ -67,13 +67,13 @@ const check = (name, ok, detail = '') => { results.push(ok); console.log(`${ok ?
     fs.writeFileSync(photo, png);
     await page.goto(firstLink);
     const before = await page.locator('section[aria-labelledby=s-photos] img').count();
-    await page.setInputFiles('input[type=file][wire\\:model=photos]', photo);
+    await page.setInputFiles('input[type=file][x-photo-upload=photos]', photo);
     await page.waitForTimeout(2500);
     const imgs = page.locator('section[aria-labelledby=s-photos] img');
     check('Foto caricata con miniatura', (await imgs.count()) === before + 1);
     const src = await imgs.last().getAttribute('src');
     const res = await page.request.get(src);
-    check('Foto servita dal controllo dei permessi', res.ok() && res.headers()['content-type'].startsWith('image/'), res.headers()['content-type']);
+    check('Foto servita dal controllo dei permessi, in WebP', res.ok() && res.headers()['content-type'] === 'image/webp', res.headers()['content-type']);
 
     // Importazione CSV con anteprima
     const csv = path.join(os.tmpdir(), 'e2e-macchine.csv');
