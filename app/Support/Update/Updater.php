@@ -2,11 +2,15 @@
 
 namespace App\Support\Update;
 
+use App\Enums\NotificationEvent;
 use App\Models\SystemVersion;
+use App\Models\User;
 use App\Support\AppVersion;
 use App\Support\Backup\DatabaseBackup;
 use App\Support\Demo\Edition;
 use App\Support\FileLock;
+use App\Support\Notifications\Notifier;
+use App\Support\Push\PushMessage;
 use App\Support\Settings;
 use App\Support\Setup\InstallState;
 use App\Support\Setup\SystemSync;
@@ -197,6 +201,8 @@ class Updater
             $this->settings->forget(self::ERROR_SETTING);
             $this->settings->forget(self::RETRY_SETTING);
 
+            $this->notifyAdmins(true, $to);
+
             return UpdateResult::success($from, $to, basename($file));
         } catch (Throwable $e) {
             report($e);
@@ -220,11 +226,32 @@ class Updater
                 // anche il database può essere il problema: resta il registro su file
             }
 
+            $this->notifyAdmins(false, $to, $message);
+
             return UpdateResult::failed($from, $to, $message, $record->backup_file);
         } finally {
             if ($wentDown) {
                 Artisan::call('up');
             }
+        }
+    }
+
+    /** Avviso a chi può aggiornare il sistema: aggiornamento riuscito o non riuscito */
+    private function notifyAdmins(bool $ok, string $version, ?string $error = null): void
+    {
+        try {
+            app(Notifier::class)->send(
+                NotificationEvent::SystemUpdate,
+                User::permission('system.update')->where('is_active', true)->get(),
+                new PushMessage(
+                    title: __($ok ? 'notifications.update.ok' : 'notifications.update.failed', ['version' => $version]),
+                    body: $ok ? __('notifications.update.ok_body') : mb_strimwidth((string) $error, 0, 300, '…'),
+                    url: '/sistema',
+                    tag: 'system-update',
+                ),
+            );
+        } catch (Throwable $e) {
+            report($e); // l'avviso non deve mai cambiare l'esito dell'aggiornamento
         }
     }
 

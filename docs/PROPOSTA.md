@@ -252,9 +252,42 @@ Ogni fase si chiude con:
 | 6 | Magazzino | ricambi, magazzini, movimenti, fornitori, distinta per macchina, prelievo su OdL, scorta minima |
 | 7 | Manutenzione preventiva | piani a tempo e a contatore, generazione automatica, calendario, rispetto dei piani |
 | 8 | Dashboard KPI | indicatori con definizioni in `docs/KPI.md` (MTTR, MTBF, fermi, arretrato, preventivo/correttivo, costi per macchina, rispetto dei piani), filtri per periodo, ubicazione e categoria (anticipata su richiesta) |
-| 9 | Notifiche complete, report ed esportazioni | eventi e preferenze, email per ruolo, raggruppamento, badge, centro notifiche, avviso nuova versione; grafici animati ed esportazioni CSV/XLSX |
+| 9 | Notifiche complete, report ed esportazioni | eventi e preferenze, email per ruolo, raggruppamento, badge, centro notifiche, avviso nuova versione; grafici con tabella equivalente, esportazioni CSV/XLSX con protezione dalle formule, rapporto mensile stampabile/PDF. **Proposta per una fase successiva:** orario di lavoro per l'MTBF (vedi sotto) |
 | 10 | 3D | M 3D d'ingresso, gemello digitale con editor e vista 2D di riserva, anteprima 3D della macchina |
 | 11 | GDPR, demo e consegna | esportazione, anonimizzazione, cancellazione totale, installazione demo con azzeramento notturno, revisione di sicurezza, README, `docs/INSTALLAZIONE.md` completa, licenze delle librerie, verifica finale PC, iPhone e Android, `scripts/deploy-many` facoltativo |
+
+### Proposta: orario di lavoro per l'MTBF (per una fase successiva, da approvare)
+
+**Il problema.** Oggi l'MTBF usa il tempo di calendario, 24 ore su 24 (`docs/KPI.md` §2.3). Per una macchina che lavora un turno di 8 ore dal lunedì al venerdì, il tempo di calendario è circa 4 volte quello di lavoro: l'MTBF risulta 4 volte più alto e non si confronta con quello di una macchina su tre turni.
+
+**Cosa si configura.**
+- **Calendari di lavoro**, con nome (es. "1 turno", "2 turni", "Ciclo continuo"):
+  - schema settimanale: per ogni giorno uno o più intervalli (es. 06:00–14:00 e 14:00–22:00); un turno di notte può passare la mezzanotte (22:00–06:00);
+  - modelli pronti: 24 su 7 (come oggi), 1 turno 8–17 lun–ven, 2 turni, 3 turni lun–ven;
+  - **eccezioni per data:** festività (proposte quelle nazionali italiane, Pasquetta compresa, calcolate per ogni anno; da confermare una per una), chiusure aziendali (es. due settimane in agosto), giornate con orario diverso.
+- **A chi si applica:** un calendario predefinito dell'azienda; si può cambiare per ubicazione (vale anche per le sotto-ubicazioni) e per singola macchina. Vince il più specifico: macchina, poi ubicazione più vicina, poi azienda.
+- **Validità nel tempo:** ogni schema ha una data "valido dal". Se l'orario cambia, i mesi passati restano calcolati con l'orario di allora e gli indicatori già stampati non cambiano.
+- **Senza configurazione** tutto resta come oggi (24 su 7): nessun cambiamento per chi non lo usa.
+
+**Formule proposte** (da aggiungere a `docs/KPI.md`):
+- `tempo di lavoro(m)` = ore degli intervalli di lavoro di m dentro la finestra di osservazione (§2.3), sul tempo reale trascorso (ora legale compresa: un turno di notte 22–06 dura 7 o 9 ore nelle due notti del cambio d'ora).
+- `funzionamento in lavoro(m)` = tempo di lavoro(m) − parte dei fermi di m che cade **dentro** gli intervalli di lavoro.
+- `MTBF (ore di lavoro)` = Σ funzionamento in lavoro / Σ guasti. **I guasti contano anche se cominciano fuori orario** (es. trovato fermo il lunedì mattina): il guasto c'è stato comunque.
+- **Minimo** per mostrare il valore: 3 guasti e almeno 40 ore di lavoro di osservazione (al posto dei 7 giorni-macchina di calendario).
+- **MTTR:** resta sul tempo di calendario (la riparazione può avvenire anche fuori orario); in più, a scelta, "MTTR in ore di lavoro".
+- **Nuovo indicatore possibile:** disponibilità = funzionamento in lavoro / tempo di lavoro × 100.
+
+**Come si vede.** Dashboard, grafici, esportazioni e rapporto mensile scrivono accanto all'MTBF la base usata ("ore di lavoro" o "calendario"). Le macchine senza un calendario restano sul calendario e lo dicono.
+
+**Calcolo e prestazioni.** Aritmetica degli intervalli in PHP: per ogni macchina e periodo si generano gli intervalli di lavoro (al massimo qualche migliaio in un anno) e si intersecano con i fermi. Nessuna estensione né programma sul server.
+
+**Test previsti.** Un mese con dati noti calcolato a mano: cambio dell'ora legale con turno di notte, festività infrasettimanale, chiusura aziendale, fermo che comincia fuori orario e finisce dentro, guasto di domenica, cambio di orario a metà mese.
+
+**Domande per te prima di cominciare:**
+1. Calendario anche per singola macchina, o bastano azienda e ubicazione?
+2. Va bene la validità nel tempo (i mesi passati non cambiano), o preferisci che un nuovo orario ricalcoli anche il passato?
+3. Mostrare tutti e due gli MTBF (calendario e lavoro) o solo quello sulle ore di lavoro quando c'è un calendario?
+4. Festività nazionali proposte in automatico (da confermare) o inserite a mano?
 
 ### `docs/INSTALLAZIONE.md` (indice previsto)
 1. Requisiti dell'hosting: PHP 8.3 con le estensioni `pdo_mysql`, `mbstring`, `openssl`, `curl`, `gd`, `zip`, `intl`, `fileinfo`, `bcmath` o `gmp`; MySQL 8 o MariaDB 10.6+.

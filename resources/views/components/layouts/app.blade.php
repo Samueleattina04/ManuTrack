@@ -14,7 +14,7 @@
 <head>
     <x-head :title="$title" />
 </head>
-<body x-data="shortcuts" @keydown.window="onKey($event)" class="app-shell">
+<body x-data="shortcuts" @keydown.window="onKey($event)" class="app-shell" data-unread="{{ \App\Support\Navigation::unread() }}">
     <a href="#contenuto" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 btn btn-primary">{{ __('app.skip_to_content') }}</a>
 
     {{-- Barra laterale (PC): logo del cliente in alto, ManuTrack in piccolo in fondo --}}
@@ -108,8 +108,11 @@
                     </a>
                 @else
                     <a href="{{ $item['url'] ?? '#' }}" @if($item['active']) aria-current="page" @endif @if($item['disabled']) aria-disabled="true" class="opacity-50" @endif>
-                        <x-icon :name="$item['icon']" class="!w-6 !h-6" />
-                        <span>{{ $item['label'] }}</span>
+                        <span class="relative inline-flex">
+                            <x-icon :name="$item['icon']" class="!w-6 !h-6" />
+                            @if(($item['badge'] ?? 0) > 0)<span class="num absolute -right-2 -top-1.5 min-w-[1.1rem] rounded-full bg-[var(--mt-ko)] px-1 text-center text-[10px] font-bold leading-4 text-white">{{ $item['badge'] > 99 ? '99+' : $item['badge'] }}</span>@endif
+                        </span>
+                        <span>{{ $item['label'] }}@if(($item['badge'] ?? 0) > 0)<span class="sr-only"> ({{ trans_choice('notifications.unread', $item['badge'], ['count' => $item['badge']]) }})</span>@endif</span>
                     </a>
                 @endif
             @endforeach

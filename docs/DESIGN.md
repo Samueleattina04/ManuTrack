@@ -174,6 +174,17 @@ I numeri in colonna usano `.num` (`tabular-nums`). Le etichette in maiuscolo (`.
 - **Periodo** con le pastiglie dei periodi rapidi; sotto, in piccolo, l'intervallo esatto con il fuso orario.
 - In fondo "Come si calcolano", in parole semplici; le definizioni complete sono in `docs/KPI.md`.
 
+### Grafici
+- **Sobri:** niente ombre, sfumature o 3D. Barre con angoli di 4 px, linee di 2 px con punti di 3 px; griglia orizzontale leggera, assi senza linea.
+- **Colori dai token del tema** (letti dalle variabili CSS, quindi giusti in chiaro e in scuro): fermi in rosso tenue, MTTR con il colore d'accento, preventivo verde e correttivo ambra come nella barra, costi impilati in tre toni.
+- **Sul telefono:** altezza fissa (14 rem), al massimo 6 etichette sull'asse orizzontale con caratteri più piccoli; il tocco mostra il valore.
+- **Sempre una tabella equivalente** sotto ogni grafico ("Mostra i dati in tabella") e una frase che riassume il grafico per i lettori di schermo. In stampa resta solo la tabella.
+- Animazione breve (500 ms) all'apertura; nessuna con "riduci movimento".
+
+### Esportazioni e rapporto
+- **Esporta** è un pulsante secondario con menu (Excel o CSV) accanto alle altre azioni dell'elenco; dice in una riga che esporta i filtri applicati, tutte le pagine.
+- **Rapporto mensile:** pagina chiara a sé, come le etichette QR: barra in alto (indietro, mesi, "Stampa o salva in PDF") che sparisce in stampa; foglio A4 con logo del cliente, riquadri degli indicatori e tabelle con intestazione ripetuta su ogni pagina. Sul telefono il foglio occupa tutta la larghezza e le tabelle scorrono di lato.
+
 ## Manutenzione preventiva
 
 - **Stato del piano** sempre con icona e testo: "In regola" (verde), "In scadenza" (ambra, orologio), "Scaduto" (rosso, triangolo), "Sospeso" (grigio, pausa).

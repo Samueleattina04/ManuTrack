@@ -42,6 +42,18 @@ final class KpiPeriod
         return new self($fromDate, $toDate, $start, $end->gt($now) ? $now : $end, $now);
     }
 
+    /**
+     * Periodo come lo indica l'indirizzo della dashboard (periodo, dal, al).
+     *
+     * @throws InvalidArgumentException date non valide
+     */
+    public static function fromInput(string $preset, string $from = '', string $to = '', ?CarbonImmutable $now = null): self
+    {
+        return $preset === 'scelta' && $from !== '' && $to !== ''
+            ? self::between($from, $to, $now)
+            : self::preset($preset, $now);
+    }
+
     public static function preset(string $key, ?CarbonImmutable $now = null): self
     {
         $now ??= CarbonImmutable::now();

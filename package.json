@@ -12,6 +12,7 @@
         "@fontsource-variable/archivo": "^5.2.0",
         "@fontsource/ibm-plex-mono": "^5.2.0",
         "@fontsource/ibm-plex-sans": "^5.2.0",
+        "chart.js": "^4.4.7",
         "jsqr": "^1.4.0"
     },
     "devDependencies": {

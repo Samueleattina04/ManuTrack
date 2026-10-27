@@ -4,6 +4,7 @@ namespace App\Actions\Preventive;
 
 use App\Actions\Maintenance\AssignWorkOrder;
 use App\Actions\Maintenance\CreateWorkOrder;
+use App\Enums\NotificationEvent;
 use App\Enums\WorkOrderType;
 use App\Models\MaintenancePlan;
 use App\Models\Meter;
@@ -11,8 +12,8 @@ use App\Models\Part;
 use App\Models\User;
 use App\Models\WorkOrder;
 use App\Support\Audit\Audit;
+use App\Support\Notifications\Notifier;
 use App\Support\Preventive\PlanSchedule;
-use App\Support\Push\PushDispatcher;
 use App\Support\Push\PushMessage;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
@@ -37,7 +38,7 @@ class GeneratePlanOrders
         private CreateWorkOrder $create,
         private AssignWorkOrder $assign,
         private PlanSchedule $schedule,
-        private PushDispatcher $push,
+        private Notifier $notifier,
     ) {}
 
     /**
@@ -177,7 +178,7 @@ class GeneratePlanOrders
 
         $planners = User::permission('work_orders.assign')->where('is_active', true)
             ->when($actor, fn ($q) => $q->whereKeyNot($actor->id))->get();
-        $this->push->send($planners, new PushMessage(
+        $this->notifier->send(NotificationEvent::PreventiveToAssign, $planners, new PushMessage(
             title: __('preventive.push.generated', ['number' => $order->number]),
             body: trim(($order->asset ? $order->asset->code.' · ' : '').$order->title.' · '.__('preventive.push.to_assign')),
             url: route('work-orders.show', $order, absolute: false),

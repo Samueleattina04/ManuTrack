@@ -5,6 +5,9 @@
             <a href="{{ route('assets.create') }}" class="btn btn-primary"><x-icon name="plus" />{{ __('assets.new') }}</a>
             <a href="{{ route('assets.import') }}" class="btn btn-secondary"><x-icon name="upload" />{{ __('assets.import.button') }}</a>
         @endif
+        @can('reports.export')
+            <x-export-menu route="export.assets" :params="['q' => $search, 'ubicazione' => $location, 'categoria' => $category, 'stato' => $status, 'criticita' => $criticality, 'ordine' => $sort]" />
+        @endcan
         <div class="ml-auto flex flex-wrap gap-2">
             <a href="{{ route('assets.locations') }}" class="btn btn-ghost btn-sm"><x-icon name="map-pin" class="!w-4 !h-4" />{{ __('assets.locations.title') }}</a>
             @if($canManage)

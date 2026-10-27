@@ -99,7 +99,10 @@ it('macchina A ferma = urgente; il telefono del responsabile riceve subito la no
     $asset = Asset::factory()->create(['criticality' => 'A', 'code' => 'PRS-01']);
     sendReport($this, $this->operator, reportPayload(['asset_id' => $asset->id, 'machine_stopped' => '1', 'priority' => 'alta']))->assertCreated();
 
-    expect(DB::table('jobs')->count())->toBe(0)->and($this->transport->sent)->toHaveCount(1);
+    // La push non passa dalla coda; in coda ci sono solo le email "subito" ai responsabili
+    expect(DB::table('jobs')->where('payload', 'like', '%SendPushMessage%')->count())->toBe(0)
+        ->and(DB::table('jobs')->where('payload', 'like', '%EventMail%')->count())->toBeGreaterThan(0)
+        ->and($this->transport->sent)->toHaveCount(1);
     $sent = $this->transport->sent[0];
     expect($sent['urgency'])->toBe('high')
         ->and($sent['payload']['title'])->toContain('PRS-01')->toContain('urgente')

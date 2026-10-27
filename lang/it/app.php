@@ -27,6 +27,7 @@ return [
         'preventive' => 'Preventiva',
         'inventory' => 'Magazzino',
         'kpi' => 'Indicatori',
+        'notification_rules' => 'Avvisi via email',
         'notifications' => 'Avvisi',
         'system' => 'Sistema',
         'design' => 'Design system',

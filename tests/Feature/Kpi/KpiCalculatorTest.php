@@ -218,3 +218,20 @@ it('dati insufficienti invece di numeri fuorvianti', function () {
     expect($quiet->mtbf()['failures'])->toBe(0)->and($quiet->mtbf()['value'])->toBeNull()
         ->and($quiet->downtime()['count'])->toBe(0);
 });
+
+it('andamento: marzo in settimane da lunedì, stesse regole e stessi minimi per intervallo', function () {
+    // 1/3 è domenica: intervalli 1/3, 2-8, 9-15, 16-22, 23-29, 30-31
+    $s = $this->kpi->series();
+    expect($s['unit'])->toBe('week')
+        ->and(array_column($s['buckets'], 'from'))->toBe(['2026-03-01', '2026-03-02', '2026-03-09', '2026-03-16', '2026-03-23', '2026-03-30'])
+        // Le ore si sommano esattamente al totale del periodo (ogni fermo è tagliato ai bordi)
+        ->and(round(array_sum(array_column($s['buckets'], 'downtime_hours')), 1))->toBe(294.5)
+        // Nessuna settimana ha 3 fermi conclusi: MTTR mai mostrato, ma i fermi contati sono i 5 del mese
+        ->and(array_filter(array_column($s['buckets'], 'mttr'), fn ($v) => $v !== null))->toBe([])
+        ->and(array_sum(array_column($s['buckets'], 'mttr_n')))->toBe(5)
+        ->and(array_sum(array_column($s['buckets'], 'preventive')))->toBe(4)
+        ->and(array_sum(array_column($s['buckets'], 'corrective')))->toBe(3);
+
+    // Un anno intero va per mesi
+    expect((new KpiCalculator(KpiPeriod::between('2025-04-01', '2026-03-31')))->series()['unit'])->toBe('month');
+});

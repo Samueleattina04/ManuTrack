@@ -41,7 +41,7 @@ class KpiCalculator
     /** @var Collection<int, DowntimeEvent>|null */
     private ?Collection $events = null;
 
-    public function __construct(private KpiPeriod $period, ?int $locationId = null, ?int $categoryId = null)
+    public function __construct(private KpiPeriod $period, private ?int $locationId = null, private ?int $categoryId = null)
     {
         if ($locationId || $categoryId) {
             $location = $locationId ? Location::query()->find($locationId) : null;
@@ -56,6 +56,47 @@ class KpiCalculator
     public function period(): KpiPeriod
     {
         return $this->period;
+    }
+
+    // ---------- Andamento nel tempo (grafici) ----------
+
+    /**
+     * Il periodo diviso in intervalli (settimane fino a 100 giorni, altrimenti mesi),
+     * ognuno calcolato con le stesse regole e gli stessi minimi (docs/KPI.md §2.8).
+     *
+     * @return array{unit: string, buckets: list<array{label: string, from: string, to: string, downtime_count: int, downtime_hours: float, mttr: float|null, mttr_n: int, preventive: int, corrective: int}>}
+     */
+    public function series(): array
+    {
+        $days = (int) $this->period->from->diffInDays($this->period->to) + 1;
+        $unit = $days <= 100 ? 'week' : 'month';
+        $buckets = [];
+        $cursor = $this->period->from;
+        while ($cursor->lte($this->period->to)) {
+            $end = $unit === 'week' ? $cursor->endOfWeek(CarbonImmutable::SUNDAY)->startOfDay() : $cursor->endOfMonth()->startOfDay();
+            $end = $end->gt($this->period->to) ? $this->period->to : $end;
+            if ($cursor->gt($this->period->now)) {
+                break;
+            }
+            $kpi = new self(KpiPeriod::between($cursor->toDateString(), $end->toDateString(), $this->period->now), $this->locationId, $this->categoryId);
+            $down = $kpi->downtime();
+            $mttr = $kpi->mttr();
+            $mix = $kpi->mix();
+            $buckets[] = [
+                'label' => $unit === 'week' ? $cursor->translatedFormat('j M') : $cursor->translatedFormat('M y'),
+                'from' => $cursor->toDateString(),
+                'to' => $end->toDateString(),
+                'downtime_count' => $down['count'],
+                'downtime_hours' => round($down['hours'], 1),
+                'mttr' => $mttr['value'] === null ? null : round($mttr['value'], 1),
+                'mttr_n' => $mttr['n'],
+                'preventive' => $mix['preventive'],
+                'corrective' => $mix['corrective'],
+            ];
+            $cursor = $end->addDay();
+        }
+
+        return ['unit' => $unit, 'buckets' => $buckets];
     }
 
     // ---------- Fermi ----------
@@ -194,6 +235,16 @@ class KpiCalculator
     private function orders(): Builder
     {
         return WorkOrder::query()->when($this->assetIds !== null, fn (Builder $q) => $q->whereIn('asset_id', $this->assetIds));
+    }
+
+    /**
+     * Ordini completati nel periodo, con la stessa regola degli indicatori (per il rapporto mensile).
+     *
+     * @return Builder<WorkOrder>
+     */
+    public function completedOrders(): Builder
+    {
+        return $this->completed();
     }
 
     /**

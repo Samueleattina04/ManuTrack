@@ -6,7 +6,7 @@ Software per la gestione della manutenzione di macchine e impianti (CMMS): ordin
 
 **Un'installazione per cliente:** ogni azienda ha la sua cartella con una copia dell'app e un suo database MySQL. Gira su un normale hosting condiviso con **PHP 8.3 e MySQL**, anche senza SSH (pannello DirectAdmin).
 
-> Stato: **fase 8 di 11** (versione 0.8.0): dashboard degli indicatori (definizioni in [`docs/KPI.md`](docs/KPI.md)) e installazione demo separata; manutenzione preventiva con piani a tempo e a contatore, generazione automatica degli ordini, calendario e rispetto dei piani; magazzino ricambi con movimenti, costo medio, scorta minima, prelievo sugli ordini e distinta per macchina; segnalazioni rapide dal telefono (QR, foto, anche senza rete) e ordini di lavoro con ciclo di vita, checklist, tempi, fermi e codici guasto; macchine e impianti; foto in WebP; app installabile con notifiche urgenti. Il test sui telefoni reali è descritto in [`docs/TEST-DISPOSITIVI.md`](docs/TEST-DISPOSITIVI.md). Il piano completo è in [`docs/PROPOSTA.md`](docs/PROPOSTA.md).
+> Stato: **fase 9 di 11** (versione 0.9.0): avvisi completi (centro avvisi, preferenze, email per ruolo, riepilogo giornaliero, badge), grafici degli indicatori, esportazioni CSV ed Excel con i filtri e protezione dalle formule, rapporto mensile stampabile o in PDF; dashboard degli indicatori (definizioni in [`docs/KPI.md`](docs/KPI.md)) e installazione demo separata; manutenzione preventiva con piani a tempo e a contatore, generazione automatica degli ordini, calendario e rispetto dei piani; magazzino ricambi con movimenti, costo medio, scorta minima, prelievo sugli ordini e distinta per macchina; segnalazioni rapide dal telefono (QR, foto, anche senza rete) e ordini di lavoro con ciclo di vita, checklist, tempi, fermi e codici guasto; macchine e impianti; foto in WebP; app installabile con notifiche urgenti. Il test sui telefoni reali è descritto in [`docs/TEST-DISPOSITIVI.md`](docs/TEST-DISPOSITIVI.md). Il piano completo è in [`docs/PROPOSTA.md`](docs/PROPOSTA.md).
 
 ## Tecnologie
 
@@ -35,6 +35,9 @@ In alternativa `php artisan manutrack:install` installa come in produzione.
 | `php artisan manutrack:backup` / `manutrack:restore` | copie del database in PHP e ripristino |
 | `php artisan manutrack:vapid` | genera le chiavi per le notifiche push |
 | `php artisan manutrack:icons` | rigenera favicon e icone dell'app dal logo |
+| `php artisan manutrack:preventiva [--prova]` | genera gli ordini dei piani in scadenza (il cron lo fa ogni 15 minuti) |
+| `php artisan manutrack:avvisi-riepilogo` | riepilogo giornaliero degli avvisi via email (il cron alle 07:10) |
+| `php artisan manutrack:rapporto-mensile` | avvisa che il rapporto del mese precedente è pronto (il cron il 1° del mese) |
 | `scripts/release.sh` / `scripts\release.ps1` | prepara il pacchetto da caricare via FTP |
 | `php artisan test` | test automatici (database `manutrack_test`) |
 | `vendor/bin/pint` · `vendor/bin/phpstan analyse` | stile e analisi statica |

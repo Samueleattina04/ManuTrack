@@ -3,10 +3,11 @@
 namespace App\Actions\Assets;
 
 use App\Enums\AssetStatus;
+use App\Enums\NotificationEvent;
 use App\Models\Asset;
 use App\Models\User;
 use App\Support\Audit\Audit;
-use App\Support\Push\PushDispatcher;
+use App\Support\Notifications\Notifier;
 use App\Support\Push\PushMessage;
 use App\Support\Push\PushUrgency;
 use Illuminate\Support\Collection;
@@ -20,7 +21,7 @@ use Illuminate\Support\Collection;
  */
 class ChangeAssetStatus
 {
-    public function __construct(private PushDispatcher $push) {}
+    public function __construct(private Notifier $notifier) {}
 
     public function handle(Asset $asset, AssetStatus $status, User $actor, ?string $note = null, bool $notify = true): void
     {
@@ -46,7 +47,7 @@ class ChangeAssetStatus
         $urgent = $down && $asset->stopsLine();
         $where = $asset->location?->fullName();
 
-        $this->push->send(self::recipients($actor), new PushMessage(
+        $this->notifier->send(NotificationEvent::AssetDown, self::recipients($actor), new PushMessage(
             title: __($down ? ($urgent ? 'assets.push.down_urgent_title' : 'assets.push.down_title') : 'assets.push.up_title', [
                 'status' => $status->label(),
                 'asset' => $asset->code.' '.$asset->name,

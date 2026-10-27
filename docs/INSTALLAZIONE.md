@@ -188,6 +188,8 @@ In *Advanced Features › Cron Jobs* aggiungi **una** voce, ogni minuto (tutti i
 - Questa voce fa tutto:
   - smaltisce la coda di email e notifiche (`queue:work --stop-when-empty`, poi si ferma);
   - genera gli ordini dei piani preventivi in scadenza (ogni 15 minuti; a mano: `php artisan manutrack:preventiva`);
+  - manda il riepilogo giornaliero degli avvisi via email alle 07:10 (`php artisan manutrack:avvisi-riepilogo`) e cancella gli avvisi più vecchi di 90 giorni;
+  - il 1° del mese alle 07:20 avvisa che il rapporto mensile è pronto (`php artisan manutrack:rapporto-mensile`);
   - fa le pulizie;
   - applica gli aggiornamenti caricati.
 - Nessun processo resta attivo e non servono `exec` o `proc_open`.
@@ -273,6 +275,11 @@ Il requisito "Foto in formato WebP" dell'installazione e la voce **Foto** della 
    Ogni foto viene verificata prima di cancellare l'originale. `--limite=200` converte a blocchi.
 
 Senza SSH: una voce di cron da eseguire una sola volta, come per le chiavi VAPID.
+
+### Email, esportazioni e rapporto mensile
+- Le **email degli avvisi** usano la posta configurata nel `.env` (paragrafo 8). Chi riceve cosa si sceglie in *Impostazioni › Avvisi via email*; ognuno può cambiare le proprie scelte in *Avvisi › Preferenze*.
+- Le **esportazioni Excel** richiedono l'estensione PHP `zip` (già tra i requisiti). Senza, l'app offre solo il CSV.
+- Il **rapporto mensile** si stampa o si salva in PDF dal browser: sul server non serve nessun programma.
 
 ## 12. Verifica finale
 

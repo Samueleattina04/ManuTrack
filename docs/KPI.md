@@ -143,6 +143,20 @@ Quando i dati non bastano per un numero affidabile, la dashboard mostra **"dati 
 - Gli interventi non ancora scaduti né completati non contano.
 - È la stessa regola della pagina Preventiva (`docs/SPECIFICA.md` §36.5).
 
+### 2.8 Andamento nel tempo (grafici ed esportazione)
+- Il periodo è diviso in intervalli: **settimane** (da lunedì a domenica) se dura fino a 100 giorni, altrimenti **mesi** di calendario.
+- Il primo e l'ultimo intervallo sono tagliati ai bordi del periodo; gli intervalli che cominciano nel futuro non ci sono.
+- **Ogni intervallo è un periodo a sé**, calcolato con le regole di questo documento: un fermo a cavallo di due settimane conta in entrambe per la sua parte; l'MTTR di un intervallo conta i fermi che finiscono lì.
+- Valori per intervallo: numero e ore di fermo (§2.1), MTTR con lo stesso minimo di 3 fermi (§2.2), ordini preventivi e correttivi completati (§2.5).
+- **MTTR insufficiente** in un intervallo: il grafico interrompe la linea e la tabella scrive "insufficienti"; non si disegna uno zero.
+- La somma delle ore di fermo degli intervalli è uguale a quella del periodo intero, a meno degli arrotondamenti a un decimale.
+
 ## 3. Permessi
 - La dashboard richiede "Vedere i report" (amministratore, responsabile, magazziniere, osservatore).
 - I costi richiedono anche "Vedere i costi".
+- Esportazione degli indicatori: "Esportare CSV ed Excel" più "Vedere i report"; il foglio dei costi solo con "Vedere i costi".
+- Rapporto mensile (`docs/SPECIFICA.md` §43): "Vedere i report"; usa queste stesse formule sul mese di calendario intero.
+
+## 4. Limite noto: tempo di calendario
+
+L'MTBF usa il tempo di calendario (§2.3). La proposta per calcolarlo sulle sole ore di lavoro previste è in `docs/PROPOSTA.md`, "Proposta: orario di lavoro".

@@ -26,7 +26,15 @@
             </div>
         </div>
         @if($error)<div class="alert alert-ko" role="alert"><x-icon name="alert-triangle" /><span>{{ $error }}</span></div>@endif
-        <p class="text-sm text-muted">{{ __('kpi.period_hint', ['from' => $period->start->translatedFormat('j M Y H:i'), 'to' => $period->end->translatedFormat('j M Y H:i'), 'tz' => config('app.timezone')]) }} · <a href="#k-notes" class="underline">{{ __('kpi.how') }}</a></p>
+<div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <p class="min-w-0 text-sm text-muted sm:flex-1">{{ __('kpi.period_hint', ['from' => $period->start->translatedFormat('j M Y H:i'), 'to' => $period->end->translatedFormat('j M Y H:i'), 'tz' => config('app.timezone')]) }} · <a href="#k-notes" class="underline">{{ __('kpi.how') }}</a></p>
+            <div class="flex flex-wrap gap-2">
+            <a href="{{ route('kpi.report') }}" class="btn btn-secondary" target="_blank" rel="noopener"><x-icon name="printer" />{{ __('kpi.report.button') }}</a>
+            @can('reports.export')
+                <x-export-menu route="export.kpi" :params="['periodo' => $preset, 'dal' => $from, 'al' => $to, 'ubicazione' => $location, 'categoria' => $category]" :parts="array_filter(__('export.kpi_parts'), fn ($k) => $k !== 'costi' || $canCosts, ARRAY_FILTER_USE_KEY)" />
+            @endcan
+            </div>
+        </div>
     </section>
 
     {{-- Indicatori principali --}}
@@ -95,6 +103,40 @@
             @endif
             <p class="text-sm text-fg-2">{{ __('preventive.compliance.on_time') }} {{ $compliance['on_time'] }} · {{ __('preventive.compliance.late') }} {{ $compliance['late'] }} · {{ __('preventive.compliance.skipped') }} {{ $compliance['skipped'] }} · {{ __('preventive.compliance.overdue') }} {{ $compliance['overdue'] }}</p>
         </section>
+    </div>
+
+    {{-- Andamento nel tempo --}}
+    @php
+        $b = $series['buckets'];
+        $labels = array_column($b, 'label');
+        $unitLabel = __('kpi.charts.unit.'.$series['unit']);
+        $empty = __('kpi.insufficient_short');
+        $costRows = $canCosts && $costs !== null ? array_slice(array_values(array_filter($costs['rows'], fn ($r) => $r['asset_id'] !== null && $r['total'] > 0)), 0, 10) : [];
+        $costNames = \App\Models\Asset::query()->whereIn('id', array_column($costRows, 'asset_id'))->pluck('code', 'id');
+    @endphp
+    <div class="grid gap-4 lg:grid-cols-2">
+        <x-kpi-chart id="ch-down" :title="__('kpi.charts.downtime', ['unit' => $unitLabel])"
+            :summary="__('kpi.charts.downtime_summary', ['count' => $downtime['count'], 'hours' => $h($downtime['hours']), 'n' => count($b)])"
+            :config="['labels' => $labels, 'unit' => 'h', 'empty' => $empty, 'datasets' => [['label' => __('kpi.hours'), 'data' => array_column($b, 'downtime_hours'), 'color' => 'warn']]]"
+            :headers="[__('kpi.charts.period'), __('kpi.downtime.title'), __('kpi.hours')]"
+            :rows="array_map(fn ($r) => [$r['label'], $r['downtime_count'], $h($r['downtime_hours'])], $b)" />
+        <x-kpi-chart id="ch-mttr" :title="__('kpi.charts.mttr', ['unit' => $unitLabel])"
+            :summary="__('kpi.charts.mttr_summary', ['n' => count(array_filter(array_column($b, 'mttr'), fn ($v) => $v !== null)), 'total' => count($b)])"
+            :config="['type' => 'line', 'labels' => $labels, 'unit' => 'h', 'empty' => $empty, 'datasets' => [['label' => 'MTTR', 'type' => 'line', 'data' => array_column($b, 'mttr'), 'color' => 'accent']]]"
+            :headers="[__('kpi.charts.period'), 'MTTR (h)', __('kpi.charts.events')]"
+            :rows="array_map(fn ($r) => [$r['label'], $r['mttr'] === null ? $empty : $h($r['mttr']), $r['mttr_n']], $b)" />
+        <x-kpi-chart id="ch-mix" :title="__('kpi.charts.mix', ['unit' => $unitLabel])"
+            :summary="__('kpi.charts.mix_summary', ['p' => $mix['preventive'], 'c' => $mix['corrective']])"
+            :config="['labels' => $labels, 'stacked' => true, 'empty' => $empty, 'datasets' => [['label' => __('kpi.mix.preventive'), 'data' => array_column($b, 'preventive'), 'color' => 'ok'], ['label' => __('kpi.mix.corrective'), 'data' => array_column($b, 'corrective'), 'color' => 'warn']]]"
+            :headers="[__('kpi.charts.period'), __('kpi.mix.preventive'), __('kpi.mix.corrective')]"
+            :rows="array_map(fn ($r) => [$r['label'], $r['preventive'], $r['corrective']], $b)" />
+        @if($canCosts)
+            <x-kpi-chart id="ch-cost" :title="__('kpi.charts.costs')" height="h-72"
+                :summary="__('kpi.charts.costs_summary', ['n' => count($costRows), 'total' => $eur($costs['total']['total'] ?? 0)])"
+                :config="['labels' => array_map(fn ($r) => $costNames[$r['asset_id']] ?? '—', $costRows), 'horizontal' => true, 'unit' => '€', 'empty' => $empty, 'datasets' => [['label' => __('kpi.costs.total'), 'data' => array_map(fn ($r) => round($r['total'], 2), $costRows), 'color' => 'accent']]]"
+                :headers="[__('assets.field.code'), __('kpi.costs.total')]"
+                :rows="array_map(fn ($r) => [$costNames[$r['asset_id']] ?? '—', $eur($r['total'])], $costRows)" />
+        @endif
     </div>
 
     {{-- Per macchina --}}

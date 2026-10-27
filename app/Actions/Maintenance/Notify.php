@@ -2,10 +2,11 @@
 
 namespace App\Actions\Maintenance;
 
+use App\Enums\NotificationEvent;
 use App\Models\User;
 use App\Models\WorkOrder;
 use App\Models\WorkRequest;
-use App\Support\Push\PushDispatcher;
+use App\Support\Notifications\Notifier;
 use App\Support\Push\PushMessage;
 use App\Support\Push\PushUrgency;
 use Illuminate\Support\Collection;
@@ -17,14 +18,15 @@ use Illuminate\Support\Collection;
  */
 class Notify
 {
-    public function __construct(private PushDispatcher $push) {}
+    public function __construct(private Notifier $notifier) {}
 
     public function newRequest(WorkRequest $request, User $actor): void
     {
         $urgent = $request->isUrgent();
         $what = $request->asset ? $request->asset->code.' '.$request->asset->name : ($request->location?->fullName() ?? __('maintenance.request.no_asset'));
 
-        $this->push->send(
+        $this->notifier->send(
+            $urgent ? NotificationEvent::RequestUrgent : NotificationEvent::RequestNew,
             $this->without(self::triagers(), $actor),
             new PushMessage(
                 title: __($urgent ? 'maintenance.push.request_urgent' : 'maintenance.push.request_new', ['what' => $what]),
@@ -46,7 +48,7 @@ class Notify
             return;
         }
 
-        $this->push->send($request->user, new PushMessage(
+        $this->notifier->send(NotificationEvent::RequestTriaged, $request->user, new PushMessage(
             title: __('maintenance.push.request_'.$request->status->value, ['number' => $request->number]),
             body: $request->triage_note ?: $request->summary(120),
             url: route('requests.show', $request, absolute: false),
@@ -60,7 +62,7 @@ class Notify
     public function assigned(WorkOrder $order, Collection $users, ?User $actor): void
     {
         $critical = $order->priority->value === 'critica';
-        $this->push->send($this->without($users, $actor), new PushMessage(
+        $this->notifier->send(NotificationEvent::OrderAssigned, $this->without($users, $actor), new PushMessage(
             title: __($critical ? 'maintenance.push.assigned_critical' : 'maintenance.push.assigned', ['number' => $order->number]),
             body: trim(($order->asset ? $order->asset->code.' · ' : '').$order->title),
             url: route('work-orders.show', $order, absolute: false),
@@ -72,7 +74,7 @@ class Notify
     {
         $author = $order->request?->user;
         if ($author && $author->id !== $actor->id) {
-            $this->push->send($author, new PushMessage(
+            $this->notifier->send(NotificationEvent::OrderCompleted, $author, new PushMessage(
                 title: __('maintenance.push.completed', ['number' => $order->request->number]),
                 body: trim(($order->asset ? $order->asset->code.' · ' : '').$order->title),
                 url: route('requests.show', $order->request, absolute: false),

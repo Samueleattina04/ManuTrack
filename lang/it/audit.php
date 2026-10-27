@@ -52,7 +52,11 @@ return [
             'permission_revoked' => 'Permesso tolto',
             'defaults_restored' => 'Permessi predefiniti ripristinati',
         ],
+        'reports' => [
+            'exported' => 'Esportazione CSV o Excel',
+        ],
         'settings' => [
+            'notifications' => 'Avvisi via email per ruolo modificati',
             'company_updated' => 'Impostazioni dell\'azienda modificate',
             'logo_uploaded' => 'Logo caricato',
             'logo_removed' => 'Logo rimosso',

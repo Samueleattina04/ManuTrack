@@ -879,3 +879,66 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
 - **Test con dati noti e risultati calcolati a mano** (`tests/Feature/Kpi/KpiCalculatorTest.php`): marzo 2026, con il passaggio all'ora legale (743 ore), fermi a cavallo dei bordi, fermo aperto, macchina dismessa, macchina senza storico, ordini annullati e fuori periodo, filtri.
 - **Dati dimostrativi:** sei mesi di storico inventato (`DemoHistorySeeder`), solo nel seeder di sviluppo e nel pacchetto demo.
 
+
+## 40. Notifiche complete (`/avvisi`, fase 9)
+
+- **Un solo punto d'invio** (`App\Support\Notifications\Notifier`). Per ogni persona e ogni evento:
+  - l'avviso entra **sempre** nel centro avvisi, anche se il telefono era spento;
+  - la **push** parte se la persona la vuole (le urgenti subito dopo la risposta, le altre dalla coda);
+  - l'**email** parte subito, finisce nel riepilogo giornaliero oppure non parte.
+- **Eventi** (`App\Enums\NotificationEvent`), ciascuno visibile solo a chi ha il permesso collegato:
+
+| Evento | Chi lo riceve | Email predefinita |
+|---|---|---|
+| Nuova segnalazione | chi valuta le segnalazioni | no |
+| Segnalazione urgente | chi valuta le segnalazioni | subito |
+| Esito della mia segnalazione | chi l'ha fatta | no |
+| Macchina ferma o ripartita | chi valuta le segnalazioni | no |
+| Ordine assegnato a me | gli assegnatari | no |
+| Ordine completato | chi aveva segnalato | no |
+| Preventiva da assegnare | chi assegna gli ordini | no |
+| Ricambio sotto scorta | chi gestisce il magazzino | riepilogo |
+| Aggiornamento applicato o fallito | chi aggiorna il sistema | subito |
+| Rapporto mensile pronto | chi vede gli indicatori | subito |
+
+- **Email per ruolo** (*Impostazioni › Avvisi via email*, solo amministratore): per ogni ruolo ed evento "nessuna", "riepilogo giornaliero" o "subito". Con più ruoli vale la scelta più forte.
+- **Preferenze personali** (*Avvisi › Preferenze*): push sì/no ed email per evento. Si salvano solo le differenze dal predefinito del ruolo: se il ruolo cambia, valgono le nuove regole.
+- **Riepilogo giornaliero** alle 07:10 (`manutrack:avvisi-riepilogo`), al massimo 30 voci per email. Gli avvisi più vecchi di 90 giorni vengono cancellati.
+- **Centro avvisi:** raggruppa gli avvisi con lo stesso argomento nello stesso giorno ("× 3"). Aprirne uno segna letti tutti quelli del gruppo. C'è "Segna tutti come letti".
+- **Badge:** numero di avvisi da leggere sulla voce di menu, nella barra in basso del telefono e sull'icona dell'app installata (`setAppBadge`, dove il sistema lo supporta), aggiornato anche dal service worker.
+
+## 41. Grafici degli indicatori (fase 9)
+
+- Quattro grafici nella dashboard: ore di fermo, MTTR, preventivo/correttivo (barre sovrapposte) e costi delle 10 macchine più costose (solo con "Vedere i costi").
+- **Serie:** il periodo è diviso in settimane (fino a 100 giorni) o mesi. Ogni intervallo è calcolato con le stesse regole e gli stessi minimi degli indicatori (`docs/KPI.md` §2.8): dove l'MTTR non è calcolabile la linea si interrompe, non scende a zero.
+- **Libreria:** Chart.js 4 (MIT), caricata **solo quando serve** in un file a parte (`chart-*.js`). Non entra nella cache dell'app installata: senza rete i grafici non hanno dati.
+- **Accessibilità:** ogni grafico ha una descrizione testuale e la **tabella equivalente** sempre presente nella pagina ("Mostra i dati in tabella"). I colori seguono il tema chiaro o scuro; con "riduci movimento" niente animazioni.
+- In stampa i grafici lasciano il posto alle tabelle.
+
+## 42. Esportazioni CSV ed Excel (fase 9)
+
+- **Dove:** pulsante **Esporta** negli elenchi di ordini, macchine e ricambi e nella dashboard degli indicatori.
+- **Cosa:** tutte le righe che rispettano i **filtri applicati** in quel momento (stessa ricerca, schede, filtri e ordinamento dell'elenco), non solo la pagina visibile. Massimo 20.000 righe: oltre, si chiede di restringere i filtri.
+- **Indicatori:** in Excel un file con quattro fogli (riepilogo, per macchina, andamento, costi); in CSV un file per parte. Gli indicatori sotto i minimi hanno la cella vuota e la nota "dati insufficienti".
+- **Formati:**
+  - **CSV** con separatore `;`, codifica UTF-8 con BOM e decimali con la virgola: si apre con un doppio clic in Excel e LibreOffice in italiano.
+  - **Excel (.xlsx)** con numeri e date veri (si possono sommare e ordinare). Serve l'estensione PHP `zip`; senza, il menu offre solo il CSV.
+- **Permessi:**
+  - serve "Esportare CSV ed Excel" **più** il permesso di vedere l'elenco (ordini, macchine, magazzino, indicatori);
+  - predefinito per amministratore, responsabile e osservatore; agli altri ruoli lo può dare l'amministratore;
+  - le **colonne dei costi** (manodopera, ricambi, esterni, totale; costo d'acquisto delle macchine; costo medio e valore dei ricambi; foglio dei costi negli indicatori) ci sono solo per chi vede i costi;
+  - chi parte dai propri ordini nell'elenco (chi non assegna) esporta i propri ordini, come vede la pagina.
+- **Protezione dalle formule (CSV injection):** ogni testo che comincia con `=`, `+`, `-`, `@` (anche a larghezza piena), tabulazione, ritorno a capo, anche dopo spazi iniziali, viene preceduto da un apostrofo e resta testo. Vale sia per il CSV sia per l'Excel, così un file risalvato come CSV non riporta in vita la formula. I numeri e le date scritti da ManuTrack non sono testi e restano numeri.
+- Ogni esportazione è scritta nel **registro attività** con i filtri usati.
+
+## 43. Rapporto mensile per la direzione (`/indicatori/rapporto`, fase 9)
+
+- Pagina pronta per la stampa: dal pulsante **Stampa o salva in PDF** il browser stampa o crea il PDF (A4 verticale). **Nessun programma da installare sul server.**
+- Si apre da *Indicatori › Rapporto mensile*; predefinito il mese precedente, con i pulsanti mese precedente e successivo. Mesi futuri non accettati.
+- **Contenuto:**
+  - indicatori del mese con le regole di `docs/KPI.md` (fermi, MTTR, MTBF, preventivo/correttivo, rispetto dei piani, arretrato, costi), con "dati insufficienti" dove serve;
+  - le 5 macchine con più ore di fermo;
+  - **ordini conclusi nel mese** (completati o chiusi, con data di completamento nel mese; annullati esclusi), fino a 150 righe e poi "e altri N";
+  - **ricambi sotto scorta** e **piani preventivi in ritardo**: situazione al momento della stampa, indicata come tale.
+- **Permessi:** serve "Vedere gli indicatori"; ogni parte compare solo a chi la può vedere (ordini, magazzino, preventiva, costi).
+- **Avviso:** il 1° del mese alle 07:20 (`manutrack:rapporto-mensile`) chi vede gli indicatori riceve "Rapporto mensile di …" con il link, nel centro avvisi e via email (predefinito "subito").

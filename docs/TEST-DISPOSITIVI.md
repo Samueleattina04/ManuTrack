@@ -446,3 +446,32 @@ Servono:
 - [ ] In *Preventiva* la percentuale di rispetto cambia di conseguenza; in panoramica il responsabile vede "Preventiva da fare" se ci sono piani scaduti.
 - [ ] Il tecnico vede elenco, schede e calendario ma non "Nuovo piano", "Modifica" né "Genera ora"; aprendo `/preventiva/piani/nuovo` riceve "Accesso negato".
 - [ ] Il richiedente e il magazziniere non vedono la voce "Preventiva".
+
+## 13. Fase 9: avvisi, grafici, esportazioni e rapporto
+
+Servono un **responsabile** e un **tecnico** con l'app installata e le notifiche attive (paragrafi 4 e 5), e un PC.
+
+### 13.1 Avvisi e badge
+- [ ] Il tecnico manda una segnalazione: sul telefono del responsabile arriva la push; nell'app, *Avvisi* mostra la segnalazione con il pallino "Nuovo".
+- [ ] Il numero degli avvisi da leggere compare sulla voce di menu, nella barra in basso e sull'**icona dell'app** (Android con Chrome; iPhone da iOS 16.4 con l'app aggiunta alla schermata Home e le notifiche permesse).
+- [ ] Tre segnalazioni sulla stessa macchina nello stesso giorno compaiono come una voce "× 3"; aprendola, il numero sull'icona scende.
+- [ ] *Avvisi › Preferenze* del tecnico: togli la push a "Ordine assegnato a me", assegnagli un ordine dal PC: la push non arriva, l'avviso c'è comunque nel centro avvisi.
+- [ ] *Impostazioni › Avvisi via email* (amministratore): metti "subito" per i responsabili su "Nuova segnalazione": alla prossima segnalazione arriva l'email con il link che apre l'app.
+
+### 13.2 Grafici sul telefono
+- [ ] *Indicatori* sul telefono: i quattro grafici si vedono interi, senza scorrere di lato; le etichette non si sovrappongono.
+- [ ] Tocca una barra: compare il valore. "Mostra i dati in tabella" apre la tabella con gli stessi numeri.
+- [ ] Cambia il tema (chiaro/scuro): i colori dei grafici si adattano senza ricaricare.
+- [ ] Senza rete (modalità aereo) la pagina degli indicatori non si apre o mostra la pagina offline: è previsto.
+
+### 13.3 Esportazioni
+- [ ] *Ordini* dal PC, scheda "Tutti", filtro priorità "Alta": **Esporta › CSV**. Il file si apre con un doppio clic in Excel (o LibreOffice) con le colonne giuste, accenti corretti e decimali con la virgola, e contiene solo gli ordini filtrati.
+- [ ] Stessa cosa con **Excel (.xlsx)**: le date sono date (si possono ordinare) e i costi sono numeri (si possono sommare).
+- [ ] Crea un ricambio chiamato `=1+1`: nell'esportazione dei ricambi la cella mostra il testo `'=1+1`, **non** il numero 2.
+- [ ] Dal telefono (iPhone e Android): *Macchine › Esporta › Excel*. Il file si scarica e si apre con l'app File / Download o con un'app per fogli di calcolo.
+- [ ] Con l'osservatore le colonne dei costi ci sono; con un ruolo senza "Vedere i costi" (es. un tecnico a cui l'amministratore ha dato "Esportare CSV ed Excel") non ci sono.
+
+### 13.4 Rapporto mensile
+- [ ] *Indicatori › Rapporto mensile* dal PC: mese precedente, logo dell'azienda in alto. **Stampa o salva in PDF** › "Salva come PDF": il PDF è A4 verticale, senza la barra dei pulsanti, con le intestazioni delle tabelle ripetute sulle pagine nuove.
+- [ ] Dal telefono: la pagina si legge senza zoom; **Stampa** apre la stampa del sistema (iPhone: Condividi › Stampa, poi allarga l'anteprima per avere il PDF; Android: "Salva come PDF").
+- [ ] Il 1° del mese, dopo le 07:20, chi vede gli indicatori trova l'avviso "Rapporto mensile di …" che apre il rapporto del mese finito.

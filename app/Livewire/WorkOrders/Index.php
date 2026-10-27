@@ -7,6 +7,7 @@ use App\Enums\WorkOrderStatus;
 use App\Enums\WorkOrderType;
 use App\Models\Asset;
 use App\Models\WorkOrder;
+use App\Support\Filters\WorkOrderFilters;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Url;
@@ -71,17 +72,17 @@ class Index extends Component
         }
     }
 
+    public function filters(): WorkOrderFilters
+    {
+        return new WorkOrderFilters($this->tab, $this->mine, $this->search, $this->priority, $this->type, $this->asset);
+    }
+
     /**
      * @return Builder<WorkOrder>
      */
     private function query(): Builder
     {
-        return WorkOrder::query()
-            ->when($this->mine, fn (Builder $q) => $q->assignedTo(auth()->user()))
-            ->search($this->search)
-            ->when(Priority::tryFrom($this->priority), fn (Builder $q) => $q->where('priority', $this->priority))
-            ->when(WorkOrderType::tryFrom($this->type), fn (Builder $q) => $q->where('type', $this->type))
-            ->when(ctype_digit($this->asset), fn (Builder $q) => $q->where('asset_id', (int) $this->asset));
+        return $this->filters()->base(auth()->user());
     }
 
     public function render(): View
@@ -89,11 +90,7 @@ class Index extends Component
         $statusCounts = $this->query()->toBase()->selectRaw('status, count(*) as n')->groupBy('status')->pluck('n', 'status')->map(fn ($n) => (int) $n);
         $tabCounts = collect(self::TABS)->map(fn (array $statuses) => $statuses === [] ? $statusCounts->sum() : $statusCounts->only($statuses)->sum());
 
-        $orders = $this->query()
-            ->with(['asset', 'assignees'])
-            ->when(self::TABS[$this->tab] !== [], fn (Builder $q) => $q->whereIn('status', self::TABS[$this->tab]))
-            ->when(in_array($this->tab, ['chiusi', 'da_chiudere'], true), fn (Builder $q) => $q->latest('updated_at'), fn (Builder $q) => $q->byUrgency())
-            ->paginate(25);
+        $orders = $this->filters()->query(auth()->user())->with(['asset', 'assignees'])->paginate(25);
 
         return view('livewire.work-orders.index', [
             'orders' => $orders,

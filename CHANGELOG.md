@@ -3,6 +3,36 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.9.0] - Fase 9: avvisi completi, grafici, esportazioni e rapporto mensile
+
+### Aggiunto
+- **Avvisi completi:**
+  - centro avvisi (`/avvisi`) con gli avvisi raggruppati per argomento e giorno, "segna tutti come letti", conservati 90 giorni;
+  - dieci eventi (segnalazioni, macchina ferma, ordini assegnati e completati, preventiva da assegnare, scorta minima, aggiornamenti, rapporto mensile), ciascuno visibile solo a chi ha il permesso collegato;
+  - **email per ruolo** (*Impostazioni › Avvisi via email*): nessuna, riepilogo giornaliero o subito;
+  - **preferenze personali** (*Avvisi › Preferenze*) per push ed email, salvate solo dove differiscono dal ruolo;
+  - riepilogo giornaliero via email alle 07:10 (`manutrack:avvisi-riepilogo`);
+  - numero degli avvisi da leggere sul menu, sulla barra in basso e sull'icona dell'app installata.
+- **Grafici degli indicatori:** ore di fermo, MTTR, preventivo/correttivo e costi per macchina, per settimana o per mese con le stesse regole degli indicatori (`docs/KPI.md` §2.8).
+  - Chart.js (MIT) caricato solo nella pagina degli indicatori;
+  - tabella equivalente e descrizione testuale per ogni grafico;
+  - colori del tema chiaro o scuro, niente animazioni con "riduci movimento".
+- **Esportazioni CSV ed Excel** di ordini, macchine, ricambi e indicatori:
+  - con i filtri applicati nell'elenco, tutte le pagine (fino a 20.000 righe);
+  - permesso "Esportare CSV ed Excel" più quello di vedere l'elenco; colonne dei costi solo a chi vede i costi;
+  - **protezione dalle formule** (CSV injection): i testi che cominciano con `=`, `+`, `-`, `@`, tabulazione o a capo restano testo;
+  - CSV con `;`, UTF-8 con BOM e decimali con la virgola; Excel con numeri e date veri e un foglio per parte negli indicatori;
+  - ogni esportazione nel registro attività.
+- **Rapporto mensile** per la direzione (`/indicatori/rapporto`): indicatori del mese, macchine con più fermo, ordini conclusi, ricambi sotto scorta, piani in ritardo. Si stampa o si salva in PDF dal browser, senza programmi sul server. Il 1° del mese chi vede gli indicatori riceve l'avviso (`manutrack:rapporto-mensile`).
+- **Proposta** per una fase successiva: orario di lavoro per calcolare l'MTBF sulle sole ore di lavoro previste (`docs/PROPOSTA.md`).
+
+### Modificato
+- Filtri di ordini, macchine e ricambi in classi comuni (`app/Support/Filters`), usate sia dagli elenchi sia dalle esportazioni: le due cose non possono divergere.
+- Tutti gli avvisi passano da un unico punto (`Notifier`), che decide centro avvisi, push ed email.
+
+### Corretto
+- Il conteggio degli avvisi da leggere era conservato per tutto il processo PHP: in un processo che serve più persone (coda, test) si poteva vedere il numero di un altro. Ora vale per la singola richiesta.
+
 ## [0.8.0] - Fase 8: dashboard degli indicatori; installazione demo separata
 
 ### Aggiunto

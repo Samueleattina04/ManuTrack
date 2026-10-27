@@ -46,9 +46,7 @@ class Dashboard extends Component
     {
         $error = null;
         try {
-            $period = $this->preset === 'scelta' && $this->from !== '' && $this->to !== ''
-                ? KpiPeriod::between($this->from, $this->to)
-                : KpiPeriod::preset($this->preset);
+            $period = KpiPeriod::fromInput($this->preset, $this->from, $this->to);
         } catch (InvalidArgumentException $e) {
             $error = $e->getMessage();
             $period = KpiPeriod::preset('30g');
@@ -72,6 +70,7 @@ class Dashboard extends Component
             'compliance' => $kpi->compliance(),
             'costs' => $canCosts ? $kpi->costs() : null,
             'assets' => $kpi->byAsset(),
+            'series' => $kpi->series(),
             'canCosts' => $canCosts,
             'locations' => Location::labels(),
             'categories' => AssetCategory::query()->orderBy('name')->pluck('name', 'id'),

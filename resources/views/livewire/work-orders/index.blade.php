@@ -9,8 +9,11 @@
         @can('work_orders.create')
             <a href="{{ route('work-orders.create') }}" x-ref="create" class="btn btn-primary"><x-icon name="plus" />{{ __('maintenance.order.new') }} <span class="kbd hidden lg:inline-flex">N</span></a>
         @endcan
+        @can('reports.export')
+            <x-export-menu class="ml-auto" route="export.work-orders" :params="['vista' => $tab, 'miei' => $mine ? '1' : '0', 'q' => $search, 'priorita' => $priority, 'tipo' => $type, 'macchina' => $asset]" />
+        @endcan
         @can('work_orders.settings')
-            <a href="{{ route('work-orders.settings') }}" class="btn btn-ghost btn-sm ml-auto"><x-icon name="settings" class="!w-4 !h-4" />{{ __('maintenance.settings.title') }}</a>
+            <a href="{{ route('work-orders.settings') }}" @class(['btn btn-ghost btn-sm', 'ml-auto' => ! auth()->user()->can('reports.export')])><x-icon name="settings" class="!w-4 !h-4" />{{ __('maintenance.settings.title') }}</a>
         @endcan
     </div>
 

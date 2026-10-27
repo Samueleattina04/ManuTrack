@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\UserNotification;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 class Navigation
 {
     /**
-     * @return list<array{key: string, label: string, icon: string, route: string|null, url: string|null, shortcut: string|null, keywords: string, active: bool, disabled: bool}>
+     * @return list<array{key: string, label: string, icon: string, route: string|null, url: string|null, shortcut: string|null, keywords: string, active: bool, disabled: bool, badge: int}>
      */
     public static function main(): array
     {
@@ -25,7 +26,7 @@ class Navigation
             ['preventive', 'calendar', 'preventive.index', 'g p', 'preventiva piani calendario scadenze rispetto contatore', 'preventive.view'],
             ['kpi', 'bar-chart', 'kpi', 'g k', 'indicatori kpi mttr mtbf fermi arretrato costi report', 'reports.view'],
             ['inventory', 'box', 'inventory.parts.index', 'g r', 'ricambi magazzino fornitori movimenti riordino scorta', 'inventory.view'],
-            ['notifications', 'bell', null, 'g n', 'avvisi', null],
+            ['notifications', 'bell', 'notifications.index', 'g n', 'avvisi notifiche preferenze email', null],
             ['app', 'smartphone', 'pwa.install', null, 'app installa telefono notifiche push diagnostica', null],
         ]);
     }
@@ -33,13 +34,14 @@ class Navigation
     /**
      * Voci di amministrazione (gruppo separato nella barra laterale).
      *
-     * @return list<array{key: string, label: string, icon: string, route: string|null, url: string|null, shortcut: string|null, keywords: string, active: bool, disabled: bool}>
+     * @return list<array{key: string, label: string, icon: string, route: string|null, url: string|null, shortcut: string|null, keywords: string, active: bool, disabled: bool, badge: int}>
      */
     public static function admin(): array
     {
         return self::build([
             ['users', 'users', 'users.index', 'g u', 'persone utenti inviti ruoli permessi', 'users.view'],
             ['settings', 'settings', 'settings.company', 'g i', 'impostazioni azienda logo colori', 'settings.manage'],
+            ['notification_rules', 'mail', 'settings.notifications', null, 'avvisi email ruoli riepilogo regole', 'settings.manage'],
             ['audit', 'clipboard-list', 'audit.index', null, 'registro attività log', 'audit.view'],
             ['system', 'server', 'system', 'g s', 'sistema versione aggiornamento copie', 'system.view'],
             ['design', 'palette', 'design', null, 'design system stile componenti', 'settings.manage'],
@@ -49,7 +51,7 @@ class Navigation
     /**
      * Voci della barra in basso del telefono (la centrale è "Segnala").
      *
-     * @return list<array{key: string, label: string, icon: string, route: string|null, url: string|null, shortcut: string|null, keywords: string, active: bool, disabled: bool}>
+     * @return list<array{key: string, label: string, icon: string, route: string|null, url: string|null, shortcut: string|null, keywords: string, active: bool, disabled: bool, badge: int}>
      */
     public static function mobile(): array
     {
@@ -62,14 +64,14 @@ class Navigation
             self::item('dashboard', 'home', 'home', short: true),
             $second,
             self::item('report', 'plus', 'requests.create'),
-            self::item('notifications', 'bell', null, short: true),
+            self::item('notifications', 'bell', 'notifications.index', short: true),
             self::item('profile', 'user', 'profile', short: true),
         ];
     }
 
     /**
      * @param  list<array{0: string, 1: string, 2: string|null, 3: string|null, 4: string, 5: string|null}>  $rows
-     * @return list<array{key: string, label: string, icon: string, route: string|null, url: string|null, shortcut: string|null, keywords: string, active: bool, disabled: bool}>
+     * @return list<array{key: string, label: string, icon: string, route: string|null, url: string|null, shortcut: string|null, keywords: string, active: bool, disabled: bool, badge: int}>
      */
     private static function build(array $rows): array
     {
@@ -85,8 +87,25 @@ class Navigation
         return $items;
     }
 
+    /** Avvisi non letti della persona collegata (una sola query per pagina) */
+    public static function unread(): int
+    {
+        $user = auth()->user();
+        if (! $user) {
+            return 0;
+        }
+
+        // Conservato nella richiesta, non in una variabile statica: i processi lunghi (code, test) servono più persone
+        $attributes = request()->attributes;
+        if (! $attributes->has('mt.unread')) {
+            $attributes->set('mt.unread', UserNotification::unreadCount($user));
+        }
+
+        return (int) $attributes->get('mt.unread');
+    }
+
     /**
-     * @return array{key: string, label: string, icon: string, route: string|null, url: string|null, shortcut: string|null, keywords: string, active: bool, disabled: bool}
+     * @return array{key: string, label: string, icon: string, route: string|null, url: string|null, shortcut: string|null, keywords: string, active: bool, disabled: bool, badge: int}
      */
     private static function item(string $key, string $icon, ?string $route, ?string $shortcut = null, string $keywords = '', bool $short = false): array
     {
@@ -102,6 +121,7 @@ class Navigation
             'keywords' => $keywords,
             'active' => $exists && request()->routeIs($route),
             'disabled' => ! $exists,
+            'badge' => $key === 'notifications' ? self::unread() : 0,
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Support\Inventory;
 
 use App\Enums\MovementType;
+use App\Enums\NotificationEvent;
 use App\Enums\WorkOrderStatus;
 use App\Models\Part;
 use App\Models\StockLevel;
@@ -12,8 +13,8 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WorkOrder;
 use App\Support\Audit\Audit;
+use App\Support\Notifications\Notifier;
 use App\Support\Numbers;
-use App\Support\Push\PushDispatcher;
 use App\Support\Push\PushMessage;
 use Closure;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +34,7 @@ use Illuminate\Validation\ValidationException;
  */
 class Stock
 {
-    public function __construct(private PushDispatcher $push) {}
+    public function __construct(private Notifier $notifier) {}
 
     /** Carico (arrivo da fornitore o giacenza iniziale) */
     public function receive(Part $part, Warehouse $warehouse, mixed $quantity, User $user, mixed $unitCost = null, ?Supplier $supplier = null, ?string $reference = null, ?string $note = null): StockMovement
@@ -214,7 +215,7 @@ class Stock
     private function notifyLowStock(Part $part, User $actor): void
     {
         $users = User::permission('inventory.manage')->where('is_active', true)->whereKeyNot($actor->id)->get();
-        $this->push->send($users, new PushMessage(
+        $this->notifier->send(NotificationEvent::StockLow, $users, new PushMessage(
             title: __((float) $part->stock_total <= 0 ? 'inventory.push.out_title' : 'inventory.push.low_title', ['code' => $part->code]),
             body: __('inventory.push.low_body', ['name' => $part->name, 'qty' => Part::formatQty($part->stock_total), 'min' => Part::formatQty($part->min_stock), 'unit' => $part->unit]),
             url: route('inventory.parts.show', $part, absolute: false),

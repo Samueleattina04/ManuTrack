@@ -59,6 +59,11 @@ class ServiceWorkerController extends Controller
                 continue;
             }
             $path = (string) $entry['file'];
+            // Librerie caricate solo quando servono e inutili senza rete (i grafici vogliono i dati
+            // dal server): non si scaricano all'installazione dell'app
+            if (($entry['isDynamicEntry'] ?? false) && str_starts_with(basename($path), 'chart-')) {
+                continue;
+            }
             $isFont = str_ends_with($path, '.woff2');
             if ($isFont && ! (str_contains($path, '-latin-') && ! str_contains($path, '-latin-ext-'))) {
                 continue;

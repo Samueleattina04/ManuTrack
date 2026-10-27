@@ -58,6 +58,16 @@ Schedule::call(function (): void {
     }
 })->dailyAt((string) config('manutrack.demo_reset_at', '03:00'))->name('manutrack:demo-reset')->withoutOverlapping(60);
 
+// Riepilogo giornaliero degli avvisi via email (e pulizia degli avvisi oltre 90 giorni)
+Schedule::call(function (): void {
+    Artisan::call('manutrack:avvisi-riepilogo');
+})->dailyAt('07:10')->name('manutrack:digest')->withoutOverlapping(30);
+
+// Rapporto mensile: il 1° del mese si avvisa che quello del mese appena finito è pronto
+Schedule::call(function (): void {
+    Artisan::call('manutrack:rapporto-mensile');
+})->monthlyOn(1, '07:20')->name('manutrack:monthly-report')->withoutOverlapping(30);
+
 // Pulizie periodiche
 Schedule::call(function (): void {
     Artisan::call('queue:prune-failed', ['--hours' => 24 * 30]);

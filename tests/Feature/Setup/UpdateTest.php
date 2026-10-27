@@ -2,6 +2,7 @@
 
 use App\Models\SystemVersion;
 use App\Models\User;
+use App\Models\UserNotification;
 use App\Support\AppVersion;
 use App\Support\FileLock;
 use App\Support\Setup\SystemSync;
@@ -49,7 +50,9 @@ it('aggiorna creando prima una copia del database', function () {
         ->and($record->backup_file)->toStartWith('manutrack-')
         ->and(is_file(config('manutrack.backups.path').'/'.$record->backup_file))->toBeTrue()
         ->and(AppVersion::installed())->toBe('9.1.0')
-        ->and(app()->isDownForMaintenance())->toBeFalse();
+        ->and(app()->isDownForMaintenance())->toBeFalse()
+        // Avviso a chi gestisce il sistema
+        ->and(UserNotification::query()->where('event', 'aggiornamento')->sole()->title)->toBe(__('notifications.update.ok', ['version' => '9.1.0']));
 
     // Ripetibile: la seconda volta non cambia nulla
     $this->artisan('manutrack:update')->assertSuccessful();
@@ -67,7 +70,8 @@ it('se fallisce lascia l\'app utilizzabile e registra l\'errore', function () {
         ->and($record->error)->toContain('migrazione di prova rotta')
         ->and(app()->isDownForMaintenance())->toBeFalse()
         ->and(AppVersion::installed())->not->toBe('9.2.0')
-        ->and(settings(Updater::ERROR_SETTING)['message'])->toContain('migrazione di prova rotta');
+        ->and(settings(Updater::ERROR_SETTING)['message'])->toContain('migrazione di prova rotta')
+        ->and(UserNotification::query()->where('event', 'aggiornamento')->sole()->body)->toContain('migrazione di prova rotta');
 
     // L'avviso compare nelle pagine, ma solo a chi gestisce il sistema
     $admin = User::query()->first();

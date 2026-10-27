@@ -4,16 +4,19 @@ use App\Http\Controllers\AssetQrController;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\DesignController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\Maintenance\QuickReportController;
 use App\Http\Controllers\ManifestController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Push\PushSubscriptionController;
 use App\Http\Controllers\Push\PushTestController;
 use App\Http\Controllers\Pwa\PwaController;
 use App\Http\Controllers\Pwa\ServiceWorkerController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SystemActionsController;
 use App\Http\Controllers\SystemController;
 use App\Livewire\Assets\Categories as AssetCategories;
@@ -33,6 +36,8 @@ use App\Livewire\Inventory\Suppliers;
 use App\Livewire\Inventory\Warehouses;
 use App\Livewire\Kpi\Dashboard as KpiDashboard;
 use App\Livewire\Maintenance\Settings as MaintenanceSettings;
+use App\Livewire\Notifications\Index as NotificationsIndex;
+use App\Livewire\Notifications\Preferences as NotificationPreferences;
 use App\Livewire\Preventive\Calendar as PreventiveCalendar;
 use App\Livewire\Preventive\Form as PlanForm;
 use App\Livewire\Preventive\Index as PreventiveIndex;
@@ -41,6 +46,7 @@ use App\Livewire\Profile;
 use App\Livewire\Requests\Index as RequestsIndex;
 use App\Livewire\Requests\Show as RequestShow;
 use App\Livewire\Settings\Company;
+use App\Livewire\Settings\Notifications as NotificationRules;
 use App\Livewire\Users\Index as UsersIndex;
 use App\Livewire\Users\Roles;
 use App\Livewire\WorkOrders\Create as WorkOrderCreate;
@@ -139,8 +145,23 @@ Route::middleware(['installed', 'auth', 'active'])->group(function () {
     Route::get('/ordini/nuovo', WorkOrderCreate::class)->middleware('can:work_orders.create')->name('work-orders.create');
     Route::get('/ordini/impostazioni', MaintenanceSettings::class)->middleware('can:work_orders.settings')->name('work-orders.settings');
 
+    // Centro avvisi e preferenze
+    Route::get('/avvisi', NotificationsIndex::class)->name('notifications.index');
+    Route::get('/avvisi/preferenze', NotificationPreferences::class)->name('notifications.preferences');
+    Route::get('/avvisi/conteggio', [NotificationController::class, 'count'])->name('notifications.count');
+    Route::get('/impostazioni/avvisi', NotificationRules::class)->middleware('can:settings.manage')->name('settings.notifications');
+
     // Indicatori
     Route::get('/indicatori', KpiDashboard::class)->middleware('can:reports.view')->name('kpi');
+    Route::get('/indicatori/rapporto', [ReportController::class, 'monthly'])->middleware('can:reports.view')->name('kpi.report');
+
+    // Esportazioni CSV ed Excel con i filtri dell'elenco
+    Route::middleware('can:reports.export')->prefix('/esporta')->name('export.')->group(function () {
+        Route::get('/ordini.{format}', [ExportController::class, 'workOrders'])->whereIn('format', ['csv', 'xlsx'])->middleware('can:work_orders.view')->name('work-orders');
+        Route::get('/macchine.{format}', [ExportController::class, 'assets'])->whereIn('format', ['csv', 'xlsx'])->middleware('can:assets.view')->name('assets');
+        Route::get('/ricambi.{format}', [ExportController::class, 'parts'])->whereIn('format', ['csv', 'xlsx'])->middleware('can:inventory.view')->name('parts');
+        Route::get('/indicatori.{format}', [ExportController::class, 'kpi'])->whereIn('format', ['csv', 'xlsx'])->middleware('can:reports.view')->name('kpi');
+    });
 
     // Manutenzione preventiva
     Route::middleware('can:preventive.view')->group(function () {

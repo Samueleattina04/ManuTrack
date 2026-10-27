@@ -5,6 +5,9 @@
             <a href="{{ route('inventory.parts.create') }}" class="btn btn-primary"><x-icon name="plus" />{{ __('inventory.part.new') }}</a>
             <a href="{{ route('inventory.import') }}" class="btn btn-secondary"><x-icon name="upload" />{{ __('assets.import.button') }}</a>
         @endif
+        @can('reports.export')
+            <x-export-menu route="export.parts" :params="['q' => $search, 'scorta' => $stock, 'magazzino' => $warehouse, 'categoria' => $category, 'disattivati' => $inactive ? '1' : '']" />
+        @endcan
         <nav class="ml-auto flex flex-wrap gap-1" aria-label="{{ __('inventory.title') }}">
             <a href="{{ route('inventory.movements') }}" class="btn btn-ghost btn-sm"><x-icon name="history" class="!w-4 !h-4" />{{ __('inventory.movements.title') }}</a>
             <a href="{{ route('inventory.suppliers') }}" class="btn btn-ghost btn-sm"><x-icon name="truck" class="!w-4 !h-4" />{{ __('inventory.suppliers.title') }}</a>

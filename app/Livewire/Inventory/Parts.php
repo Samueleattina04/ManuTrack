@@ -4,6 +4,7 @@ namespace App\Livewire\Inventory;
 
 use App\Models\Part;
 use App\Models\Warehouse;
+use App\Support\Filters\PartFilters;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Url;
@@ -50,18 +51,17 @@ class Parts extends Component
         }
     }
 
+    public function filters(): PartFilters
+    {
+        return new PartFilters($this->search, $this->stock, $this->warehouse, $this->category, $this->inactive);
+    }
+
     /**
      * @return Builder<Part>
      */
     private function query(bool $withStock = true): Builder
     {
-        return Part::query()
-            ->where('is_active', ! $this->inactive)
-            ->search($this->search)
-            ->when($this->category !== '', fn (Builder $q) => $q->where('category', $this->category))
-            ->when(ctype_digit($this->warehouse), fn (Builder $q) => $q->whereHas('levels', fn (Builder $l) => $l->where('warehouse_id', (int) $this->warehouse)->where('quantity', '>', 0)))
-            ->when($withStock && $this->stock === 'sotto', fn (Builder $q) => $q->belowMinimum())
-            ->when($withStock && $this->stock === 'esauriti', fn (Builder $q) => $q->where('stock_total', '<=', 0));
+        return $this->filters()->query($withStock);
     }
 
     public function render(): View

@@ -94,8 +94,16 @@ self.addEventListener('push', (event) => {
 
     event.waitUntil((async () => {
         await self.registration.showNotification(title, options);
-        if (typeof data.count === 'number' && 'setAppBadge' in self.navigator) {
-            try { data.count > 0 ? await self.navigator.setAppBadge(data.count) : await self.navigator.clearAppBadge(); } catch (e) {}
+        // Contatore sull'icona dell'app: dal messaggio, altrimenti dagli avvisi non letti
+        if ('setAppBadge' in self.navigator) {
+            try {
+                let count = typeof data.count === 'number' ? data.count : null;
+                if (count === null) {
+                    const r = await fetch('/avvisi/conteggio', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                    if (r.ok) count = (await r.json()).unread;
+                }
+                if (typeof count === 'number') count > 0 ? await self.navigator.setAppBadge(count) : await self.navigator.clearAppBadge();
+            } catch (e) {}
         }
         const clients = await self.clients.matchAll({ type: 'window' });
         clients.forEach((c) => c.postMessage({ type: 'push', data }));
