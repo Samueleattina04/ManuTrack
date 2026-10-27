@@ -2,6 +2,7 @@
 
 namespace App\Actions\Maintenance;
 
+use App\Actions\Preventive\AdvancePlan;
 use App\Enums\WaitingReason;
 use App\Enums\WorkOrderStatus;
 use App\Models\DowntimeEvent;
@@ -94,6 +95,9 @@ class CorrectWorkOrderStatus
                 'note' => trim((string) $data['reason']),
                 'is_correction' => true,
             ]);
+
+            // Ordine di un piano portato a completato, chiuso o annullato: il piano avanza
+            app(AdvancePlan::class)->handle($order, $to);
 
             // Il lavoro non è in corso: nessun cronometro resta acceso
             if ($to !== WorkOrderStatus::InProgress) {

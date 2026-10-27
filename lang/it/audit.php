@@ -25,6 +25,7 @@ return [
         'requests' => 'Segnalazioni',
         'work_orders' => 'Ordini di lavoro',
         'inventory' => 'Magazzino',
+        'preventive' => 'Preventiva',
     ],
 
     'actions' => [
@@ -80,6 +81,12 @@ return [
             'accepted' => 'Segnalazione accettata',
             'rejected' => 'Segnalazione respinta',
             'duplicate' => 'Segnalazione segnata come duplicata',
+        ],
+        'preventive' => [
+            'plan_created' => 'Piano preventivo creato',
+            'plan_updated' => 'Piano preventivo modificato',
+            'plan_deleted' => 'Piano preventivo eliminato',
+            'generated' => 'Ordine preventivo generato',
         ],
         'inventory' => [
             'part_created' => 'Ricambio creato',

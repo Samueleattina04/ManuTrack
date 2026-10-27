@@ -50,8 +50,10 @@ class Audit
     public static function diff(Model $model): array
     {
         $out = [];
+        // Dopo il salvataggio getOriginal() contiene già i valori nuovi: i vecchi sono in getPrevious()
+        $previous = $model->getPrevious();
         foreach (Arr::except($model->getChanges(), ['updated_at', ...self::HIDDEN]) as $key => $new) {
-            $out[$key] = [$model->getOriginal($key), $new];
+            $out[$key] = [$previous[$key] ?? null, $new];
         }
 
         return $out;

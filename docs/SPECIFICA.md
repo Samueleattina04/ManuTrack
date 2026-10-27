@@ -141,6 +141,7 @@ Una sola voce di cron (`schedule:run` ogni minuto). Tutti i compiti girano nello
 | Segnale di vita (mostrato in Sistema) | ogni minuto |
 | Aggiornamento automatico (§3.3) | ogni minuto |
 | Coda: `queue:work --stop-when-empty --max-time=50`, saltata con `QUEUE_CONNECTION=sync` | ogni minuto, senza sovrapposizioni |
+| Ordini dei piani preventivi in scadenza (§36), senza sovrapposizioni | ogni 15 minuti |
 | Pulizia dei job falliti (30 giorni) e dei lotti (7 giorni) | ogni giorno alle 3:30 |
 
 ## 6. Interfaccia (fase 1)
@@ -198,6 +199,8 @@ Una sola voce di cron (`schedule:run` ogni minuto). Tutti i compiti girano nello
 | `manutrack:restore [file] [--force] [--no-safety]` | ripristino |
 | `manutrack:vapid [--force] [--show]` | chiavi per le notifiche push |
 | `manutrack:icons [--palette=] [--path=]` | icone dell'app dal logo |
+| `manutrack:foto-ottimizza [--prova] [--limite=]` | foto già salvate in WebP (§27) |
+| `manutrack:preventiva [--prova]` | genera subito gli ordini dei piani preventivi in scadenza (§36) |
 
 ---
 
@@ -597,6 +600,7 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
   - cronometro (uno solo acceso per persona: avviarne uno ferma quello su un altro ordine; sotto i 30 secondi non si conserva);
   - inserimento a mano (minuti e giorno);
   - si elimina il proprio tempo, oppure tutti con "Pianificare e assegnare".
+- **Scadenza:** una data senza ora vale fino alla fine di quel giorno: l'ordine risulta scaduto dal giorno dopo (dalla 0.7.0; prima lo era dalla mezzanotte del giorno stesso).
 - **Fermo macchina:** aperto dalla segnalazione o a mano, chiuso al completamento, orari correggibili. È la base di MTTR e MTBF (fase 9).
 - **Codici guasto:**
   - problema, causa e rimedio, scelti al completamento;
@@ -671,12 +675,14 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
   - segnalazioni da valutare, con le urgenti in cima;
   - "I miei ordini";
   - ricambi sotto scorta, per chi gestisce il magazzino (dalla 0.6.0);
+  - preventiva da fare (piani scaduti o in scadenza), per chi gestisce i piani (dalla 0.7.0);
   - macchine ferme.
 - **Scheda macchina:**
   - "Segnala un guasto";
   - **storico interventi** (ordini e segnalazioni aperte) con le ore di fermo degli ultimi 90 giorni;
   - "Nuovo ordine" per quella macchina;
-  - **ricambi della macchina** (distinta) con giacenza e stato, per chi vede il magazzino (dalla 0.6.0).
+  - **ricambi della macchina** (distinta) con giacenza e stato, per chi vede il magazzino (dalla 0.6.0);
+  - **piani preventivi** della macchina con la prossima scadenza e "Nuovo piano" (dalla 0.7.0).
 
 ## 33. Account dimostrativi (dalla 0.5.1)
 
@@ -776,4 +782,60 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
 - `scripts/release.sh` e `release.ps1` tolgono `database/seeders` e `database/factories` prima di Composer, così non finiscono nemmeno nell'autoload.
 - `scripts/release/package.php` si rifiuta di creare il pacchetto se trova seeder, factory, test, `.env`, un database SQLite, la password degli account di prova o i nomi dei seeder dimostrativi nel codice, o seeder nell'autoload. Lo verifica `tests/Feature/Setup/ReleasePackageTest.php`.
 - Restano nel pacchetto solo esempi di formato: le due righe del modello CSV scaricabile ("Esempio da cancellare") e gli esempi nei suggerimenti dei campi.
+
+## 36. Manutenzione preventiva (`/preventiva`, fase 7)
+
+### 36.1 Piani
+- Un piano appartiene a **una macchina** e descrive un intervento ripetuto: titolo, istruzioni, priorità, assegnatario, durata stimata, checklist (dai modelli delle impostazioni manutenzione), ricambi previsti.
+- **A tempo:** ogni N giorni, settimane, mesi o anni, con la data della prossima scadenza.
+- **A contatore:** ogni N unità di un contatore della stessa macchina (ore, cicli, colpi…), con la prossima soglia; la soglia proposta è il valore attuale più l'intervallo.
+- **Scadenze successive:**
+  - *date fisse*: il calendario non si sposta. Le date si contano sempre dalla data di partenza (31 gennaio mensile → 28/29 febbraio → 31 marzo); le soglie restano 500, 1.000, 1.500 h…;
+  - *dall'ultima esecuzione*: dal giorno di completamento, o dal valore del contatore al completamento.
+  - Un intervento fatto in ritardo non genera recuperi: la scadenza successiva è la prima dopo il completamento.
+- **Anticipo:** l'ordine nasce N giorni prima della scadenza (o quando al contatore manca meno di N alla soglia).
+- La prossima scadenza si corregge a mano dal modulo; per i piani a date fisse diventa il nuovo punto di partenza del calendario.
+- Un piano si **sospende** (non genera), si **copia** su un'altra macchina (i piani a contatore copiati restano sospesi finché non si sceglie il contatore) o si **elimina** (gli ordini già generati restano).
+- Stato del piano: in regola, in scadenza (dentro l'anticipo), scaduto, sospeso.
+
+### 36.2 Generazione degli ordini
+- Il cron, ogni 15 minuti, crea un ordine di lavoro **preventivo** per ogni piano attivo in scadenza; anche `php artisan manutrack:preventiva` (con `--prova` elenca soltanto).
+- Per i piani a contatore l'ordine nasce **subito** quando una lettura raggiunge la soglia meno l'anticipo, senza aspettare il cron.
+- **Al massimo un ordine aperto per piano.** La riga del piano è bloccata mentre si controlla e si crea l'ordine: due esecuzioni contemporanee ne creano uno solo (verificato con processi separati, `tests/Feature/Preventive/GenerationTest.php`).
+- L'ordine riceve titolo, istruzioni, priorità, checklist del piano e la **scadenza prevista** (per i contatori: la data stimata dal consumo medio degli ultimi 90 giorni; senza letture sufficienti, oggi + anticipo). "Creato da" mostra *Sistema (piano preventivo)*.
+- **Assegnatario** del piano avvisato come per ogni assegnazione (urgente se critico). Senza assegnatario, o se non può più eseguire ordini, si avvisa chi pianifica e assegna.
+- **"Genera ora"** dalla scheda del piano (chi gestisce i piani e può creare ordini): crea l'ordine anche prima dell'anticipo.
+- Nella sezione Ricambi dell'ordine compaiono per primi i **ricambi previsti** dal piano, con la quantità già proposta.
+
+### 36.3 Avanzamento
+- **Completato** (o portato a completato/chiuso con "Correggi stato"): il piano passa alla scadenza successiva, registra l'ultima esecuzione e torna libero di generare.
+- **Annullato:** l'intervento conta come *saltato*; la scadenza successiva si conta da quella prevista, mai prima di domani.
+- Riaprire o chiudere un ordine già completato non fa avanzare il piano una seconda volta.
+- **Contatore azzerato o sostituito:** le soglie dei piani mantengono quanto mancava (4.800 su 5.000 h, azzerato → nuova soglia 200).
+
+### 36.4 Calendario (`/preventiva/calendario`)
+- Mese per mese: ordini preventivi già generati (pieni; barrati quando conclusi, rossi se scaduti) e scadenze previste dei piani (tratteggiate; con l'icona del contatore quando sono stimate).
+- "Solo i miei": ordini assegnati a me e piani di cui sono assegnatario.
+- Sul telefono il mese diventa un elenco dei giorni con qualcosa in programma.
+
+### 36.5 Rispetto dei piani
+- Per gli ordini preventivi con scadenza prevista nel periodo (ultimi 12 mesi, fino a oggi):
+  - *in tempo*: completato entro la fine del giorno di scadenza;
+  - *in ritardo*: completato dopo;
+  - *saltato*: annullato;
+  - *scaduto aperto*: non completato e scadenza passata.
+- **Rispetto = in tempo / (in tempo + in ritardo + saltati + scaduti aperti).** In elenco per tutti i piani, nella scheda per il singolo piano, con l'esito di ogni intervento.
+
+### 36.6 Permessi
+
+| Permesso | Amministratore | Responsabile | Tecnico | Magazziniere | Richiedente | Osservatore |
+|---|---|---|---|---|---|---|
+| Vedere i piani preventivi (elenco, scheda, calendario) | ✓ | ✓ | ✓ | — | — | ✓ |
+| Creare e modificare i piani, ricambi previsti, copia, eliminazione, "Genera ora" | ✓ | ✓ | — | — | — | — |
+
+- Gli ordini generati seguono i permessi degli ordini di lavoro (§30.1).
+- Verificati dai test `tests/Feature/Preventive/PagesTest.php`, una riga per ruolo.
+
+## 37. Registro attività: modifiche prima e dopo (correzione nella 0.7.0)
+- Le modifiche registravano il valore nuovo sia come "prima" sia come "dopo". Ora il "prima" è il valore precedente al salvataggio (vale per macchine, ricambi, magazzini, fornitori, ubicazioni, categorie, profilo, ordini e piani).
 

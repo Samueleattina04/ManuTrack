@@ -187,7 +187,7 @@ In *Advanced Features › Cron Jobs* aggiungi **una** voce, ogni minuto (tutti i
 - Se sul server convivono più versioni di PHP, usa il percorso di PHP 8.3, ad esempio `/usr/local/php83/bin/php`. Il supporto dell'hosting sa indicartelo; in alternativa prova `php83`.
 - Questa voce fa tutto:
   - smaltisce la coda di email e notifiche (`queue:work --stop-when-empty`, poi si ferma);
-  - genera i piani preventivi;
+  - genera gli ordini dei piani preventivi in scadenza (ogni 15 minuti; a mano: `php artisan manutrack:preventiva`);
   - fa le pulizie;
   - applica gli aggiornamenti caricati.
 - Nessun processo resta attivo e non servono `exec` o `proc_open`.

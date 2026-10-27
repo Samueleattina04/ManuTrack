@@ -6,7 +6,9 @@ use App\Enums\Priority;
 use App\Enums\WaitingReason;
 use App\Enums\WorkOrderStatus;
 use App\Enums\WorkOrderType;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -25,6 +27,8 @@ use Illuminate\Support\Carbon;
  * @property string|null $description
  * @property int|null $asset_id
  * @property int|null $location_id
+ * @property int|null $maintenance_plan_id
+ * @property Carbon|null $plan_due_on
  * @property Priority $priority
  * @property WorkOrderStatus $status
  * @property WaitingReason|null $waiting_reason
@@ -49,6 +53,7 @@ use Illuminate\Support\Carbon;
  * @property-read Location|null $location
  * @property-read WorkRequest|null $request
  * @property-read User|null $creator
+ * @property-read MaintenancePlan|null $plan
  */
 class WorkOrder extends Model
 {
@@ -72,6 +77,7 @@ class WorkOrder extends Model
             'status' => WorkOrderStatus::class,
             'waiting_reason' => WaitingReason::class,
             'due_at' => 'datetime',
+            'plan_due_on' => 'date',
             'planned_start_at' => 'datetime',
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
@@ -79,6 +85,21 @@ class WorkOrder extends Model
             'external_cost' => 'decimal:2',
             'labor_rate' => 'decimal:2',
         ];
+    }
+
+    /**
+     * Una scadenza data come giorno ("2026-10-28") vale fino alla fine di quel giorno:
+     * l'ordine diventa scaduto dal giorno dopo, non dalla mezzanotte.
+     *
+     * @return Attribute<Carbon|null, mixed>
+     */
+    protected function dueAt(): Attribute
+    {
+        return Attribute::make(set: fn (mixed $value) => match (true) {
+            is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1 => $value.' 23:59:59',
+            $value instanceof DateTimeInterface => $this->fromDateTime($value),
+            default => $value,
+        });
     }
 
     protected static function booted(): void
@@ -104,6 +125,16 @@ class WorkOrder extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    /**
+     * Piano preventivo che ha generato l'ordine
+     *
+     * @return BelongsTo<MaintenancePlan, $this>
+     */
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(MaintenancePlan::class, 'maintenance_plan_id');
     }
 
     /** @return BelongsTo<User, $this> */

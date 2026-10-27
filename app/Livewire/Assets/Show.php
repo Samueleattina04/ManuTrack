@@ -263,6 +263,9 @@ class Show extends Component
             'orderHistory' => $user->can('work_orders.view')
                 ? $this->asset->workOrders()->with('assignees')->latest('id')->limit(8)->get()
                 : collect(),
+            // Piani preventivi della macchina
+            'plans' => $user->can('preventive.view') ? $this->asset->plans()->with(['meter', 'currentOrder'])->orderByDesc('is_active')->orderBy('next_due_on')->get() : null,
+            'canPlan' => $user->can('preventive.manage'),
             // Distinta ricambi (si modifica dalla scheda del ricambio)
             'bom' => $user->can('inventory.view') ? $this->asset->parts()->get() : null,
             'historyCount' => $user->can('work_orders.view') ? $this->asset->workOrders()->count() : 0,

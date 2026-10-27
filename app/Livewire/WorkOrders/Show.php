@@ -441,7 +441,7 @@ class Show extends Component
         $o = $this->workOrder->load([
             'asset.location', 'location', 'assignees', 'creator', 'request.user', 'request.attachments',
             'checklist.doneBy', 'timeEntries.user', 'attachments.user', 'comments.user', 'statusChanges.user',
-            'failureProblem', 'failureCause', 'failureRemedy',
+            'failureProblem', 'failureCause', 'failureRemedy', 'plan.meter',
         ]);
         $user = auth()->user();
 

@@ -32,7 +32,11 @@
             @endif
             @if($o->due_at)<dt class="text-muted">{{ __('maintenance.field.due_at') }}</dt><dd @class(['font-semibold text-ko' => $o->isOverdue()])>{{ $o->due_at->translatedFormat('j M Y') }}@if($o->isOverdue()) · {{ __('maintenance.order.overdue') }}@endif</dd>@endif
             @if($o->planned_start_at)<dt class="text-muted">{{ __('maintenance.field.planned_start_at') }}</dt><dd>{{ $o->planned_start_at->translatedFormat('j M Y, H:i') }}</dd>@endif
-            <dt class="text-muted">{{ __('maintenance.order.created_by') }}</dt><dd>{{ $o->creator?->name ?? '—' }} · {{ $o->created_at->translatedFormat('j M Y, H:i') }}</dd>
+            <dt class="text-muted">{{ __('maintenance.order.created_by') }}</dt><dd>{{ $o->creator?->name ?? ($o->maintenance_plan_id ? __('preventive.plan.system') : '—') }} · {{ $o->created_at->translatedFormat('j M Y, H:i') }}</dd>
+            @if($o->plan)
+                <dt class="text-muted">{{ __('preventive.plan.from_plan') }}</dt>
+                <dd>@can('preventive.view')<a href="{{ route('preventive.show', $o->plan) }}" class="underline">{{ $o->plan->title }}</a>@else{{ $o->plan->title }}@endcan · {{ $o->plan->frequencyLabel() }}@if($o->plan_due_on) · {{ __('preventive.field.planned_due') }} {{ $o->plan_due_on->translatedFormat('j M Y') }}@endif</dd>
+            @endif
             @if($o->request)
                 <dt class="text-muted">{{ __('maintenance.order.from_request') }}</dt>
                 <dd><a href="{{ route('requests.show', $o->request) }}" class="underline">{{ $o->request->number }}</a> · {{ $o->request->user?->name }}@if($o->request->machine_stopped) · <span class="text-ko">{{ __('maintenance.request.stopped') }}</span>@endif</dd>
@@ -300,7 +304,7 @@
                             @php $s = $e['item']; @endphp
                             <li class="flex items-start gap-2 text-sm text-fg-2">
                                 <x-icon :name="$s->to->icon()" class="mt-0.5 !w-4 !h-4 text-muted" />
-                                <span>@if($s->is_correction)<x-status tone="warn" icon="shield" class="mr-1">{{ __('maintenance.correction.badge') }}</x-status>@endif{!! __('maintenance.comments.status', ['name' => '<strong>'.e($s->user?->name ?? '—').'</strong>', 'status' => '<strong>'.e($s->to->label()).'</strong>']) !!}@if($s->note) · {{ $s->note }}@endif <span class="text-muted">· {{ $s->created_at->translatedFormat('j M H:i') }}</span></span>
+                                <span>@if($s->is_correction)<x-status tone="warn" icon="shield" class="mr-1">{{ __('maintenance.correction.badge') }}</x-status>@endif{!! __('maintenance.comments.status', ['name' => '<strong>'.e($s->user?->name ?? ($o->maintenance_plan_id ? __('preventive.plan.system_short') : '—')).'</strong>', 'status' => '<strong>'.e($s->to->label()).'</strong>']) !!}@if($s->note) · {{ $s->note }}@endif <span class="text-muted">· {{ $s->created_at->translatedFormat('j M H:i') }}</span></span>
                             </li>
                         @else
                             @php $c = $e['item']; @endphp

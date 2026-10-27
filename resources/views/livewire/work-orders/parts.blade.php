@@ -12,12 +12,12 @@
             @if(! $chosen)
                 <label for="op-search" class="field-label">{{ __('inventory.order.search') }}</label>
                 <input id="op-search" type="search" wire:model.live.debounce.250ms="search" class="input" placeholder="{{ __('inventory.part.search_placeholder') }}" autocomplete="off">
-                @if($fromBom && $suggestions->isNotEmpty())<p class="text-xs font-semibold uppercase tracking-wide text-muted">{{ __('inventory.order.from_bom') }}</p>@endif
+                @if($fromBom && $suggestions->isNotEmpty())<p class="text-xs font-semibold uppercase tracking-wide text-muted">{{ $planned->isNotEmpty() ? __('preventive.plan.planned_parts').' · '.__('inventory.order.from_bom') : __('inventory.order.from_bom') }}</p>@endif
                 <ul class="flex flex-col gap-1">
                     @foreach($suggestions as $s)
                         <li wire:key="sg-{{ $s->id }}">
                             <button type="button" wire:click="choose({{ $s->id }})" class="flex w-full items-center gap-3 rounded-[var(--radius-md)] border border-line bg-surface px-3 py-2.5 text-left hover:border-accent">
-                                <span class="min-w-0 flex-1"><span class="font-mono text-xs text-muted">{{ $s->code }}</span> <span class="font-medium">{{ $s->name }}</span></span>
+                                <span class="min-w-0 flex-1"><span class="font-mono text-xs text-muted">{{ $s->code }}</span> <span class="font-medium">{{ $s->name }}</span>@if($planned->has($s->id)) <span class="text-xs text-accent-fg">· {{ __('preventive.plan.from_plan') }} × {{ $q($planned[$s->id]) }}</span>@endif</span>
                                 <span @class(['num text-sm', 'text-ko' => (float) $s->stock_total <= 0, 'text-fg-2' => (float) $s->stock_total > 0])>{{ $q($s->stock_total) }} {{ $s->unit }}</span>
                             </button>
                         </li>

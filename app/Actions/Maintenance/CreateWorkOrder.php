@@ -42,9 +42,13 @@ class CreateWorkOrder
     }
 
     /**
+     * $actor è null quando l'ordine lo crea il sistema (piani preventivi).
+     * Il collegamento al piano non arriva mai dai dati del modulo.
+     *
      * @param  array<string, mixed>  $input
+     * @param  array{maintenance_plan_id?: int, plan_due_on?: string|null}  $plan
      */
-    public function handle(User $actor, array $input): WorkOrder
+    public function handle(?User $actor, array $input, array $plan = []): WorkOrder
     {
         $data = Validator::make($input, self::rules(), [], [
             'title' => __('maintenance.field.title'),
@@ -53,7 +57,7 @@ class CreateWorkOrder
             'due_at' => __('maintenance.field.due_at'),
         ])->validate();
 
-        $order = DB::transaction(function () use ($actor, $data) {
+        $order = DB::transaction(function () use ($actor, $data, $plan) {
             $order = new WorkOrder([
                 'type' => $data['type'],
                 'title' => trim((string) $data['title']),
@@ -64,9 +68,10 @@ class CreateWorkOrder
                 'due_at' => $data['due_at'] ?? null,
                 'planned_start_at' => $data['planned_start_at'] ?? null,
             ]);
-            $order->created_by = $actor->id;
+            $order->created_by = $actor?->id;
+            $order->forceFill(['maintenance_plan_id' => $plan['maintenance_plan_id'] ?? null, 'plan_due_on' => $plan['plan_due_on'] ?? null]);
             $order->save();
-            $order->statusChanges()->create(['from' => null, 'to' => WorkOrderStatus::Open, 'user_id' => $actor->id]);
+            $order->statusChanges()->create(['from' => null, 'to' => WorkOrderStatus::Open, 'user_id' => $actor?->id]);
 
             if (! empty($data['checklist_template_id'])) {
                 $this->copyChecklist($order, (int) $data['checklist_template_id']);

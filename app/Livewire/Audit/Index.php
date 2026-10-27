@@ -49,7 +49,7 @@ class Index extends Component
 
         return view('livewire.audit.index', [
             'logs' => $logs,
-            'groups' => ['auth', 'users', 'roles', 'settings', 'system', 'profile', 'assets', 'requests', 'work_orders', 'inventory', 'push'],
+            'groups' => ['auth', 'users', 'roles', 'settings', 'system', 'profile', 'assets', 'requests', 'work_orders', 'inventory', 'preventive', 'push'],
         ])->title(__('audit.title'))->layoutData(['heading' => __('audit.title')]);
     }
 }

@@ -48,7 +48,7 @@ foreach ($forbidden as $f) {
 
 // Nessuna traccia dei dati dimostrativi nel codice dell'app: la password
 // degli account di prova e i nomi dei seeder
-$demoMarkers = ['manutrack-demo', 'DemoAssetsSeeder', 'DemoMaintenanceSeeder', 'DemoInventorySeeder'];
+$demoMarkers = ['manutrack-demo', 'DemoAssetsSeeder', 'DemoMaintenanceSeeder', 'DemoInventorySeeder', 'DemoPreventiveSeeder'];
 foreach (['app', 'bootstrap', 'config', 'database', 'lang', 'public', 'resources', 'routes'] as $dir) {
     if (! is_dir($build.'/'.$dir)) {
         continue;

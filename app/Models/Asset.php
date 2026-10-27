@@ -129,6 +129,12 @@ class Asset extends Model
         return $this->hasMany(WorkRequest::class);
     }
 
+    /** @return HasMany<MaintenancePlan, $this> */
+    public function plans(): HasMany
+    {
+        return $this->hasMany(MaintenancePlan::class);
+    }
+
     /**
      * Distinta ricambi della macchina
      *

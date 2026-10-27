@@ -2,7 +2,7 @@
 
 Elenco delle librerie usate da ManuTrack e delle loro licenze, con la verifica di compatibilità per un **uso commerciale** (software installato presso clienti e venduto come servizio).
 
-Aggiornato alla versione **0.6.0**. Fase 4: aggiunta `openspout/openspout` (MIT) per leggere i file Excel. Fase 5: aggiunta `jsqr` (Apache-2.0) per leggere i codici QR sui telefoni senza lettore nativo (iPhone). Fase 6: nessuna libreria nuova (il magazzino usa solo Laravel e openspout, già presenti). Il service worker è generato da Laravel, quindi `vite-plugin-pwa` e Workbox non servono. Le fasi successive aggiungono le librerie previste in `docs/PROPOSTA.md`, ciascuna verificata prima dell'uso.
+Aggiornato alla versione **0.7.0**. Fase 4: aggiunta `openspout/openspout` (MIT) per leggere i file Excel. Fase 5: aggiunta `jsqr` (Apache-2.0) per leggere i codici QR sui telefoni senza lettore nativo (iPhone). Fasi 6 e 7: nessuna libreria nuova. Il service worker è generato da Laravel, quindi `vite-plugin-pwa` e Workbox non servono. Le fasi successive aggiungono le librerie previste in `docs/PROPOSTA.md`, ciascuna verificata prima dell'uso.
 
 ## In sintesi
 

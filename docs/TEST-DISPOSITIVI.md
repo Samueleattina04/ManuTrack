@@ -418,3 +418,31 @@ Prima prepara il magazzino dal PC, con il magazziniere:
 ### 11.4 Permessi
 - [ ] Il tecnico aprendo `/magazzino/riordino` o `/magazzino/importa` riceve "Accesso negato".
 - [ ] Il richiedente non vede la voce "Magazzino".
+
+## 12. Fase 7: manutenzione preventiva
+
+Servono:
+- un **responsabile** con l'app installata e le notifiche attive (paragrafi 4 e 5);
+- un **tecnico** con il telefono da provare, anche lui con le notifiche attive.
+
+### 12.1 Piano a tempo (responsabile, dal PC)
+- [ ] *Preventiva › Nuovo piano*: macchina a scelta, "Controllo settimanale", **A tempo**, ogni **1 settimana**, prossima scadenza **dopodomani**, anticipo **3** giorni, assegnatario il tecnico.
+- [ ] Entro 15 minuti (o subito con `php artisan manutrack:preventiva` se hai SSH) nasce l'ordine preventivo: la scheda del piano mostra "Ordine aperto" con il numero.
+- [ ] Il **telefono del tecnico** riceve "Ordine … assegnato a te" (passa dalla coda del cron).
+- [ ] Nell'ordine: "Creato da: Sistema (piano preventivo)", "Dal piano" con la scadenza prevista; nello storico compare "Sistema → Aperto".
+
+### 12.2 Esecuzione dal telefono (tecnico)
+- [ ] Apri la notifica › **Inizia** › completa la checklist › **Completa**.
+- [ ] Nella scheda del piano la prossima scadenza è avanzata di una settimana e "Interventi" mostra l'ordine con **In tempo**.
+- [ ] *Preventiva › Calendario* sul telefono: compare l'elenco dei giorni del mese con l'intervento fatto (barrato) e le prossime scadenze (tratteggiate).
+
+### 12.3 Piano a contatore
+- [ ] Su una macchina con un contatore (ore di lavoro): nuovo piano **A contatore**, ogni **100**, la soglia proposta è il valore attuale + 100; anticipo **10**.
+- [ ] Dal telefono, nella scheda macchina, registra una lettura che supera la soglia meno 10: l'ordine nasce **subito**, senza aspettare il cron.
+- [ ] Se aggiungi ricambi previsti al piano, in *Ricambi › Preleva ricambio* dell'ordine compaiono per primi con la quantità già scritta.
+
+### 12.4 Rispetto dei piani e permessi
+- [ ] Annulla un ordine preventivo (con motivo): nel piano risulta **Saltato** e la scadenza va avanti.
+- [ ] In *Preventiva* la percentuale di rispetto cambia di conseguenza; in panoramica il responsabile vede "Preventiva da fare" se ci sono piani scaduti.
+- [ ] Il tecnico vede elenco, schede e calendario ma non "Nuovo piano", "Modifica" né "Genera ora"; aprendo `/preventiva/piani/nuovo` riceve "Accesso negato".
+- [ ] Il richiedente e il magazziniere non vedono la voce "Preventiva".

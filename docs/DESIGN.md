@@ -166,6 +166,13 @@ I numeri in colonna usano `.num` (`tabular-nums`). Le etichette in maiuscolo (`.
   - checklist con caselle da 24 px e barra di avanzamento verde;
   - cronometro con il tempo che scorre nel pulsante "Ferma".
 
+## Manutenzione preventiva
+
+- **Stato del piano** sempre con icona e testo: "In regola" (verde), "In scadenza" (ambra, orologio), "Scaduto" (rosso, triangolo), "Sospeso" (grigio, pausa).
+- **Rispetto dei piani:** percentuale in un anello colorato (verde da 90%, ambra da 70%, rosso sotto), con i quattro numeri accanto; mai solo il colore.
+- **Tipo di piano** scelto con due schede grandi (A tempo / A contatore) con icona calendario o contachilometri; le opzioni cambiano subito.
+- **Calendario:** griglia del mese su PC, settimana da lunedì, oggi cerchiato nell'accento. Ordini generati pieni (barrati quando conclusi, rossi se scaduti); scadenze previste tratteggiate; stimate con l'icona del contatore. Sul telefono diventa un elenco per giorno, con schede da toccare.
+
 ## Magazzino
 
 - **Stato della scorta** sempre con icona e testo: "Disponibile" (verde, spunta), "Sotto scorta" (ambra, triangolo), "Esaurito" (rosso, croce). Le stesse pastiglie fanno da filtro nell'elenco, con i conteggi.

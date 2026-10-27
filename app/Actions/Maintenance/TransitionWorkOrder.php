@@ -3,6 +3,7 @@
 namespace App\Actions\Maintenance;
 
 use App\Actions\Assets\ChangeAssetStatus;
+use App\Actions\Preventive\AdvancePlan;
 use App\Enums\AssetStatus;
 use App\Enums\WaitingReason;
 use App\Enums\WorkOrderStatus;
@@ -93,6 +94,9 @@ class TransitionWorkOrder
                 'user_id' => $actor->id,
                 'note' => $data['note'] ?? ($to === WorkOrderStatus::Waiting ? WaitingReason::from($data['waiting_reason'])->label() : null),
             ]);
+
+            // Piano preventivo: al completamento o all'annullamento passa alla scadenza successiva
+            app(AdvancePlan::class)->handle($order, $to);
 
             // Cronometri: fermi quando il lavoro si interrompe
             if (in_array($to, [WorkOrderStatus::Waiting, WorkOrderStatus::Completed, WorkOrderStatus::Cancelled], true)) {

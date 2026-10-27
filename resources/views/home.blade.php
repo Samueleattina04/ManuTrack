@@ -82,6 +82,24 @@
             </section>
         @endif
 
+        @if($duePlans !== null && $duePlans->isNotEmpty())
+            <section class="card overflow-hidden" aria-labelledby="home-plans">
+                <div class="flex items-center gap-2 border-b border-line-soft px-4 py-3">
+                    <h2 id="home-plans" class="flex-1 text-base font-bold">{{ __('app.home.due_plans') }} <span class="font-normal text-muted">{{ $duePlans->count() }}</span></h2>
+                    <a href="{{ route('preventive.index', ['stato' => 'overdue']) }}" class="btn btn-ghost btn-sm shrink-0">{{ __('preventive.title') }}<x-icon name="chevron-right" class="!w-4 !h-4" /></a>
+                </div>
+                <ul>
+                    @foreach($duePlans->take(6) as $r)
+                        @php $pl = $r['plan']; @endphp
+                        <li class="border-b border-line-soft last:border-0"><a href="{{ $pl->hasOpenOrder() ? route('work-orders.show', $pl->currentOrder) : route('preventive.show', $pl) }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2">
+                            <span class="min-w-0 flex-1"><span class="block truncate font-medium">{{ $pl->title }}</span><span class="block truncate text-xs text-muted"><span class="font-mono">{{ $pl->asset->code }}</span> · @if($pl->isTime()){{ $pl->next_due_on?->translatedFormat('j M') }}@else{{ \App\Models\Part::formatQty($pl->next_meter_due) }} {{ $pl->meter->unit ?? '' }}@endif @if($pl->hasOpenOrder())· {{ $pl->currentOrder->number }}@endif</span></span>
+                            <x-plan-state :state="$r['state']" />
+                        </a></li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
         @if($lowStock !== null && ($lowStock->isNotEmpty() || ! auth()->user()->can('work_orders.execute')))
             <section class="card overflow-hidden" aria-labelledby="home-stock">
                 <div class="flex items-center gap-2 border-b border-line-soft px-4 py-3">

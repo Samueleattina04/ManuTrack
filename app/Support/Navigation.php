@@ -22,7 +22,7 @@ class Navigation
             ['requests', 'alert-triangle', 'requests.index', 'g e', 'segnalazioni guasti richieste', null],
             ['assets', 'factory', 'assets.index', 'g m', 'macchine impianti ubicazioni categorie qr etichette contatori', 'assets.view'],
             ['plant', 'cube', null, null, 'stabilimento 3d gemello', 'assets.view'],
-            ['preventive', 'calendar', null, 'g p', 'piani calendario', 'preventive.view'],
+            ['preventive', 'calendar', 'preventive.index', 'g p', 'preventiva piani calendario scadenze rispetto contatore', 'preventive.view'],
             ['inventory', 'box', 'inventory.parts.index', 'g r', 'ricambi magazzino fornitori movimenti riordino scorta', 'inventory.view'],
             ['notifications', 'bell', null, 'g n', 'avvisi', null],
             ['app', 'smartphone', 'pwa.install', null, 'app installa telefono notifiche push diagnostica', null],

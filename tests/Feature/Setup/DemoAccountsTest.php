@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Asset;
+use App\Models\MaintenancePlan;
 use App\Models\Part;
 use App\Models\User;
 use App\Models\WorkOrder;
@@ -8,6 +9,7 @@ use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\DemoAssetsSeeder;
 use Database\Seeders\DemoInventorySeeder;
 use Database\Seeders\DemoMaintenanceSeeder;
+use Database\Seeders\DemoPreventiveSeeder;
 
 /** Account dimostrativi creati dal seeder di sviluppo */
 const DEMO_EMAILS = ['operatore@example.com', 'responsabile@example.com', 'tecnico1@example.com', 'tecnico2@example.com', 'magazzino@example.com', 'admin@example.com'];
@@ -52,6 +54,7 @@ it('i seeder dimostrativi non creano nulla in produzione', function () {
     app(DemoAssetsSeeder::class)->run();
     app(DemoMaintenanceSeeder::class)->run();
     app(DemoInventorySeeder::class)->run();
+    app(DemoPreventiveSeeder::class)->run();
     app(DatabaseSeeder::class)->run();
 
     expect(User::query()->whereIn('email', DEMO_EMAILS)->exists())->toBeFalse()
@@ -62,7 +65,8 @@ it('i seeder dimostrativi non creano nulla in produzione', function () {
 it('in sviluppo il seeder crea gli account dimostrativi', function () {
     $this->artisan('migrate', ['--seed' => true, '--force' => true])->assertSuccessful();
     expect(User::query()->whereIn('email', DEMO_EMAILS)->count())->toBe(6)
-        ->and(Part::query()->count())->toBeGreaterThan(0);
+        ->and(Part::query()->count())->toBeGreaterThan(0)
+        ->and(MaintenancePlan::query()->count())->toBeGreaterThan(0);
 });
 
 it('la pagina Sistema avvisa se in produzione ci sono account @example.com', function () {

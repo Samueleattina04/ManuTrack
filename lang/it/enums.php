@@ -38,6 +38,20 @@ return [
         'preventivo' => 'Preventivo',
         'miglioramento' => 'Miglioramento',
     ],
+    'plan_trigger' => [
+        'tempo' => 'A tempo',
+        'contatore' => 'A contatore',
+    ],
+    'plan_mode' => [
+        'fisso' => 'Date fisse',
+        'ultima' => 'Dall\'ultima esecuzione',
+    ],
+    'interval_unit' => [
+        'giorni' => 'giorno|giorni',
+        'settimane' => 'settimana|settimane',
+        'mesi' => 'mese|mesi',
+        'anni' => 'anno|anni',
+    ],
     'waiting_reason' => [
         'ricambi' => 'Ricambi',
         'fornitore' => 'Fornitore esterno',

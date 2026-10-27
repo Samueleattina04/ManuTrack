@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Preventive\GeneratePlanOrders;
 use App\Support\Setup\SystemStatus;
 use App\Support\Update\Updater;
 use Illuminate\Support\Facades\Artisan;
@@ -42,6 +43,11 @@ Schedule::call(function (): void {
         '--sleep' => 1,
     ]);
 })->everyMinute()->name('manutrack:queue')->withoutOverlapping(10);
+
+// Manutenzione preventiva: ordini dei piani in scadenza
+Schedule::call(function (): void {
+    app(GeneratePlanOrders::class)->run();
+})->everyFifteenMinutes()->name('manutrack:preventive')->withoutOverlapping(30);
 
 // Pulizie periodiche
 Schedule::call(function (): void {

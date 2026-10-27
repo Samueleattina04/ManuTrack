@@ -64,6 +64,11 @@ class Parts extends Component
         abort_unless($this->canMove(), 403);
         $part = Part::query()->where('is_active', true)->findOrFail($partId);
         $this->partId = $part->id;
+        // Dal piano preventivo arriva anche la quantità prevista
+        $planned = $this->workOrder->maintenance_plan_id
+            ? $this->workOrder->plan?->parts()->whereKey($part->id)->first()?->getRelationValue('pivot')?->getAttribute('quantity')
+            : null;
+        $this->quantity = $planned !== null ? Part::formatQty($planned) : '1';
         // Il magazzino con più pezzi disponibili
         $this->warehouseId = (string) (StockLevel::query()->where('part_id', $part->id)->where('quantity', '>', 0)
             ->whereHas('warehouse', fn ($q) => $q->where('is_active', true))
@@ -151,14 +156,19 @@ class Parts extends Component
                     ->whereHas('warehouse', fn ($q) => $q->where('is_active', true))->get();
             } elseif (trim($this->search) !== '') {
                 $suggestions = Part::query()->where('is_active', true)->search($this->search)->orderBy('code')->limit(8)->get();
-            } elseif ($this->workOrder->asset_id) {
-                // Senza ricerca: la distinta ricambi della macchina
-                $suggestions = Part::query()->where('is_active', true)
-                    ->whereHas('assets', fn ($q) => $q->whereKey($this->workOrder->asset_id))->orderBy('code')->get();
+            } else {
+                // Senza ricerca: prima i ricambi previsti dal piano preventivo, poi la distinta della macchina
+                $planParts = $this->workOrder->plan ? $this->workOrder->plan->parts()->where('is_active', true)->get() : collect();
+                $bom = $this->workOrder->asset_id
+                    ? Part::query()->where('is_active', true)->whereHas('assets', fn ($q) => $q->whereKey($this->workOrder->asset_id))->orderBy('code')->get()
+                    : collect();
+                $suggestions = $planParts->concat($bom->whereNotIn('id', $planParts->pluck('id')))->values();
+                $plannedIds = $planParts->pluck('pivot.quantity', 'id');
             }
         }
 
         return view('livewire.work-orders.parts', [
+            'planned' => $plannedIds ?? collect(),
             'used' => $used,
             'canMove' => $this->canMove(),
             'canCosts' => $user->can('viewCosts', $this->workOrder),

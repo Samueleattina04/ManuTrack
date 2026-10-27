@@ -3,6 +3,35 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.7.0] - Fase 7: manutenzione preventiva
+
+### Aggiunto
+- **Piani preventivi** (`/preventiva`):
+  - a tempo (ogni N giorni, settimane, mesi, anni) o a contatore (ogni N ore, cicli…);
+  - scadenze a date fisse (senza slittamenti di fine mese) o dall'ultima esecuzione;
+  - anticipo in giorni o in valore del contatore;
+  - assegnatario, priorità, checklist, durata stimata, ricambi previsti;
+  - sospensione, copia su un'altra macchina, eliminazione.
+- **Generazione automatica** degli ordini di lavoro preventivi:
+  - dal cron ogni 15 minuti, subito dopo una lettura del contatore, o con "Genera ora";
+  - al massimo un ordine aperto per piano, anche con esecuzioni contemporanee (riga del piano bloccata; test con processi separati);
+  - avviso all'assegnatario, oppure a chi pianifica se il piano non ha assegnatario;
+  - comando `php artisan manutrack:preventiva` (con `--prova`).
+- **Avanzamento:** al completamento la scadenza successiva; un ordine annullato conta come saltato; un contatore azzerato mantiene quanto mancava alla soglia.
+- **Calendario** mensile con ordini generati e scadenze previste (stimate dal consumo medio per i contatori); elenco per giorno sul telefono; "Solo i miei".
+- **Rispetto dei piani** negli ultimi 12 mesi: in tempo, in ritardo, saltati, scaduti aperti, percentuale; anche per singolo piano.
+- Piani nella scheda macchina, "Dal piano" nella scheda dell'ordine, ricambi previsti proposti per primi nel prelievo, "Preventiva da fare" in panoramica.
+- Area "Preventiva" nel registro attività; scorciatoia `G P`.
+- Test: calcolo delle scadenze (fine mese, anni bisestili, ritardi), generazione e avanzamento, concorrenza, rispetto dei piani, permessi per ruolo, pagine.
+- Piani dimostrativi inventati, creati solo dal seeder di sviluppo.
+
+### Modificato
+- Una scadenza indicata come giorno vale fino alla fine di quel giorno: l'ordine risulta scaduto dal giorno dopo.
+- Creazione e assegnazione degli ordini accettano il "sistema" come autore (ordini nati dai piani).
+
+### Corretto
+- Registro attività: le modifiche ora registrano il valore precedente; prima "prima" e "dopo" erano uguali.
+
 ## [0.6.1] - Verifiche dopo la fase 6
 
 ### Aggiunto

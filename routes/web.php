@@ -32,6 +32,10 @@ use App\Livewire\Inventory\Reorder as PartsReorder;
 use App\Livewire\Inventory\Suppliers;
 use App\Livewire\Inventory\Warehouses;
 use App\Livewire\Maintenance\Settings as MaintenanceSettings;
+use App\Livewire\Preventive\Calendar as PreventiveCalendar;
+use App\Livewire\Preventive\Form as PlanForm;
+use App\Livewire\Preventive\Index as PreventiveIndex;
+use App\Livewire\Preventive\Show as PlanShow;
 use App\Livewire\Profile;
 use App\Livewire\Requests\Index as RequestsIndex;
 use App\Livewire\Requests\Show as RequestShow;
@@ -133,6 +137,17 @@ Route::middleware(['installed', 'auth', 'active'])->group(function () {
     });
     Route::get('/ordini/nuovo', WorkOrderCreate::class)->middleware('can:work_orders.create')->name('work-orders.create');
     Route::get('/ordini/impostazioni', MaintenanceSettings::class)->middleware('can:work_orders.settings')->name('work-orders.settings');
+
+    // Manutenzione preventiva
+    Route::middleware('can:preventive.view')->group(function () {
+        Route::get('/preventiva', PreventiveIndex::class)->name('preventive.index');
+        Route::get('/preventiva/calendario', PreventiveCalendar::class)->name('preventive.calendar');
+        Route::get('/preventiva/piani/{plan}', PlanShow::class)->whereNumber('plan')->name('preventive.show');
+    });
+    Route::middleware('can:preventive.manage')->group(function () {
+        Route::get('/preventiva/piani/nuovo', PlanForm::class)->name('preventive.create');
+        Route::get('/preventiva/piani/{plan}/modifica', PlanForm::class)->whereNumber('plan')->name('preventive.edit');
+    });
 
     // Magazzino ricambi
     Route::middleware('can:inventory.view')->group(function () {

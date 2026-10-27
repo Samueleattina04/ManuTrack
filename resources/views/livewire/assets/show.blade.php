@@ -268,6 +268,29 @@
                 @if($can['attach'])<p class="border-t border-line-soft px-4 py-2 text-xs text-muted">{{ __('assets.files.limits', ['max' => $maxMb, 'format' => strtoupper($photoFormat === 'none' ? 'originale' : $photoFormat)]) }}</p>@endif
             </section>
 
+            {{-- Piani preventivi --}}
+            @if($plans !== null)
+                <section class="card overflow-hidden" aria-labelledby="s-plans">
+                    <div class="flex items-center gap-2 border-b border-line-soft px-4 py-3">
+                        <h2 id="s-plans" class="flex-1 text-base font-bold">{{ __('preventive.plan.for_asset') }} <span class="font-normal text-muted">{{ $plans->count() }}</span></h2>
+                        @if($canPlan)<a href="{{ route('preventive.create', ['macchina' => $asset->id]) }}" class="btn btn-ghost btn-sm shrink-0"><x-icon name="plus" class="!w-4 !h-4" />{{ __('preventive.plan.new') }}</a>@endif
+                    </div>
+                    <ul>
+                        @forelse($plans as $pl)
+                            <li class="border-b border-line-soft last:border-0" wire:key="pl-{{ $pl->id }}">
+                                <a href="{{ route('preventive.show', $pl) }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2">
+                                    <x-icon :name="$pl->trigger->icon()" class="!w-5 !h-5 text-muted" />
+                                    <span class="min-w-0 flex-1"><span class="block truncate font-medium">{{ $pl->title }}</span><span class="block text-xs text-muted">{{ $pl->frequencyLabel() }} · @if($pl->isTime()){{ $pl->next_due_on?->translatedFormat('j M Y') }}@else{{ \App\Models\Part::formatQty($pl->next_meter_due) }} {{ $pl->meter->unit ?? '' }}@endif</span></span>
+                                    <x-plan-state :state="$pl->dueState()" />
+                                </a>
+                            </li>
+                        @empty
+                            <li class="px-4 py-3 text-sm text-muted">{{ __('preventive.plan.asset_empty') }}</li>
+                        @endforelse
+                    </ul>
+                </section>
+            @endif
+
             {{-- Distinta ricambi --}}
             @if($bom !== null)
                 <section class="card overflow-hidden" aria-labelledby="s-bom">

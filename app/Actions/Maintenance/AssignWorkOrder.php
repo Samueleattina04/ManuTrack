@@ -21,7 +21,7 @@ class AssignWorkOrder
     /**
      * @param  list<int>  $userIds
      */
-    public function handle(WorkOrder $order, array $userIds, User $actor): void
+    public function handle(WorkOrder $order, array $userIds, ?User $actor): void
     {
         if (! $order->status->isActive()) {
             throw ValidationException::withMessages(['assignees' => __('maintenance.errors.not_active')]);
@@ -42,7 +42,7 @@ class AssignWorkOrder
 
             if ($order->status === WorkOrderStatus::Open && $users->isNotEmpty()) {
                 $order->forceFill(['status' => WorkOrderStatus::Planned])->save();
-                $order->statusChanges()->create(['from' => WorkOrderStatus::Open, 'to' => WorkOrderStatus::Planned, 'user_id' => $actor->id]);
+                $order->statusChanges()->create(['from' => WorkOrderStatus::Open, 'to' => WorkOrderStatus::Planned, 'user_id' => $actor?->id]);
             }
         });
 

@@ -2,12 +2,15 @@
 
 namespace App\Actions\Assets;
 
+use App\Actions\Preventive\GeneratePlanOrders;
+use App\Models\MaintenancePlan;
 use App\Models\Meter;
 use App\Models\MeterReading;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 /**
  * Registra una lettura di un contatore.
@@ -27,7 +30,7 @@ class RecordMeterReading
             throw ValidationException::withMessages(['value' => __('assets.meters.future')]);
         }
 
-        return DB::transaction(function () use ($meter, $value, $user, $readAt, $reset, $note, $source) {
+        $reading = DB::transaction(function () use ($meter, $value, $user, $readAt, $reset, $note, $source) {
             /** @var Meter $meter */
             $meter = Meter::query()->lockForUpdate()->findOrFail($meter->id);
 
@@ -52,11 +55,32 @@ class RecordMeterReading
             ]);
 
             if ($meter->last_read_at === null || ! $readAt->isBefore($meter->last_read_at)) {
+                // Contatore sostituito o azzerato: le soglie dei piani ripartono dal nuovo valore
+                if ($reset) {
+                    $this->rebasePlans($meter, (float) $meter->current_value, $value);
+                }
                 $meter->forceFill(['current_value' => $value, 'last_read_at' => $readAt])->save();
             }
 
             return $reading;
         });
+
+        // Piani a contatore arrivati alla soglia: l'ordine nasce subito, senza aspettare il cron
+        // (un problema nella generazione non deve far perdere la lettura, già salvata)
+        try {
+            app(GeneratePlanOrders::class)->forMeter($meter->refresh());
+        } catch (Throwable $e) {
+            report($e);
+        }
+
+        return $reading;
+    }
+
+    /** Mantiene quanto mancava alla soglia: 4.800 su 5.000 h, azzerato a 0 → nuova soglia 200 */
+    private function rebasePlans(Meter $meter, float $old, float $new): void
+    {
+        MaintenancePlan::query()->where('meter_id', $meter->id)->whereNotNull('next_meter_due')->lockForUpdate()->get()
+            ->each(fn (MaintenancePlan $p) => $p->forceFill(['next_meter_due' => round($new + max(0, (float) $p->next_meter_due - $old), 2)])->save());
     }
 
     public static function format(float $value): string

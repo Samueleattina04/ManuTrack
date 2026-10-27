@@ -6,6 +6,7 @@ use App\Enums\AssetStatus;
 use App\Enums\RequestStatus;
 use App\Enums\WorkOrderStatus;
 use App\Models\Asset;
+use App\Models\MaintenancePlan;
 use App\Models\Part;
 use App\Models\WorkOrder;
 use App\Models\WorkRequest;
@@ -38,6 +39,14 @@ class HomeController extends Controller
             // I miei ordini ancora da fare
             'myOrders' => $request->user()->can('work_orders.execute')
                 ? WorkOrder::query()->assignedTo($request->user())->whereIn('status', array_map(fn ($s) => $s->value, WorkOrderStatus::active()))->with('asset')->byUrgency()->limit(6)->get()
+                : null,
+            // Preventiva: piani scaduti o in scadenza, per chi la gestisce
+            'duePlans' => $request->user()->can('preventive.manage')
+                ? MaintenancePlan::query()->active()->with(['asset', 'meter', 'currentOrder'])->get()
+                    ->map(fn (MaintenancePlan $p) => ['plan' => $p, 'state' => $p->dueState()])
+                    ->filter(fn ($r) => in_array($r['state'], ['scaduto', 'in_scadenza'], true))
+                    ->sortBy(fn ($r) => [$r['state'] === 'scaduto' ? 0 : 1, $r['plan']->next_due_on?->getTimestamp() ?? PHP_INT_MAX])
+                    ->values()
                 : null,
             // Per il magazziniere: ricambi da riordinare, prima gli esauriti
             'lowStock' => $request->user()->can('inventory.manage')

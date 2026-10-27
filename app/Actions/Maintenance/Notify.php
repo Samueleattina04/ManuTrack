@@ -57,7 +57,7 @@ class Notify
     /**
      * @param  Collection<int, User>  $users  persone appena aggiunte all'ordine
      */
-    public function assigned(WorkOrder $order, Collection $users, User $actor): void
+    public function assigned(WorkOrder $order, Collection $users, ?User $actor): void
     {
         $critical = $order->priority->value === 'critica';
         $this->push->send($this->without($users, $actor), new PushMessage(
@@ -93,8 +93,8 @@ class Notify
      * @param  Collection<int, User>  $users
      * @return Collection<int, User>
      */
-    private function without(Collection $users, User $actor): Collection
+    private function without(Collection $users, ?User $actor): Collection
     {
-        return $users->reject(fn (User $u) => $u->id === $actor->id)->values();
+        return $users->reject(fn (User $u) => $u->id === $actor?->id)->values();
     }
 }
