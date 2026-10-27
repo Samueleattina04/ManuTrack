@@ -15,6 +15,7 @@ use App\Support\Audit\Audit;
 use App\Support\Numbers;
 use App\Support\Push\PushDispatcher;
 use App\Support\Push\PushMessage;
+use Closure;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -54,27 +55,37 @@ class Stock
     public function issue(Part $part, Warehouse $warehouse, mixed $quantity, User $user, ?WorkOrder $order = null, ?string $note = null): StockMovement
     {
         $qty = $this->positive($quantity);
-        if ($order && ! ($order->status->isActive() || $order->status === WorkOrderStatus::Completed)) {
-            throw ValidationException::withMessages(['work_order' => __('inventory.errors.order_closed')]);
-        }
+        // Lo stato dell'ordine si rilegge dentro la transazione, a righe bloccate
+        $guard = $order ? function () use ($order): void {
+            $status = WorkOrder::query()->whereKey($order->id)->value('status');
+            $status = $status instanceof WorkOrderStatus ? $status : WorkOrderStatus::tryFrom((string) $status);
+            if (! $status || ! ($status->isActive() || $status === WorkOrderStatus::Completed)) {
+                throw ValidationException::withMessages(['work_order' => __('inventory.errors.order_closed')]);
+            }
+        } : null;
 
-        return $this->move($part, $warehouse, MovementType::Issue, -$qty, $user, ['work_order_id' => $order?->id, 'note' => $note]);
+        return $this->move($part, $warehouse, MovementType::Issue, -$qty, $user, ['work_order_id' => $order?->id, 'note' => $note], guard: $guard);
     }
 
     /** Reso a magazzino di un ricambio prelevato per un ordine e non usato */
     public function giveBack(Part $part, Warehouse $warehouse, mixed $quantity, User $user, WorkOrder $order, ?string $note = null): StockMovement
     {
         $qty = $this->positive($quantity);
-        $taken = $this->netIssued($order, $part);
-        if ($qty > $taken + 0.0001) {
-            throw ValidationException::withMessages(['quantity' => __('inventory.errors.return_too_much', ['qty' => Part::formatQty($taken), 'unit' => $part->unit])]);
-        }
 
         // Il reso torna al costo a cui era uscito
         $cost = (float) (StockMovement::query()->where('work_order_id', $order->id)->where('part_id', $part->id)
             ->where('type', MovementType::Issue->value)->latest('id')->value('unit_cost') ?? $part->unit_cost);
 
-        return $this->move($part, $warehouse, MovementType::Return, $qty, $user, ['work_order_id' => $order->id, 'note' => $note], fixedCost: $cost);
+        // Il controllo "non più del prelevato" si fa con il ricambio bloccato:
+        // due resi contemporanei non possono superarlo insieme
+        $guard = function () use ($order, $part, $qty): void {
+            $taken = $this->netIssued($order, $part);
+            if ($qty > $taken + 0.0001) {
+                throw ValidationException::withMessages(['quantity' => __('inventory.errors.return_too_much', ['qty' => Part::formatQty($taken), 'unit' => $part->unit])]);
+            }
+        };
+
+        return $this->move($part, $warehouse, MovementType::Return, $qty, $user, ['work_order_id' => $order->id, 'note' => $note], fixedCost: $cost, guard: $guard);
     }
 
     /** Rettifica dopo una conta: la giacenza diventa quella contata */
@@ -93,10 +104,13 @@ class Stock
             throw ValidationException::withMessages(['quantity' => __('inventory.errors.no_difference')]);
         }
 
-        $movement = $this->move($part, $warehouse, MovementType::Adjustment, $delta, $user, ['note' => trim($reason)], expectedBefore: $current);
-        Audit::log('inventory.adjusted', $part, $part->code.' · '.$warehouse->name.' · '.Part::formatQty($current).' → '.Part::formatQty($value).' · '.trim($reason), actor: $user);
+        // Movimento e voce del registro attività nella stessa transazione
+        return DB::transaction(function () use ($part, $warehouse, $delta, $user, $reason, $current, $value) {
+            $movement = $this->move($part, $warehouse, MovementType::Adjustment, $delta, $user, ['note' => trim($reason)], expectedBefore: $current);
+            Audit::log('inventory.adjusted', $part, $part->code.' · '.$warehouse->name.' · '.Part::formatQty($current).' → '.Part::formatQty($value).' · '.trim($reason), actor: $user);
 
-        return $movement;
+            return $movement;
+        });
     }
 
     /** Trasferimento tra magazzini: due movimenti con lo stesso codice */
@@ -123,19 +137,23 @@ class Stock
     /**
      * @param  array<string, mixed>  $extra
      */
-    private function move(Part $part, Warehouse $warehouse, MovementType $type, float $delta, User $user, array $extra, ?float $receiptCost = null, ?float $fixedCost = null, ?float $expectedBefore = null): StockMovement
+    private function move(Part $part, Warehouse $warehouse, MovementType $type, float $delta, User $user, array $extra, ?float $receiptCost = null, ?float $fixedCost = null, ?float $expectedBefore = null, ?Closure $guard = null): StockMovement
     {
         // In un magazzino disattivato si può solo togliere (svuotarlo), non aggiungere
         if (! $warehouse->is_active && $delta > 0) {
             throw ValidationException::withMessages(['warehouse' => __('inventory.errors.warehouse_inactive')]);
         }
 
-        [$movement, $wasAbove, $isBelow] = DB::transaction(function () use ($part, $warehouse, $type, $delta, $user, $extra, $receiptCost, $fixedCost, $expectedBefore) {
+        [$movement, $wasAbove, $isBelow] = DB::transaction(function () use ($part, $warehouse, $type, $delta, $user, $extra, $receiptCost, $fixedCost, $expectedBefore, $guard) {
             /** @var Part $locked */
             $locked = Part::query()->lockForUpdate()->findOrFail($part->id);
             StockLevel::query()->insertOrIgnore(['part_id' => $part->id, 'warehouse_id' => $warehouse->id, 'quantity' => 0, 'created_at' => now(), 'updated_at' => now()]);
             /** @var StockLevel $level */
             $level = StockLevel::query()->where('part_id', $part->id)->where('warehouse_id', $warehouse->id)->lockForUpdate()->firstOrFail();
+
+            if ($guard) {
+                $guard();
+            }
 
             $before = (float) $level->quantity;
             // La conta è stata fatta su una giacenza che nel frattempo è cambiata
@@ -175,7 +193,8 @@ class Stock
 
         $part->refresh();
         if ($wasAbove && $isBelow) {
-            $this->notifyLowStock($part, $user);
+            // Dentro un'altra transazione (trasferimento, rettifica) l'avviso parte solo dopo il commit
+            DB::afterCommit(fn () => $this->notifyLowStock($part, $user));
         }
 
         return $movement;

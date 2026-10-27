@@ -57,6 +57,10 @@ if ($Dirty) {
 
 Set-Location $Build
 try {
+    # Seeder e factory creano dati e account dimostrativi: non vanno ai clienti.
+    # Si tolgono prima di Composer, così non finiscono nemmeno nell'autoload.
+    foreach ($d in @('database\seeders', 'database\factories')) { if (Test-Path $d) { Remove-Item $d -Recurse -Force } }
+
     Write-Host '-> Dipendenze PHP di produzione'
     Invoke-Step composer @('install', '--no-dev', '--optimize-autoloader', '--classmap-authoritative', '--no-interaction', '--no-progress', '--prefer-dist')
 

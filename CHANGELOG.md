@@ -3,6 +3,17 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.6.1] - Verifiche dopo la fase 6
+
+### Aggiunto
+- Test di concorrenza reale: più processi PHP prelevano o rendono lo stesso ricambio nello stesso istante (MariaDB e MySQL 8 in CI).
+- Il pacchetto di rilascio si rifiuta di includere seeder, factory, test o tracce degli account dimostrativi; test relativi.
+
+### Modificato
+- Magazzino: il controllo "non più del prelevato" del reso e lo stato dell'ordine nel prelievo si verificano dentro la transazione, a righe bloccate.
+- La rettifica scrive movimento e registro attività nella stessa transazione; l'avviso di scorta minima parte dopo la conferma.
+- Il pacchetto di rilascio non contiene più `database/seeders` e `database/factories`.
+
 ## [0.6.0] - Fase 6: magazzino ricambi
 
 ### Aggiunto

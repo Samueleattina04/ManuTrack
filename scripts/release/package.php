@@ -36,13 +36,41 @@ if (! preg_match('/^\d+\.\d+\.\d+([.-][0-9A-Za-z.-]+)?$/', $version)) {
     exit(2);
 }
 
-// Cose che non devono mai finire nel pacchetto
-$forbidden = ['.env', 'public/hot', 'auth.json'];
+// Cose che non devono mai finire nel pacchetto: configurazione, dati e
+// dati dimostrativi (seeder, factory, database di prova, test)
+$forbidden = ['.env', 'public/hot', 'auth.json', 'database/seeders', 'database/factories', 'database/database.sqlite', 'tests'];
 foreach ($forbidden as $f) {
     if (file_exists($build.'/'.$f)) {
         fwrite(STDERR, "Il pacchetto conterrebbe {$f}: interrotto.\n");
         exit(1);
     }
+}
+
+// Nessuna traccia dei dati dimostrativi nel codice dell'app: la password
+// degli account di prova e i nomi dei seeder
+$demoMarkers = ['manutrack-demo', 'DemoAssetsSeeder', 'DemoMaintenanceSeeder', 'DemoInventorySeeder'];
+foreach (['app', 'bootstrap', 'config', 'database', 'lang', 'public', 'resources', 'routes'] as $dir) {
+    if (! is_dir($build.'/'.$dir)) {
+        continue;
+    }
+    $scan = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($build.'/'.$dir, FilesystemIterator::SKIP_DOTS));
+    foreach ($scan as $file) {
+        /** @var SplFileInfo $file */
+        if (! $file->isFile() || $file->getSize() > 5_000_000) {
+            continue;
+        }
+        $content = (string) file_get_contents($file->getPathname());
+        foreach ($demoMarkers as $marker) {
+            if (str_contains($content, $marker)) {
+                fwrite(STDERR, "Il pacchetto conterrebbe dati dimostrativi ({$marker}) in ".substr($file->getPathname(), strlen($build) + 1).": interrotto.\n");
+                exit(1);
+            }
+        }
+    }
+}
+if (preg_match_all('/\\\\?Database\\\\+(Seeders|Factories)\\\\/', (string) @file_get_contents($build.'/vendor/composer/autoload_classmap.php'), $m)) {
+    fwrite(STDERR, "L'autoload del pacchetto contiene ancora seeder o factory: interrotto.\n");
+    exit(1);
 }
 
 // File elencati in release.json: tutto tranne storage/ e bootstrap/cache/,

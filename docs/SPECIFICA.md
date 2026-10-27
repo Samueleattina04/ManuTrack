@@ -711,7 +711,11 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
 
 - **Regole:**
   - la giacenza non va mai sotto zero;
-  - ricambio e giacenza sono bloccati durante il movimento (`SELECT … FOR UPDATE`): due prelievi contemporanei non possono prendere lo stesso pezzo;
+  - ogni movimento è una transazione: si bloccano la riga del ricambio e quella della giacenza (`SELECT … FOR UPDATE`, sempre in quest'ordine), si fanno i controlli, si scrivono giacenza, totale e movimento, poi si conferma. Due prelievi contemporanei non possono prendere lo stesso pezzo;
+  - anche i controlli che dipendono da altri dati si fanno a righe bloccate: il reso rilegge quanto prelevato per l'ordine, il prelievo rilegge lo stato dell'ordine;
+  - il trasferimento mette i due movimenti in un'unica transazione; la rettifica scrive movimento e registro attività insieme;
+  - l'avviso di scorta minima parte solo dopo la conferma della transazione;
+  - verificato con processi PHP separati che muovono lo stesso ricambio nello stesso istante (`tests/Feature/Inventory/ConcurrencyTest.php`), su MariaDB e MySQL 8 (matrice CI);
   - la rettifica si rifiuta se la giacenza è cambiata mentre si contava;
   - ogni movimento registra chi, quando e la giacenza risultante;
   - i movimenti non si modificano né si cancellano: un errore si corregge con un movimento opposto;
@@ -766,4 +770,10 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
 - Il prelievo dall'ordine richiede anche di poter eseguire quell'ordine: il magazziniere non esegue ordini e preleva dalla scheda del ricambio.
 - I permessi si cambiano per ruolo da `/ruoli`, come gli altri.
 - Verificati dai test `tests/Feature/Inventory/RolePermissionsTest.php`, una riga per ruolo.
+
+## 35. Pacchetto di rilascio senza dati dimostrativi (dalla 0.6.1)
+
+- `scripts/release.sh` e `release.ps1` tolgono `database/seeders` e `database/factories` prima di Composer, così non finiscono nemmeno nell'autoload.
+- `scripts/release/package.php` si rifiuta di creare il pacchetto se trova seeder, factory, test, `.env`, un database SQLite, la password degli account di prova o i nomi dei seeder dimostrativi nel codice, o seeder nell'autoload. Lo verifica `tests/Feature/Setup/ReleasePackageTest.php`.
+- Restano nel pacchetto solo esempi di formato: le due righe del modello CSV scaricabile ("Esempio da cancellare") e gli esempi nei suggerimenti dei campi.
 

@@ -43,6 +43,10 @@ fi
 
 cd "$BUILD"
 
+# Seeder e factory creano dati e account dimostrativi: non vanno ai clienti.
+# Si tolgono prima di Composer, così non finiscono nemmeno nell'autoload.
+rm -rf database/seeders database/factories
+
 echo "→ Dipendenze PHP di produzione"
 composer install --no-dev --optimize-autoloader --classmap-authoritative --no-interaction --no-progress --prefer-dist
 
