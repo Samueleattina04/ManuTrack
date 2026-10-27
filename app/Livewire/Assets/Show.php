@@ -263,6 +263,8 @@ class Show extends Component
             'orderHistory' => $user->can('work_orders.view')
                 ? $this->asset->workOrders()->with('assignees')->latest('id')->limit(8)->get()
                 : collect(),
+            // Distinta ricambi (si modifica dalla scheda del ricambio)
+            'bom' => $user->can('inventory.view') ? $this->asset->parts()->get() : null,
             'historyCount' => $user->can('work_orders.view') ? $this->asset->workOrders()->count() : 0,
             'openRequests' => $this->asset->workRequests()->where('status', 'nuova')->when(! $user->can('requests.view_all'), fn ($q) => $q->where('user_id', $user->id))->latest('id')->get(),
             'downtimeMinutes' => (int) $this->asset->downtimes()->where('started_at', '>=', now()->subDays(90))->get()->sum(fn ($d) => $d->minutes()),

@@ -154,6 +154,13 @@ class WorkOrder extends Model
         return $this->hasMany(DowntimeEvent::class)->orderBy('started_at');
     }
 
+    /** Ricambi prelevati e resi per questo ordine */
+    /** @return HasMany<StockMovement, $this> */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class)->orderBy('created_at')->orderBy('id');
+    }
+
     /** @return MorphMany<Attachment, $this> */
     public function attachments(): MorphMany
     {
@@ -234,15 +241,22 @@ class WorkOrder extends Model
         return (float) ($this->labor_rate ?? settings('costs.hourly_rate', 0));
     }
 
+    /** Valore dei ricambi usati: prelievi meno resi, ciascuno al suo costo */
+    public function partsCost(): float
+    {
+        return round((float) $this->stockMovements->sum(fn (StockMovement $m) => -(float) $m->quantity * (float) $m->unit_cost), 2);
+    }
+
     /**
-     * @return array{labor: float, external: float, total: float}
+     * @return array{labor: float, parts: float, external: float, total: float}
      */
     public function costs(): array
     {
         $labor = round($this->laborMinutes() / 60 * $this->hourlyRate(), 2);
+        $parts = $this->partsCost();
         $external = (float) ($this->external_cost ?? 0);
 
-        return ['labor' => $labor, 'external' => $external, 'total' => round($labor + $external, 2)];
+        return ['labor' => $labor, 'parts' => $parts, 'external' => $external, 'total' => round($labor + $parts + $external, 2)];
     }
 
     public function checklistComplete(): bool

@@ -17,14 +17,6 @@ beforeEach(function () {
     $this->admin = installManuTrack();
 });
 
-/** CSV come lo salva Excel in italiano: punto e virgola e codifica Windows-1252 */
-function excelCsv(array $rows): string
-{
-    $lines = array_map(fn ($r) => implode(';', array_map(fn ($c) => str_contains((string) $c, ';') ? '"'.$c.'"' : $c, $r)), $rows);
-
-    return mb_convert_encoding(implode("\r\n", $lines)."\r\n", 'Windows-1252', 'UTF-8');
-}
-
 function importRows(array $rows): array
 {
     $import = app(AssetImport::class);

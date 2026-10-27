@@ -255,6 +255,11 @@
                 </ul>
             </section>
 
+            {{-- Ricambi --}}
+            @if(auth()->user()->can('inventory.view') || $o->stockMovements->isNotEmpty())
+                <livewire:work-orders.parts :work-order="$o" :key="'parts-'.$o->id" />
+            @endif
+
             {{-- Foto --}}
             <section class="card overflow-hidden" aria-labelledby="w-photos">
                 <div class="flex items-center gap-2 border-b border-line-soft px-4 py-3">
@@ -391,7 +396,7 @@
                     <dl class="grid grid-cols-[1fr_auto] gap-y-1.5 text-sm">
                         <dt class="text-muted">{{ __('maintenance.costs.labor', ['time' => $fmtMin($laborMinutes), 'rate' => number_format($o->hourlyRate(), 2, ',', '.')]) }}</dt><dd class="num text-right">€ {{ number_format($costs['labor'], 2, ',', '.') }}</dd>
                         <dt class="text-muted">{{ __('maintenance.costs.external') }}</dt><dd class="num text-right">€ {{ number_format($costs['external'], 2, ',', '.') }}</dd>
-                        <dt class="text-muted">{{ __('maintenance.costs.parts') }}</dt><dd class="text-right text-muted">{{ __('maintenance.costs.parts_soon') }}</dd>
+                        <dt class="text-muted">{{ __('maintenance.costs.parts') }}</dt><dd class="num text-right">€ {{ number_format($costs['parts'], 2, ',', '.') }}</dd>
                         <dt class="border-t border-line pt-1.5 font-semibold">{{ __('maintenance.costs.total') }}</dt><dd class="num border-t border-line pt-1.5 text-right font-bold">€ {{ number_format($costs['total'], 2, ',', '.') }}</dd>
                     </dl>
                     @if($can['update'])

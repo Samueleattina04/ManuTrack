@@ -82,6 +82,26 @@
             </section>
         @endif
 
+        @if($lowStock !== null && ($lowStock->isNotEmpty() || ! auth()->user()->can('work_orders.execute')))
+            <section class="card overflow-hidden" aria-labelledby="home-stock">
+                <div class="flex items-center gap-2 border-b border-line-soft px-4 py-3">
+                    <h2 id="home-stock" class="flex-1 text-base font-bold">{{ __('app.home.low_stock') }} @if($lowStockCount)<span class="font-normal text-muted">{{ $lowStockCount }}</span>@endif</h2>
+                    <a href="{{ route('inventory.reorder') }}" class="btn btn-ghost btn-sm shrink-0">{{ __('inventory.reorder.title') }}<x-icon name="chevron-right" class="!w-4 !h-4" /></a>
+                </div>
+                <ul>
+                    @forelse($lowStock as $p)
+                        <li class="border-b border-line-soft last:border-0"><a href="{{ route('inventory.parts.show', $p) }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2">
+                            <span class="min-w-0 flex-1"><span class="block truncate font-medium">{{ $p->name }}</span><span class="block truncate text-xs text-muted"><span class="font-mono">{{ $p->code }}</span> · {{ __('inventory.field.min_stock') }} {{ \App\Models\Part::formatQty($p->min_stock) }}</span></span>
+                            <span class="num font-semibold">{{ \App\Models\Part::formatQty($p->stock_total) }} {{ $p->unit }}</span>
+                            <x-stock-state :part="$p" />
+                        </a></li>
+                    @empty
+                        <li class="px-4 py-4 text-sm text-fg-2"><x-icon name="check-circle" class="text-ok" /> {{ __('inventory.reorder.empty') }}</li>
+                    @endforelse
+                </ul>
+            </section>
+        @endif
+
         @if($down !== null)
             <section class="card overflow-hidden" aria-labelledby="home-down">
                 <div class="flex items-center gap-2 border-b border-line-soft px-4 py-3">

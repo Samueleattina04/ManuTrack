@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -126,6 +127,16 @@ class Asset extends Model
     public function workRequests(): HasMany
     {
         return $this->hasMany(WorkRequest::class);
+    }
+
+    /**
+     * Distinta ricambi della macchina
+     *
+     * @return BelongsToMany<Part, $this>
+     */
+    public function parts(): BelongsToMany
+    {
+        return $this->belongsToMany(Part::class)->withPivot(['quantity', 'note'])->withTimestamps()->orderBy('code');
     }
 
     /** @return HasMany<DowntimeEvent, $this> */

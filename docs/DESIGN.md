@@ -166,6 +166,15 @@ I numeri in colonna usano `.num` (`tabular-nums`). Le etichette in maiuscolo (`.
   - checklist con caselle da 24 px e barra di avanzamento verde;
   - cronometro con il tempo che scorre nel pulsante "Ferma".
 
+## Magazzino
+
+- **Stato della scorta** sempre con icona e testo: "Disponibile" (verde, spunta), "Sotto scorta" (ambra, triangolo), "Esaurito" (rosso, croce). Le stesse pastiglie fanno da filtro nell'elenco, con i conteggi.
+- **Quantità** in cifre tabellari (`.num`), seguite dall'unità in grigio; i decimali compaiono solo se servono (`2,5 l`, `12 pz`).
+- **Scheda ricambio:** in alto giacenza in grande, scorta minima, costo medio e valore (questi ultimi solo a chi vede i costi); sotto, i movimenti come pulsanti grandi, "Preleva" pieno. Il riquadro del movimento si apre sotto i pulsanti, come i passaggi dell'ordine.
+- **Movimenti:** entrate in verde con `+`, uscite con `−` e icona ambra; sotto ogni movimento la giacenza risultante.
+- **Ricambi nell'ordine:** sezione con "Preleva ricambio"; la distinta della macchina compare per prima, come elenco di schede da toccare con la giacenza a destra (rossa se esaurito).
+- **Da riordinare:** una scheda per fornitore, con "Copia l'elenco" e stampa; in stampa restano solo le tabelle.
+
 ## App installabile
 
 - **Procedura guidata** (`/app`):

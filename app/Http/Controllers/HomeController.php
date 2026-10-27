@@ -6,6 +6,7 @@ use App\Enums\AssetStatus;
 use App\Enums\RequestStatus;
 use App\Enums\WorkOrderStatus;
 use App\Models\Asset;
+use App\Models\Part;
 use App\Models\WorkOrder;
 use App\Models\WorkRequest;
 use App\Support\Setup\SystemStatus;
@@ -38,6 +39,11 @@ class HomeController extends Controller
             'myOrders' => $request->user()->can('work_orders.execute')
                 ? WorkOrder::query()->assignedTo($request->user())->whereIn('status', array_map(fn ($s) => $s->value, WorkOrderStatus::active()))->with('asset')->byUrgency()->limit(6)->get()
                 : null,
+            // Per il magazziniere: ricambi da riordinare, prima gli esauriti
+            'lowStock' => $request->user()->can('inventory.manage')
+                ? Part::query()->where('is_active', true)->belowMinimum()->orderBy('stock_total')->orderBy('code')->limit(6)->get()
+                : null,
+            'lowStockCount' => $request->user()->can('inventory.manage') ? Part::query()->where('is_active', true)->belowMinimum()->count() : 0,
         ]);
     }
 }

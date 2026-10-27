@@ -38,6 +38,9 @@ class AppServiceProvider extends ServiceProvider
         // L'amministratore può tutto
         Gate::before(fn (User $user) => $user->hasRole(Access::ADMIN) ? true : null);
 
+        // Costi dei ricambi: chi gestisce il magazzino o chi vede i costi degli ordini
+        Gate::define('inventory.view_costs', fn (User $user) => $user->can('inventory.manage') || $user->can('work_orders.view_costs'));
+
         RateLimiter::for('install', fn (Request $request) => Limit::perMinute(5)->by((string) $request->ip()));
         RateLimiter::for('invitation', fn (Request $request) => Limit::perMinute(10)->by((string) $request->ip()));
         // Segnalazioni: abbastanza per svuotare una coda offline, non per inondare

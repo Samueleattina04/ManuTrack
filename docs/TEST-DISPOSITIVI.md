@@ -381,3 +381,40 @@ Prima stampa le etichette QR di due macchine (paragrafo 9.3):
 - [ ] Il tecnico non vede i costi e non può chiudere l'ordine.
 - [ ] All'uscita dal profilo, sullo stesso telefono, la pagina Segnala non resta in cache: con Uso in aereo si vede la pagina offline generica.
 
+
+## 11. Fase 6: magazzino ricambi
+
+Servono:
+- un **magazziniere** con l'app installata e le notifiche attive (paragrafi 4 e 5);
+- un **tecnico** con il telefono da provare.
+
+Prima prepara il magazzino dal PC, con il magazziniere:
+1. *Magazzino › Magazzini*: crea "Magazzino centrale".
+2. *Magazzino › Importa*: scarica il modello CSV e caricalo così com'è (contiene due ricambi d'esempio). In anteprima risultano 2 ricambi da creare; conferma. Per provare anche Excel: apri il modello, salvalo come `.xlsx` e caricalo di nuovo (risultano 2 da aggiornare).
+3. Apri il ricambio `CUS-6205` (cuscinetto) › *Usato sulle macchine*: aggiungi la macchina dell'ordine che userai al punto 11.2.
+4. Imposta per lo stesso ricambio una **scorta minima** di 10, così il primo prelievo la supera verso il basso.
+
+### 11.1 Elenco e scheda dal telefono (tecnico)
+- [ ] Apri ManuTrack › menu › **Magazzino**. L'elenco mostra giacenza e stato con icona e testo.
+- [ ] I filtri "Sotto scorta" ed "Esauriti" mostrano i conteggi giusti.
+- [ ] Il tecnico **non** vede costo medio né valori.
+- [ ] Apri un ricambio › **Preleva**: con il telefono si scrivono comodamente quantità decimali (tastiera numerica, virgola).
+
+### 11.2 Prelievo dall'ordine di lavoro (tecnico)
+- [ ] Apri un ordine **in corso** assegnato a te › sezione **Ricambi** › **Preleva ricambio**.
+- [ ] Senza scrivere nulla compare la **distinta della macchina** con il cuscinetto. Toccalo.
+- [ ] È già scelto il magazzino con più pezzi. Scrivi `2` › **Preleva**: il ricambio compare nell'elenco dell'ordine.
+- [ ] Sul telefono del magazziniere arriva **"Ricambio sotto scorta"** entro circa un minuto (passa dalla coda).
+- [ ] **Rendi** › scrivi `5`: viene rifiutato ("Puoi rendere al massimo 2 pz"). Scrivi `1` › il ricambio risulta 1 pz.
+- [ ] Dal PC, il responsabile vede nella card dei **Costi** la riga "Ricambi" con il valore del pezzo.
+
+### 11.3 Magazziniere
+- [ ] In panoramica compare "Ricambi sotto scorta" con il cuscinetto.
+- [ ] **Da riordinare**: il ricambio è sotto il suo fornitore preferito con la quantità proposta. **Copia l'elenco** e incollalo in una mail: ogni riga ha codice del fornitore, nome e quantità.
+- [ ] Dalla scheda del ricambio: **Carica** 20 pezzi con un costo diverso. Il costo medio cambia e lo stato torna "Disponibile".
+- [ ] **Rettifica** con una quantità diversa e un motivo: compare nei movimenti e in *Registro attività* (area Magazzino).
+- [ ] *Movimenti di magazzino*: filtra per tipo "Prelievo": compare il prelievo del tecnico con il numero dell'ordine.
+
+### 11.4 Permessi
+- [ ] Il tecnico aprendo `/magazzino/riordino` o `/magazzino/importa` riceve "Accesso negato".
+- [ ] Il richiedente non vede la voce "Magazzino".

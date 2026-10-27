@@ -27,6 +27,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
@@ -413,6 +414,13 @@ class Show extends Component
     }
 
     // ---------- Costi ----------
+
+    /** Dopo un prelievo o un reso si ricalcolano i costi */
+    #[On('parts-changed')]
+    public function refreshCosts(): void
+    {
+        $this->workOrder->unsetRelation('stockMovements');
+    }
 
     public function saveExternalCost(): void
     {

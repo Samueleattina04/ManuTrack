@@ -225,6 +225,7 @@ Senza `--password` il comando la chiede in modo nascosto (consigliato): una pass
 1. Apri `https://<dominio>/login` ed entra con l'email e la password dell'amministratore.
 2. In **Impostazioni** carica il logo dell'azienda (ed eventualmente la versione per il tema scuro) e scegli i colori.
 3. In **Persone** invita i colleghi: ricevono un'email con un link valido 7 giorni.
+4. In **Macchine › Importa** e **Magazzino › Importa** carica gli elenchi da Excel. Per il magazzino crea prima almeno un magazzino (*Magazzino › Magazzini*): le giacenze del file entrano lì come carico iniziale.
 
 Per gli inviti e per "password dimenticata" la posta deve funzionare: compila i valori `MAIL_*` di `.env` con la casella creata in DirectAdmin (*E-Mail Accounts*).
 

@@ -268,6 +268,29 @@
                 @if($can['attach'])<p class="border-t border-line-soft px-4 py-2 text-xs text-muted">{{ __('assets.files.limits', ['max' => $maxMb, 'format' => strtoupper($photoFormat === 'none' ? 'originale' : $photoFormat)]) }}</p>@endif
             </section>
 
+            {{-- Distinta ricambi --}}
+            @if($bom !== null)
+                <section class="card overflow-hidden" aria-labelledby="s-bom">
+                    <div class="flex items-center gap-2 border-b border-line-soft px-4 py-3">
+                        <h2 id="s-bom" class="flex-1 text-base font-bold">{{ __('inventory.bom.title') }} <span class="font-normal text-muted">{{ $bom->count() }}</span></h2>
+                        <a href="{{ route('inventory.parts.index') }}" class="btn btn-ghost btn-sm shrink-0">{{ __('inventory.title') }}<x-icon name="chevron-right" class="!w-4 !h-4" /></a>
+                    </div>
+                    <ul>
+                        @forelse($bom as $p)
+                            <li class="border-b border-line-soft last:border-0" wire:key="bom-{{ $p->id }}">
+                                <a href="{{ route('inventory.parts.show', $p) }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2">
+                                    <span class="min-w-0 flex-1"><span class="block truncate font-medium">{{ $p->name }}</span><span class="block font-mono text-xs text-muted">{{ $p->code }}@if((float) $p->pivot->quantity != 1.0) · × {{ \App\Models\Part::formatQty($p->pivot->quantity) }}@endif</span></span>
+                                    <span class="num text-sm">{{ \App\Models\Part::formatQty($p->stock_total) }} {{ $p->unit }}</span>
+                                    <x-stock-state :part="$p" />
+                                </a>
+                            </li>
+                        @empty
+                            <li class="px-4 py-3 text-sm text-muted">{{ __('inventory.bom.empty') }}</li>
+                        @endforelse
+                    </ul>
+                </section>
+            @endif
+
             {{-- Sottogruppi --}}
             @if($asset->children->isNotEmpty())
                 <section class="card overflow-hidden" aria-labelledby="s-children">

@@ -607,8 +607,8 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
   - commenti e cambi di stato in un'unica cronologia.
 - **Costi** (visibili con "Vedere i costi"):
   - manodopera = minuti × costo orario;
-  - più i costi esterni;
-  - i ricambi arriveranno con il magazzino.
+  - più i ricambi prelevati per l'ordine, al costo a cui sono usciti (al netto dei resi, §34.5);
+  - più i costi esterni.
 - **Elenco:**
   - schede Da fare, In corso, Da chiudere, Chiusi, Tutti, con i conteggi;
   - "Solo i miei", attivo di default per chi non assegna;
@@ -670,16 +670,100 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
   - "Segnala un guasto" in evidenza sul telefono;
   - segnalazioni da valutare, con le urgenti in cima;
   - "I miei ordini";
+  - ricambi sotto scorta, per chi gestisce il magazzino (dalla 0.6.0);
   - macchine ferme.
 - **Scheda macchina:**
   - "Segnala un guasto";
   - **storico interventi** (ordini e segnalazioni aperte) con le ore di fermo degli ultimi 90 giorni;
-  - "Nuovo ordine" per quella macchina.
+  - "Nuovo ordine" per quella macchina;
+  - **ricambi della macchina** (distinta) con giacenza e stato, per chi vede il magazzino (dalla 0.6.0).
 
 ## 33. Account dimostrativi (dalla 0.5.1)
 
-- Gli account dimostrativi (`operatore@`, `responsabile@`, `tecnico1@`, `tecnico2@`, `admin@example.com`, password `manutrack-demo`) li crea **solo** il seeder di sviluppo (`php artisan migrate --seed`). Fuori da produzione, oppure con `MANUTRACK_DEMO=true`, li crea anche `DemoMaintenanceSeeder`.
+- Gli account dimostrativi (`operatore@`, `responsabile@`, `tecnico1@`, `tecnico2@`, `magazzino@` (dalla 0.6.0), `admin@example.com`, password `manutrack-demo`) li crea **solo** il seeder di sviluppo (`php artisan migrate --seed`). Fuori da produzione, oppure con `MANUTRACK_DEMO=true`, li creano anche `DemoMaintenanceSeeder` e `DemoInventorySeeder`.
 - `manutrack:install` e l'installazione dal browser creano soltanto l'amministratore indicato, senza dati dimostrativi. Lo verificano i test `tests/Feature/Setup/DemoAccountsTest.php`.
 - I seeder dimostrativi non fanno nulla in produzione, salvo installazione dimostrativa.
 - **Avviso:** se in produzione (non dimostrativa) esistono account `@example.com`, `@example.org` o `@example.net`, la pagina Sistema li elenca e invita a disattivarli o a dar loro un indirizzo vero.
+
+## 34. Magazzino ricambi (`/magazzino`, fase 6)
+
+### 34.1 Ricambi
+- **Anagrafica:** codice univoco, nome, categoria, unità (pz, m, kg, l…), costruttore e suo codice, descrizione, scorta minima, quantità da riordinare, attivo/disattivato.
+- **Giacenza:** per magazzino, con lo scaffale; il totale è sempre la somma dei magazzini.
+- **Costo medio ponderato:** solo i carichi con un costo lo cambiano: `(giacenza × costo medio + quantità × costo del carico) / (giacenza + quantità)`.
+- **Stato:** disponibile, sotto scorta (giacenza ≤ scorta minima), esaurito.
+- **Elenco:** filtri per stato della scorta (con i conteggi), magazzino, categoria, disattivati; ricerca per codice, nome, costruttore e codice del costruttore.
+- **Scheda:**
+  - giacenze per magazzino con lo scaffale;
+  - fornitori del ricambio (codice, prezzo, giorni di consegna, preferito);
+  - macchine su cui è montato (distinta);
+  - ultimi movimenti.
+- Le quantità non si scrivono mai a mano: cambiano solo con i movimenti. Anche la giacenza iniziale di un ricambio nuovo è un carico.
+
+### 34.2 Movimenti
+| Tipo | Chi | Effetto |
+|---|---|---|
+| Carico | gestisce il magazzino | entra merce, con fornitore, riferimento (DDT o fattura) e costo; aggiorna il costo medio |
+| Prelievo | può muovere il magazzino | esce merce al costo medio, di solito per un ordine di lavoro |
+| Reso | può muovere il magazzino | torna merce prelevata per un ordine e non usata, al costo a cui era uscita, mai più del prelevato |
+| Rettifica | gestisce il magazzino | dopo una conta: la giacenza diventa quella contata; motivo obbligatorio, nel registro attività |
+| Trasferimento | gestisce il magazzino | da un magazzino a un altro: due movimenti con lo stesso codice, totale invariato |
+
+- **Regole:**
+  - la giacenza non va mai sotto zero;
+  - ricambio e giacenza sono bloccati durante il movimento (`SELECT … FOR UPDATE`): due prelievi contemporanei non possono prendere lo stesso pezzo;
+  - la rettifica si rifiuta se la giacenza è cambiata mentre si contava;
+  - ogni movimento registra chi, quando e la giacenza risultante;
+  - i movimenti non si modificano né si cancellano: un errore si corregge con un movimento opposto;
+  - in un magazzino disattivato non entra nulla.
+- **Registro movimenti** (`/magazzino/movimenti`) con filtri per tipo, magazzino, ricambio e date.
+
+### 34.3 Magazzini e fornitori
+- **Magazzini** (`/magazzino/magazzini`): nome e codice. Di solito ne basta uno; altri servono per armadi a bordo linea o furgoni. Un magazzino con giacenza non si può disattivare.
+- **Fornitori** (`/magazzino/fornitori`): ragione sociale, referente, email, telefono, sito, note, con i ricambi collegati.
+
+### 34.4 Scorta minima e riordino
+- Quando la giacenza totale **scende** alla scorta minima, chi gestisce il magazzino riceve una notifica (in coda, non urgente); chi ha fatto il movimento non la riceve. L'avviso parte una volta sola, finché la giacenza non risale.
+- **Da riordinare** (`/magazzino/riordino`):
+  - ricambi alla scorta minima o sotto, raggruppati per fornitore preferito;
+  - quantità proposta = scorta minima + quantità da riordinare − giacenza (se la quantità da riordinare è vuota, vale quanto la scorta minima);
+  - "Copia l'elenco" per incollarlo in una mail, oppure stampa.
+- In panoramica, chi gestisce il magazzino vede i ricambi sotto scorta.
+
+### 34.5 Ricambi nell'ordine di lavoro
+- Sezione **Ricambi** nella scheda dell'ordine.
+- **Chi preleva:** chi può eseguire l'ordine (assegnatario, o chi può assegnare) **e** può muovere il magazzino. L'ordine deve essere attivo o completato (non chiuso né annullato).
+- **Come:**
+  - senza scrivere nulla si vede la distinta della macchina dell'ordine; altrimenti si cerca per codice o nome;
+  - si propone il magazzino con più pezzi.
+- **Reso:** "Rendi" per ogni ricambio, fino alla quantità prelevata; torna nel magazzino dell'ultimo prelievo.
+- Il costo dei ricambi (prelievi meno resi) entra nei **costi dell'ordine**.
+- Il magazziniere può anche prelevare per un ordine dalla scheda del ricambio, indicando il numero dell'ordine.
+
+### 34.6 Distinta ricambi per macchina
+- Dalla scheda del ricambio: "Usato sulle macchine", con la quantità montata. La modifica chi gestisce il magazzino o le macchine.
+- Nella scheda macchina: elenco dei ricambi con giacenza e stato.
+
+### 34.7 Importazione (`/magazzino/importa`)
+- CSV o Excel con anteprima e conferma, come per le macchine (§26). Il modello CSV si scarica dalla pagina.
+- **Colonne:** `codice`, `nome` (obbligatorie), `categoria`, `unita`, `costruttore`, `codice_costruttore`, `descrizione`, `scorta_minima`, `quantita_riordino`, `fornitore`, `codice_fornitore`, `prezzo_fornitore`, `magazzino`, `giacenza`, `costo_unitario`, `scaffale`.
+- **Regole:**
+  - i ricambi esistenti si riconoscono dal codice e si aggiornano; le celle vuote non cancellano nulla;
+  - la giacenza vale **solo per i ricambi nuovi** e diventa un carico iniziale; per quelli esistenti si ignora (con avviso) e si usa una rettifica;
+  - i fornitori mancanti si creano; i magazzini devono esistere (vuoto = il primo).
+- La lettura dei file (CSV di Excel in italiano, XLSX) è in comune con l'importazione delle macchine.
+
+### 34.8 Permessi
+
+| Permesso | Amministratore | Responsabile | Tecnico | Magazziniere | Richiedente | Osservatore |
+|---|---|---|---|---|---|---|
+| Vedere il magazzino | ✓ | ✓ | ✓ | ✓ | — | ✓ |
+| Prelevare (e rendere) | ✓ | ✓ | ✓ | ✓ | — | — |
+| Carichi, rettifiche, trasferimenti, anagrafiche, riordino, importazione | ✓ | — | — | ✓ | — | — |
+| Vedere costi e valori | ✓ | ✓ | — | ✓ | — | ✓ |
+
+- "Vedere costi e valori" vale per chi gestisce il magazzino o vede i costi degli ordini.
+- Il prelievo dall'ordine richiede anche di poter eseguire quell'ordine: il magazziniere non esegue ordini e preleva dalla scheda del ricambio.
+- I permessi si cambiano per ruolo da `/ruoli`, come gli altri.
+- Verificati dai test `tests/Feature/Inventory/RolePermissionsTest.php`, una riga per ruolo.
 

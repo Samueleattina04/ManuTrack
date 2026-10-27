@@ -6,6 +6,7 @@ use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\DesignController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\Maintenance\QuickReportController;
 use App\Http\Controllers\ManifestController;
@@ -22,6 +23,14 @@ use App\Livewire\Assets\Index as AssetsIndex;
 use App\Livewire\Assets\Locations as AssetLocations;
 use App\Livewire\Assets\Show as AssetShow;
 use App\Livewire\Audit\Index as AuditIndex;
+use App\Livewire\Inventory\Import as PartImport;
+use App\Livewire\Inventory\Movements as StockMovements;
+use App\Livewire\Inventory\PartForm;
+use App\Livewire\Inventory\Parts as PartsIndex;
+use App\Livewire\Inventory\PartShow;
+use App\Livewire\Inventory\Reorder as PartsReorder;
+use App\Livewire\Inventory\Suppliers;
+use App\Livewire\Inventory\Warehouses;
 use App\Livewire\Maintenance\Settings as MaintenanceSettings;
 use App\Livewire\Profile;
 use App\Livewire\Requests\Index as RequestsIndex;
@@ -124,6 +133,22 @@ Route::middleware(['installed', 'auth', 'active'])->group(function () {
     });
     Route::get('/ordini/nuovo', WorkOrderCreate::class)->middleware('can:work_orders.create')->name('work-orders.create');
     Route::get('/ordini/impostazioni', MaintenanceSettings::class)->middleware('can:work_orders.settings')->name('work-orders.settings');
+
+    // Magazzino ricambi
+    Route::middleware('can:inventory.view')->group(function () {
+        Route::get('/magazzino', PartsIndex::class)->name('inventory.parts.index');
+        Route::get('/magazzino/ricambi/{part}', PartShow::class)->whereNumber('part')->name('inventory.parts.show');
+        Route::get('/magazzino/movimenti', StockMovements::class)->name('inventory.movements');
+        Route::get('/magazzino/fornitori', Suppliers::class)->name('inventory.suppliers');
+    });
+    Route::middleware('can:inventory.manage')->group(function () {
+        Route::get('/magazzino/ricambi/nuovo', PartForm::class)->name('inventory.parts.create');
+        Route::get('/magazzino/ricambi/{part}/modifica', PartForm::class)->whereNumber('part')->name('inventory.parts.edit');
+        Route::get('/magazzino/magazzini', Warehouses::class)->name('inventory.warehouses');
+        Route::get('/magazzino/riordino', PartsReorder::class)->name('inventory.reorder');
+        Route::get('/magazzino/importa', PartImport::class)->name('inventory.import');
+        Route::get('/magazzino/importa/modello.csv', [InventoryController::class, 'template'])->name('inventory.import.template');
+    });
 
     // Allegati (il controllo dei permessi dipende dall'oggetto a cui appartengono)
     Route::get('/allegati/{attachment}', [AttachmentController::class, 'show'])->whereNumber('attachment')->name('attachments.show');

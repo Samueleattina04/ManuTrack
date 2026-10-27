@@ -54,4 +54,11 @@ return [
         'causa' => 'Causa',
         'rimedio' => 'Rimedio',
     ],
+    'movement_type' => [
+        'carico' => 'Carico',
+        'prelievo' => 'Prelievo',
+        'reso' => 'Reso',
+        'rettifica' => 'Rettifica inventario',
+        'trasferimento' => 'Trasferimento',
+    ],
 ];

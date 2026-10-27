@@ -3,6 +3,35 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.6.0] - Fase 6: magazzino ricambi
+
+### Aggiunto
+- **Ricambi** (`/magazzino`):
+  - anagrafica con codice, categoria, unità, costruttore, scorta minima e quantità da riordinare;
+  - giacenza per magazzino con lo scaffale;
+  - costo medio ponderato;
+  - stato Disponibile / Sotto scorta / Esaurito, con filtri e conteggi;
+  - scheda con giacenze, fornitori, macchine su cui è montato e ultimi movimenti.
+- **Movimenti:**
+  - carico (fornitore, DDT, costo), prelievo, reso, rettifica dopo una conta (motivo obbligatorio, nel registro attività), trasferimento tra magazzini;
+  - giacenza mai negativa, anche con due prelievi contemporanei (righe bloccate durante il movimento);
+  - giacenza risultante registrata a ogni movimento; registro con filtri.
+- **Magazzini e fornitori**; un magazzino con giacenza non si disattiva.
+- **Scorta minima:** notifica (in coda) a chi gestisce il magazzino quando un ricambio ci scende; pagina **Da riordinare** raggruppata per fornitore preferito, con quantità proposta, "Copia l'elenco" e stampa; card in panoramica.
+- **Ricambi nell'ordine di lavoro:**
+  - prelievo proponendo prima la distinta della macchina;
+  - reso fino a quanto prelevato, al costo di uscita;
+  - il costo dei ricambi entra nei costi dell'ordine.
+- **Distinta ricambi per macchina**, modificabile dalla scheda del ricambio e visibile nella scheda macchina.
+- **Importazione dei ricambi** da CSV o Excel con anteprima, fornitori creati al volo e giacenza iniziale per i ricambi nuovi; modello CSV scaricabile.
+- Area "Magazzino" nel registro attività; scorciatoia `G R`.
+- Test: servizio delle giacenze (costo medio, giacenza negativa, prelievi con dati vecchi, reso, rettifica, trasferimento, scorta minima), matrice dei permessi per ruolo, pagine e importazione.
+- Magazzini, fornitori e ricambi dimostrativi inventati e l'account `magazzino@example.com`, creati solo dal seeder di sviluppo.
+
+### Modificato
+- La lettura dei file CSV ed Excel è in comune tra l'importazione delle macchine e quella dei ricambi.
+- I costi dell'ordine mostrano i ricambi al posto di "con il magazzino".
+
 ## [0.5.1] - Correzioni alla fase 5
 
 ### Aggiunto

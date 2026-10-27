@@ -219,7 +219,6 @@ return [
         'external' => 'Esterni',
         'external_placeholder' => 'Costi esterni in €',
         'parts' => 'Ricambi',
-        'parts_soon' => 'con il magazzino',
         'total' => 'Totale',
     ],
 

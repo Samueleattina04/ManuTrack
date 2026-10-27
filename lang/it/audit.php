@@ -24,6 +24,7 @@ return [
         'push' => 'Notifiche',
         'requests' => 'Segnalazioni',
         'work_orders' => 'Ordini di lavoro',
+        'inventory' => 'Magazzino',
     ],
 
     'actions' => [
@@ -79,6 +80,17 @@ return [
             'accepted' => 'Segnalazione accettata',
             'rejected' => 'Segnalazione respinta',
             'duplicate' => 'Segnalazione segnata come duplicata',
+        ],
+        'inventory' => [
+            'part_created' => 'Ricambio creato',
+            'part_updated' => 'Ricambio modificato',
+            'part_supplier_saved' => 'Fornitore del ricambio salvato',
+            'adjusted' => 'Giacenza rettificata',
+            'imported' => 'Ricambi importati',
+            'warehouse_created' => 'Magazzino creato',
+            'warehouse_updated' => 'Magazzino modificato',
+            'supplier_created' => 'Fornitore creato',
+            'supplier_updated' => 'Fornitore modificato',
         ],
         'work_orders' => [
             'created' => 'Ordine di lavoro creato',

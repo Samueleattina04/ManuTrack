@@ -153,7 +153,7 @@ it('i costi sommano manodopera e costi esterni', function () {
 
     Livewire::actingAs($this->admin)->test(Show::class, ['workOrder' => $order])->set('externalCost', '1.200,50')->call('saveExternalCost');
 
-    expect($order->refresh()->costs())->toBe(['labor' => 54.0, 'external' => 1200.5, 'total' => 1254.5]);
+    expect($order->refresh()->costs())->toBe(['labor' => 54.0, 'parts' => 0.0, 'external' => 1200.5, 'total' => 1254.5]);
 });
 
 it('dalle impostazioni si creano modelli di checklist, codici guasto e costo orario', function () {
