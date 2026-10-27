@@ -2,7 +2,7 @@
 
 Elenco delle librerie usate da ManuTrack e delle loro licenze, con la verifica di compatibilità per un **uso commerciale** (software installato presso clienti e venduto come servizio).
 
-Aggiornato alla versione **0.2.0** (fase 2). Le fasi successive aggiungono le librerie previste in `docs/PROPOSTA.md`, ciascuna verificata prima dell'uso.
+Aggiornato alla versione **0.3.0** (fase 3: nessuna libreria nuova; il service worker è generato da Laravel, quindi `vite-plugin-pwa` e Workbox non servono). Le fasi successive aggiungono le librerie previste in `docs/PROPOSTA.md`, ciascuna verificata prima dell'uso.
 
 ## In sintesi
 

@@ -18,6 +18,7 @@
         </main>
         <footer class="flex justify-center"><x-powered-by :version="true" /></footer>
     </div>
+    <x-update-banner />
     @livewireScriptConfig
 </body>
 </html>

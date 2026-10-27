@@ -25,7 +25,7 @@ class Requirements
     private const RECOMMENDED_EXTENSIONS = [
         'zip' => 'esportazioni GDPR in archivio ZIP',
         'intl' => 'formattazione di date e numeri in italiano',
-        'bcmath' => 'calcoli delle notifiche push (in alternativa gmp)',
+        'bcmath' => 'velocizza la cifratura delle notifiche push (in alternativa gmp; funzionano anche senza)',
     ];
 
     /**

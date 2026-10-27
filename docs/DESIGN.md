@@ -135,6 +135,16 @@ I numeri in colonna usano `.num` (`tabular-nums`). Le etichette in maiuscolo (`.
   - `apple-touch-icon` 180;
   - `favicon-32`, `favicon.svg`.
   Lo sfondo è pieno, grafite con un alone del colore della palette.
+- **Schermate di avvio iPhone:** fondo `#0C0F14` con la M al centro (34% della larghezza), 11 formati per palette (`splash-<larghezza>x<altezza>.png`).
+
+## App installabile
+
+- **Procedura guidata** (`/app`):
+  - indicatore a tre passi;
+  - illustrazioni animate costruite in HTML e CSS (`<x-pwa-steps>`: schermo, barra di Safari o Chrome, tasto evidenziato che pulsa, foglio che sale, icona che compare sulla Home);
+  - con movimento ridotto le illustrazioni restano ferme.
+- **Avviso "Nuova versione disponibile"** (`<x-update-banner>`): riquadro in basso, sopra la barra di navigazione del telefono, con "Aggiorna" e la chiusura (×, "Più tardi").
+- **Pagina offline:** autonoma, senza CSS esterno, scura, icona senza rete e pulsante "Riprova".
 
 ## Accessibilità
 

@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Models\User;
 use App\Support\Access\Access;
 use App\Support\Audit\Audit;
+use App\Support\Push\PushTransport;
+use App\Support\Push\WebPushTransport;
 use App\Support\Settings;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
@@ -25,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(Settings::class);
+        $this->app->bind(PushTransport::class, WebPushTransport::class);
     }
 
     public function boot(): void
@@ -37,6 +40,8 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('install', fn (Request $request) => Limit::perMinute(5)->by((string) $request->ip()));
         RateLimiter::for('invitation', fn (Request $request) => Limit::perMinute(10)->by((string) $request->ip()));
+        RateLimiter::for('push-test', fn (Request $request) => Limit::perMinute(10)->by((string) $request->user()?->id));
+        RateLimiter::for('push', fn (Request $request) => Limit::perMinute(30)->by($request->user() ? 'u'.$request->user()->id : (string) $request->ip()));
 
         $this->registerAuditListeners();
     }

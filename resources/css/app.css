@@ -382,6 +382,27 @@
     }
     .bottom-nav .fab .mt-icon { width: 28px; height: 28px; }
 
+    /* Procedura guidata: illustrazioni dei passaggi */
+    .step-n { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 999px; font-size: 12px; font-weight: 700; color: var(--mt-accent-fg); background: color-mix(in oklab, var(--mt-accent-soft) 18%, transparent); margin-right: 0.25rem; }
+    .wiz-screen { position: relative; height: 7.5rem; border-radius: 14px; overflow: hidden; background: var(--mt-bg-2); border: 1px solid var(--mt-line-soft); display: flex; flex-direction: column; justify-content: center; padding: 0.6rem; }
+    .wiz-bar { display: flex; align-items: center; justify-content: space-around; gap: 0.25rem; padding: 0.5rem; border-radius: 12px; background: var(--mt-surface-2); color: var(--mt-fg-2); }
+    .wiz-bar-bottom { margin-top: auto; }
+    .wiz-bar-top { margin-bottom: auto; justify-content: space-between; }
+    .wiz-url { flex: 1; font-size: 12px; color: var(--mt-muted); background: var(--mt-bg-2); border-radius: 8px; padding: 0.3rem 0.5rem; }
+    .wiz-ico { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 10px; }
+    .wiz-ico .mt-icon { width: 1.1rem; height: 1.1rem; }
+    .wiz-hl { color: var(--mt-on-accent); background: var(--mt-accent); animation: wiz-pulse 1.6s ease-in-out infinite; }
+    .wiz-sheet { display: flex; flex-direction: column; gap: 0.3rem; }
+    .wiz-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.55rem; border-radius: 9px; font-size: 12.5px; color: var(--mt-fg-2); background: var(--mt-surface-2); }
+    .wiz-row .mt-icon { width: 1rem; height: 1rem; }
+    .wiz-hl-row { color: var(--mt-fg); outline: 2px solid var(--mt-accent-fg); animation: wiz-pulse 1.6s ease-in-out infinite; }
+    .wiz-home { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.45rem; justify-items: center; }
+    .wiz-app { width: 2.1rem; height: 2.1rem; border-radius: 9px; background: var(--mt-surface-2); }
+    .wiz-app-mt { overflow: hidden; animation: wiz-pop 1.8s ease-in-out infinite; box-shadow: 0 0 0 2px var(--mt-accent-fg); }
+    .wiz-app-mt img { width: 100%; height: 100%; display: block; }
+    @keyframes wiz-pulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--mt-accent-soft) 55%, transparent); } 50% { box-shadow: 0 0 0 7px transparent; } }
+    @keyframes wiz-pop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
     /* Schede con inclinazione 3D (attivata da Alpine, x-tilt) */
     .tilt { transform-style: preserve-3d; transition: transform 0.2s ease, box-shadow 0.2s ease; will-change: transform; }
 }

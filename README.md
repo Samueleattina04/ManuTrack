@@ -6,7 +6,7 @@ Software per la gestione della manutenzione di macchine e impianti (CMMS): ordin
 
 **Un'installazione per cliente:** ogni azienda ha la sua cartella con una copia dell'app e un suo database MySQL. Gira su un normale hosting condiviso con **PHP 8.3 e MySQL**, anche senza SSH (pannello DirectAdmin).
 
-> Stato: **fase 2 di 11** (versione 0.2.0): accesso con verifica in due passaggi, ruoli e permessi, inviti, impostazioni dell'azienda con logo e colori, registro attività. Il piano completo è in [`docs/PROPOSTA.md`](docs/PROPOSTA.md).
+> Stato: **fase 3 di 11** (versione 0.3.0): app installabile su PC, iPhone e Android, notifica push di prova, diagnostica delle notifiche e procedura guidata, oltre ad accesso, ruoli, inviti e impostazioni dell'azienda. Il test sui telefoni reali è descritto in [`docs/TEST-DISPOSITIVI.md`](docs/TEST-DISPOSITIVI.md). Il piano completo è in [`docs/PROPOSTA.md`](docs/PROPOSTA.md).
 
 ## Tecnologie
 
@@ -42,6 +42,7 @@ In alternativa `php artisan manutrack:install` installa come in produzione.
 ## Documentazione
 
 - [Installazione e aggiornamento su DirectAdmin](docs/INSTALLAZIONE.md) (HTTPS, cron, chiavi push, aggiornamenti)
+- [Prova su iPhone e Android reali](docs/TEST-DISPOSITIVI.md) (sottodominio HTTPS, chiavi VAPID, checklist)
 - [Specifica funzionale](docs/SPECIFICA.md), aggiornata a ogni fase
 - [Design system](docs/DESIGN.md) e [anteprima dello stile](docs/anteprima/stile.html)
 - [Librerie e licenze](docs/LIBRERIE.md)

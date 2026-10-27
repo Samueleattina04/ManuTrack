@@ -47,7 +47,7 @@ Anteprima dello stile: `docs/anteprima/stile.html` (da aprire nel browser).
 **Monolite Laravel 12** (PHP 8.3, MySQL 8 o MariaDB 10.6+). Un'installazione serve una sola azienda e ha un solo database.
 
 ```
-domains/cliente.it/
+domains/example.com/
 ├── manutrack/            ← copia dell'app (codice, vendor/, build già pronta)
 │   ├── .env              ← unico file diverso tra installazioni (con storage/)
 │   ├── storage/          ← file caricati, log, cache: mai sovrascritti dagli aggiornamenti
@@ -154,7 +154,7 @@ Disco privato `storage/app/private` (predisposto per S3), download tramite contr
 - Blade, Livewire 3, Alpine.js, Tailwind con i token del design system, Vite. La build avviene sul tuo PC; sul server arrivano solo i file compilati.
 - Icone Lucide inline, font ospitati localmente, Chart.js solo nelle dashboard, Three.js caricato solo quando serve, con vista 2D di riserva.
 - Scorciatoie da tastiera e palette comandi (`Ctrl/Cmd K`).
-- PWA: manifest, icone, meta iOS, service worker (Workbox via `vite-plugin-pwa`), pagina offline, avviso "Nuova versione disponibile", coda delle segnalazioni offline in IndexedDB (Background Sync su Android, invio alla riapertura su iPhone).
+- PWA: manifest, icone, meta iOS, service worker (generato da Laravel dal manifest di Vite: niente Workbox né `vite-plugin-pwa`, una dipendenza in meno e controllo completo su cache e aggiornamenti — decisione presa in fase 3), pagina offline, avviso "Nuova versione disponibile", coda delle segnalazioni offline in IndexedDB (Background Sync su Android, invio alla riapertura su iPhone).
 - Web Push con minishlink/web-push:
   - più dispositivi per utente;
   - pulizia automatica delle iscrizioni scadute (404/410);

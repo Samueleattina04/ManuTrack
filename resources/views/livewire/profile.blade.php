@@ -75,6 +75,8 @@
             <h2 class="font-bold">{{ __('app.theme.label') }}</h2>
             <x-theme-switcher />
         </div>
+        <a href="{{ route('pwa.install') }}" class="card flex items-center gap-3 p-4 hover:bg-surface-2"><x-icon name="smartphone" /><span class="flex-1 font-medium">{{ __('pwa.nav') }}</span><x-icon name="chevron-right" /></a>
+        <a href="{{ route('pwa.diagnostics') }}" class="card flex items-center gap-3 p-4 hover:bg-surface-2"><x-icon name="bell" /><span class="flex-1 font-medium">{{ __('pwa.diag.title') }}</span><x-icon name="chevron-right" /></a>
         @can('system.view')
             <a href="{{ route('system') }}" class="card flex items-center gap-3 p-4 hover:bg-surface-2"><x-icon name="server" /><span class="flex-1 font-medium">{{ __('app.nav.system') }}</span><x-icon name="chevron-right" /></a>
         @endcan

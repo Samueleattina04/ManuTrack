@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Support\Brand\IconRenderer;
+use App\Support\Brand\SplashRenderer;
 use App\Support\Setup\Requirements;
 use Illuminate\Console\Command;
 
@@ -12,7 +13,7 @@ class IconsCommand extends Command
         {--palette=* : Palette da generare (predefinito: tutte)}
         {--path= : Cartella di destinazione (predefinito: public/icons)}';
 
-    protected $description = 'Genera favicon, icone dell\'app (anche maskable) e apple-touch-icon dal logo';
+    protected $description = 'Genera favicon, icone dell\'app (anche maskable), apple-touch-icon e schermate di avvio iPhone dal logo';
 
     /** nome file => [lato, tipo] */
     private const FILES = [
@@ -24,7 +25,7 @@ class IconsCommand extends Command
         'favicon-32.png' => [32, 'favicon'],
     ];
 
-    public function handle(IconRenderer $renderer): int
+    public function handle(IconRenderer $renderer, SplashRenderer $splash): int
     {
         if (Requirements::imageDriver() === null || ! function_exists('imagecreatetruecolor')) {
             $this->components->error(__('install.icons_need_gd'));
@@ -52,6 +53,11 @@ class IconsCommand extends Command
                 file_put_contents($dir.DIRECTORY_SEPARATOR.$file, $renderer->png($palettes[$key], $size, $kind));
             }
             file_put_contents($dir.DIRECTORY_SEPARATOR.'favicon.svg', $renderer->svgFavicon($palettes[$key]));
+
+            // Schermate di avvio per iPhone
+            foreach (SplashRenderer::DEVICES as [$w, $h]) {
+                file_put_contents($dir.DIRECTORY_SEPARATOR.SplashRenderer::fileName($w, $h), $splash->png($palettes[$key], $w, $h));
+            }
 
             $this->components->task($palettes[$key]['label'].' → '.$dir);
         }

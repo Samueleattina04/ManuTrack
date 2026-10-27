@@ -2,7 +2,7 @@
 
 Documento scritto man mano, fase per fase. Descrive cosa fa l'app dal punto di vista di chi la usa e di chi la gestisce. Le decisioni di progetto sono in `docs/PROPOSTA.md`.
 
-**Stato:** fase 2 completata (versione 0.2.0).
+**Stato:** fase 3 completata (versione 0.3.0).
 
 | Fase | Contenuto | Stato |
 |---|---|---|
@@ -297,3 +297,62 @@ Una sola voce di cron (`schedule:run` ogni minuto). Tutti i compiti girano nello
   - **Fai ritentare al cron**: dopo un errore;
   - **Crea una copia ora**.
 - L'avviso di aggiornamento in attesa o fallito compare in tutte le pagine solo a chi gestisce il sistema.
+
+## 16. App installabile (fase 3)
+
+- **Manifest** (`/manifest.webmanifest`): nome dell'azienda, icone della palette attiva (anche maskable), avvio a schermo intero (`standalone`), colori del tema.
+- **Service worker** (`/sw.js`): generato da Laravel a partire dal manifest di Vite (niente Workbox).
+  - Versione = `VERSION` + impronta dei file in cache: cambia a ogni rilascio.
+  - Cache: pagina offline, CSS e JavaScript compilati, caratteri latini, icona e favicon.
+  - Pagine: prima la rete; senza rete, la pagina **"Sei offline"** (`/offline`), che si ricarica da sola quando torna la connessione.
+  - File compilati: prima la cache. Icone e immagini: la cache, aggiornata in background.
+  - Mai in cache: chiamate Livewire, push, installazione, aggiornamento, file privati.
+  - `/sw.js` e `/offline` non aprono sessioni e non impostano cookie.
+- **Nuova versione:** il nuovo service worker resta in attesa. In basso compare "Nuova versione disponibile" con **Aggiorna**; la pagina si ricarica solo su richiesta. Il controllo avviene ogni ora e a ogni ritorno sull'app.
+- **Schermate di avvio iPhone:** 11 formati per palette, generati da `manutrack:icons` (per la palette personalizzata si usa la preimpostazione più vicina).
+
+## 17. Procedura guidata (`/app`)
+
+- Tre passi: **Installa**, **Notifiche**, **Prova**. Il dispositivo viene riconosciuto (iPhone/iPad con versione di iOS, Android, PC; browser; app già installata o no).
+- **iPhone:** illustrazioni animate di Condividi › Aggiungi alla schermata Home. Avvisi se il browser non è Safari, se iOS è precedente alla 16.4, o se la pagina è aperta in Safari anziché dall'icona.
+- **Android e PC:** pulsante di installazione quando il browser lo consente (`beforeinstallprompt`), altrimenti istruzioni dal menu.
+- **Notifiche:** il permesso si chiede **solo** dopo il tocco su "Attiva notifiche", mai all'apertura di una pagina. Se è negato, compaiono le istruzioni per riattivarlo sul proprio sistema.
+- **Prova:** "Invia notifica di prova" a questo dispositivo, con l'esito.
+- In panoramica, su telefono, un riquadro invita all'installazione finché l'app non è installata con le notifiche decise; "Non ora" lo nasconde su quel dispositivo.
+
+## 18. Notifiche push
+
+- Chiavi **VAPID** per installazione, in `.env` (`manutrack:vapid`, oppure in installazione).
+- **Iscrizioni** per dispositivo (`push_subscriptions`):
+  - endpoint con impronta univoca, chiavi del browser;
+  - nome del dispositivo ricavato dal browser (es. "iPhone · Safari");
+  - ultimo uso, ultimo invio riuscito, errori consecutivi.
+  Una persona può avere più dispositivi.
+- **Invio** con `minishlink/web-push`:
+  - l'iscrizione si elimina quando il servizio risponde 404/410 o dopo 5 errori consecutivi;
+  - funziona anche senza `bcmath`/`gmp`.
+- **Contenuto:** titolo, testo, pagina da aprire al tocco, etichetta (sostituisce la notifica precedente con la stessa etichetta), numero sul pallino dell'icona (Badging API, dove disponibile).
+- Il tocco sulla notifica porta in primo piano l'app già aperta, altrimenti la apre sulla pagina indicata.
+- **Rinnovo:** quando il browser cambia l'iscrizione (`pushsubscriptionchange`), il service worker la aggiorna su `/push/rinnova` presentando quella vecchia.
+- **Limiti:** 10 prove al minuto per persona; 30 chiamate al minuto per iscrizioni e rinnovi.
+- **Registro attività:** dispositivo aggiunto, dispositivo rimosso.
+
+## 19. Diagnostica notifiche (`/notifiche/diagnostica`)
+
+- Controlli su questo dispositivo, ciascuno con lo stato e cosa fare:
+  - HTTPS;
+  - service worker supportato e attivo (con versione);
+  - app installata;
+  - versione di iOS;
+  - push supportate;
+  - permesso;
+  - iscrizione sul dispositivo e sul server;
+  - chiavi VAPID;
+  - pallino sull'icona.
+- **Azioni:**
+  - attiva;
+  - prova su questo dispositivo o su tutti i propri;
+  - disattiva su questo dispositivo;
+  - **Copia rapporto** (testo senza chiavi né endpoint completi).
+- Elenco dei propri dispositivi iscritti, con l'ultimo invio riuscito e l'ultimo errore, e la rimozione.
+- La guida passo passo per i telefoni reali è in [`TEST-DISPOSITIVI.md`](TEST-DISPOSITIVI.md).

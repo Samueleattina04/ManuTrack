@@ -30,7 +30,7 @@ Questa guida spiega come creare una **nuova installazione per un cliente** su un
 |---|---|
 | PHP **8.3** | In DirectAdmin: *Account Manager › Domain Setup › PHP Version* (o *Select PHP Version*). |
 | Estensioni PHP indispensabili | `pdo_mysql`, `mbstring`, `openssl`, `curl`, `fileinfo`, `tokenizer`, `xml`, `ctype`, `json`, `filter` |
-| Estensioni consigliate | `gd` **o** `imagick` (foto e icone), `zip` (esportazioni), `intl`, `bcmath` o `gmp` (push) |
+| Estensioni consigliate | `gd` **o** `imagick` (foto e icone), `zip` (esportazioni), `intl`, `bcmath` o `gmp` (facoltative: velocizzano la cifratura delle notifiche push, che funzionano anche senza) |
 | Database | MySQL 8 o MariaDB 10.6+, con charset `utf8mb4` |
 | HTTPS | Obbligatorio: senza HTTPS l'app non si installa sui telefoni e le notifiche non funzionano |
 | Cron | Una voce ogni minuto (*Advanced Features › Cron Jobs*) |
@@ -73,8 +73,8 @@ Lo zip contiene `release.json`, scritto per ultimo, con la versione e l'elenco d
 ## 3. Dominio o sottodominio
 
 In DirectAdmin:
-- **Dominio dedicato** (es. `manutenzione.cliente.it`): *Account Manager › Domain Setup › Add New*.
-- **Sottodominio** (es. `manutrack.cliente.it`): *Account Manager › Subdomain Management › Add Subdomain*.
+- **Dominio dedicato** (es. `manutenzione.example.com`): *Account Manager › Domain Setup › Add New*.
+- **Sottodominio** (es. `manutrack.example.com`): *Account Manager › Subdomain Management › Add Subdomain*.
 
 DirectAdmin crea la cartella del sito:
 - `domains/<dominio>/public_html` per un dominio;
@@ -156,21 +156,21 @@ Il file inoltra tutto a `manutrack/public/` e blocca l'accesso al resto della ca
 ```dotenv
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://manutenzione.cliente.it
+APP_URL=https://manutenzione.example.com
 
 DB_HOST=localhost
 DB_DATABASE=utente_manutrack
 DB_USERNAME=utente_manutrack
 DB_PASSWORD=la-password-del-database
 
-MAIL_HOST=mail.cliente.it
-MAIL_USERNAME=manutrack@cliente.it
+MAIL_HOST=mail.example.com
+MAIL_USERNAME=manutrack@example.com
 MAIL_PASSWORD=...
-MAIL_FROM_ADDRESS="manutrack@cliente.it"
+MAIL_FROM_ADDRESS="manutrack@example.com"
 
 MANUTRACK_COMPANY_NAME="Nome del cliente"
 MANUTRACK_INSTALL_TOKEN=un-codice-lungo-e-casuale
-VAPID_SUBJECT="mailto:manutrack@cliente.it"
+VAPID_SUBJECT="mailto:manutrack@example.com"
 ```
 
 `APP_KEY` può restare vuota: la genera l'installazione. Il file `.env` contiene password: non va mai inviato per email né messo nel repository.
@@ -216,7 +216,7 @@ php artisan manutrack:install
 Oppure senza domande, per automatizzare:
 ```bash
 php artisan manutrack:install --company="Nome cliente" --name="Mario Rossi" \
-  --email=mario@cliente.it --palette=rame --vapid --no-interaction
+  --email=admin@example.com --palette=rame --vapid --no-interaction
 ```
 Senza `--password` il comando la chiede in modo nascosto (consigliato): una password scritta nel comando resta nella cronologia della shell.
 
@@ -246,7 +246,7 @@ Imposta `VAPID_SUBJECT` con un indirizzo email reale (`mailto:...`): i servizi p
 - [ ] `https://<dominio>` apre ManuTrack con il lucchetto e `http://` reindirizza su `https://`.
 - [ ] `https://<dominio>/.env` e `https://<dominio>/../.env` non sono raggiungibili.
 - [ ] **Sistema**: versione applicata, cron "attivo", requisiti senza voci rosse, notifiche push "chiavi configurate".
-- [ ] Dalla fase 3: prova di installazione su un telefono e "Invia notifica di prova".
+- [ ] Prova di installazione su un telefono e "Invia notifica di prova": checklist in [`TEST-DISPOSITIVI.md`](TEST-DISPOSITIVI.md).
 
 ## 13. Aggiornamenti
 
@@ -343,4 +343,4 @@ Facoltativo: `docker compose up -d` avvia Apache, PHP 8.3, MariaDB e un cron di 
 
 **Qualità:** `vendor/bin/pint` e `vendor/bin/phpstan analyse`.
 
-**Provare l'app installabile e le notifiche su un telefono vero.** Serve HTTPS anche in sviluppo. Il modo più semplice è un tunnel HTTPS verso il PC (ad esempio Cloudflare Tunnel o ngrok): apri l'indirizzo `https://…` dal telefono e imposta lo stesso indirizzo in `APP_URL`. Istruzioni dettagliate nella fase 3.
+**Provare l'app installabile e le notifiche su un telefono vero.** Serve HTTPS anche in sviluppo. Il modo più semplice è un tunnel HTTPS verso il PC (ad esempio Cloudflare Tunnel o ngrok): apri l'indirizzo `https://…` dal telefono e imposta lo stesso indirizzo in `APP_URL`. Istruzioni dettagliate in [`TEST-DISPOSITIVI.md`](TEST-DISPOSITIVI.md).

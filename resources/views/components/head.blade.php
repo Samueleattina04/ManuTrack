@@ -32,6 +32,12 @@
 <link rel="icon" href="{{ \App\Support\Brand\Brand::iconUrl('favicon.svg') }}" type="image/svg+xml">
 <link rel="icon" href="{{ \App\Support\Brand\Brand::iconUrl('favicon-32.png') }}" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="{{ \App\Support\Brand\Brand::iconUrl('apple-touch-icon.png') }}">
+@foreach(\App\Support\Brand\SplashRenderer::DEVICES as [$sw, $sh, $cw, $ch, $ratio])
+<link rel="apple-touch-startup-image" media="{{ \App\Support\Brand\SplashRenderer::media($cw, $ch, $ratio) }}" href="{{ \App\Support\Brand\Brand::splashUrl($sw, $sh) }}">
+@endforeach
+@auth
+<meta name="vapid-public-key" content="{{ config('manutrack.webpush.public_key') }}">
+@endauth
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 {{-- Dopo il CSS principale: la palette dell'azienda sostituisce quella predefinita --}}

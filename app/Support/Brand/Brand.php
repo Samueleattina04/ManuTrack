@@ -114,6 +114,20 @@ class Brand
     }
 
     /**
+     * Schermata di avvio iPhone per la palette attiva (per la palette personalizzata
+     * si usa quella della preimpostazione più vicina).
+     */
+    public static function splashUrl(int $width, int $height): string
+    {
+        $key = self::paletteKey();
+        if ($key === self::CUSTOM) {
+            $key = PaletteBuilder::nearestPreset(self::palette());
+        }
+
+        return asset("icons/{$key}/".SplashRenderer::fileName($width, $height));
+    }
+
+    /**
      * Variabili CSS della palette, da inserire nella pagina.
      */
     public static function cssVariables(): string

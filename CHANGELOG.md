@@ -3,6 +3,33 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.3.0] - Fase 3: app installabile e notifiche push di prova
+
+### Aggiunto
+- App installabile su PC, iPhone e Android:
+  - service worker generato da Laravel, con versione legata al rilascio;
+  - pagina "Sei offline";
+  - schermate di avvio per iPhone in 11 formati.
+- Avviso "Nuova versione disponibile": la pagina si ricarica solo quando si tocca "Aggiorna".
+- Procedura guidata **App e notifiche** (`/app`) in tre passi (installa, notifiche, prova), con illustrazioni animate per iPhone e Android e istruzioni per riattivare le notifiche negate.
+- Il permesso alle notifiche si chiede solo dopo un tocco, mai all'apertura della pagina.
+- Notifiche push:
+  - iscrizione per dispositivo;
+  - "Invia notifica di prova";
+  - numero sul pallino dell'icona dove supportato;
+  - rinnovo automatico dell'iscrizione;
+  - eliminazione delle iscrizioni rifiutate o fallite 5 volte di seguito.
+- Pagina **Diagnostica notifiche** (`/notifiche/diagnostica`): controlli su HTTPS, service worker, installazione, versione di iOS, permesso, iscrizione e chiavi; prova su uno o tutti i propri dispositivi; "Copia rapporto"; elenco dei dispositivi.
+- Invito all'installazione nella panoramica, su telefono.
+- Guida [`docs/TEST-DISPOSITIVI.md`](docs/TEST-DISPOSITIVI.md):
+  - sottodominio con HTTPS su DirectAdmin;
+  - chiavi VAPID anche senza SSH;
+  - checklist per iPhone e Android reali.
+- Controllo automatico nel browser `scripts/e2e/pwa-check.cjs`.
+
+### Corretto
+- Le notifiche push fallivano sui server senza le estensioni `bcmath` o `gmp`: un avviso della libreria veniva trattato come errore. Ora funzionano anche senza (le estensioni restano consigliate per la velocità).
+
 ## [0.2.0] - Fase 2: accesso, ruoli e impostazioni dell'azienda
 
 ### Aggiunto

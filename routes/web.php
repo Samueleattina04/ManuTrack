@@ -6,6 +6,10 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\ManifestController;
+use App\Http\Controllers\Push\PushSubscriptionController;
+use App\Http\Controllers\Push\PushTestController;
+use App\Http\Controllers\Pwa\PwaController;
+use App\Http\Controllers\Pwa\ServiceWorkerController;
 use App\Http\Controllers\SystemActionsController;
 use App\Http\Controllers\SystemController;
 use App\Livewire\Audit\Index as AuditIndex;
@@ -13,13 +17,34 @@ use App\Livewire\Profile;
 use App\Livewire\Settings\Company;
 use App\Livewire\Users\Index as UsersIndex;
 use App\Livewire\Users\Roles;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 /*
 | Nessuna closure nelle rotte: l'aggiornamento esegue route:cache.
 */
 
 Route::get('/manifest.webmanifest', ManifestController::class)->name('manifest');
+
+// App installabile: service worker e pagina offline (pubblici, servono anche prima dell'accesso)
+// Senza sessione né cookie: il browser li richiede spesso e non servono
+Route::withoutMiddleware([
+    StartSession::class,
+    ShareErrorsFromSession::class,
+    ValidateCsrfToken::class,
+    AddQueuedCookiesToResponse::class,
+    EncryptCookies::class,
+])->group(function () {
+    Route::get('/sw.js', [ServiceWorkerController::class, 'worker'])->name('pwa.worker');
+    Route::get('/offline', [ServiceWorkerController::class, 'offline'])->name('pwa.offline');
+});
+
+// Rinnovo dell'iscrizione push chiesto dal service worker (senza sessione né token CSRF)
+Route::post('/push/rinnova', [PushSubscriptionController::class, 'renew'])->middleware(['installed', 'throttle:push'])->name('push.renew');
 
 // Marchio dell'azienda (pubblico: serve anche alla pagina di accesso)
 Route::get('/marchio/logo', [BrandingController::class, 'logo'])->name('branding.logo');
@@ -41,6 +66,16 @@ Route::middleware(['installed', 'auth', 'active'])->group(function () {
     Route::get('/', HomeController::class)->name('home');
     Route::get('/profilo', Profile::class)->name('profile');
     Route::get('/design', DesignController::class)->name('design');
+
+    // App e notifiche: procedura guidata, diagnostica, iscrizioni
+    Route::get('/app', [PwaController::class, 'install'])->name('pwa.install');
+    Route::get('/notifiche/diagnostica', [PwaController::class, 'diagnostics'])->name('pwa.diagnostics');
+    Route::middleware('throttle:push')->group(function () {
+        Route::post('/push/iscrizioni', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
+        Route::delete('/push/iscrizioni', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
+        Route::delete('/push/dispositivi/{subscription}', [PushSubscriptionController::class, 'remove'])->name('push.devices.remove');
+    });
+    Route::post('/push/prova', PushTestController::class)->middleware('throttle:push-test')->name('push.test');
 
     Route::get('/utenti', UsersIndex::class)->middleware('can:users.view')->name('users.index');
     Route::get('/ruoli', Roles::class)->middleware('can:users.manage')->name('roles.index');

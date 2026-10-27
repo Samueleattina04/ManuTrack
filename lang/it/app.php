@@ -30,6 +30,7 @@ return [
         'audit' => 'Registro attività',
         'profile' => 'Profilo',
         'admin_group' => 'Amministrazione',
+        'app' => 'App e notifiche',
     ],
 
     // Etichette brevi per la barra in basso del telefono

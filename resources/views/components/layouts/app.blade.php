@@ -142,6 +142,7 @@
         </div>
     </div>
 
+    <x-update-banner />
     <x-toasts />
     @livewireScriptConfig
 </body>

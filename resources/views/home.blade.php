@@ -4,6 +4,19 @@
 @endphp
 <x-layouts.app :title="__('app.home.title')" :heading="__('app.home.title')">
     <div class="mx-auto flex max-w-6xl flex-col gap-6">
+        {{-- Invito a installare l'app e attivare le notifiche (solo telefono, finché serve) --}}
+        <div x-data="appPrompt" x-show="visible" x-cloak class="card flex items-center gap-4 border-accent-fg/40 p-4">
+            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] bg-surface-2 text-accent-fg"><x-icon name="smartphone" class="!h-6 !w-6" /></span>
+            <div class="min-w-0 flex-1">
+                <strong class="block" x-text="env.standalone ? @js(__('pwa.prompt.notifications_title')) : @js(__('pwa.prompt.title'))"></strong>
+                <span class="text-sm text-fg-2" x-text="env.standalone ? @js(__('pwa.prompt.notifications_text')) : @js(__('pwa.prompt.text'))"></span>
+            </div>
+            <div class="flex flex-col gap-1 sm:flex-row">
+                <a href="{{ route('pwa.install') }}" class="btn btn-primary btn-sm">{{ __('pwa.prompt.action') }}</a>
+                <button type="button" class="btn btn-ghost btn-sm" @click="dismiss()">{{ __('pwa.prompt.dismiss') }}</button>
+            </div>
+        </div>
+
         <section class="card relative overflow-hidden p-6 lg:p-8">
             <div class="pointer-events-none absolute -top-24 -right-16 h-72 w-72 rounded-full" style="background: radial-gradient(closest-side, var(--mt-glow), transparent)"></div>
             <div class="relative grid items-center gap-6 lg:grid-cols-[1fr_auto]">

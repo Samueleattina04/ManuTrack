@@ -24,6 +24,7 @@ class Navigation
             ['preventive', 'calendar', null, 'g p', 'piani calendario', 'preventive.view'],
             ['inventory', 'box', null, 'g r', 'ricambi magazzino', 'inventory.view'],
             ['notifications', 'bell', null, 'g n', 'avvisi', null],
+            ['app', 'smartphone', 'pwa.install', null, 'app installa telefono notifiche push diagnostica', null],
         ]);
     }
 
