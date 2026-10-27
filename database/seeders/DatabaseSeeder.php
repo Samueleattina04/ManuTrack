@@ -23,9 +23,19 @@ class DatabaseSeeder extends Seeder
 
     public const DEMO_PASSWORD = 'manutrack-demo';
 
+    /**
+     * I dati e gli account dimostrativi si creano solo in sviluppo o in
+     * un'installazione dimostrativa (MANUTRACK_DEMO=true), mai in produzione.
+     * manutrack:install e l'installazione dal browser non usano i seeder.
+     */
+    public static function demoAllowed(): bool
+    {
+        return ! app()->isProduction() || (bool) config('manutrack.demo');
+    }
+
     public function run(): void
     {
-        if (app()->isProduction() && ! config('manutrack.demo')) {
+        if (! self::demoAllowed()) {
             $this->command?->error('In produzione usa "php artisan manutrack:install".');
 
             return;

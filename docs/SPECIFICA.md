@@ -2,7 +2,7 @@
 
 Documento scritto man mano, fase per fase. Descrive cosa fa l'app dal punto di vista di chi la usa e di chi la gestisce. Le decisioni di progetto sono in `docs/PROPOSTA.md`.
 
-**Stato:** fase 5 completata (versione 0.5.0).
+**Stato:** fase 5 completata (versione 0.5.1).
 
 | Fase | Contenuto | Stato |
 |---|---|---|
@@ -586,7 +586,7 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
 | completato | chiuso | Chiudere e riaprire | il costo orario del momento resta fissato |
 | completato | in corso | Chiudere e riaprire | riapertura, motivo obbligatorio, contatore riaperture |
 
-  Nessun altro passaggio è possibile, **nemmeno per l'amministratore**: il ciclo si controlla nell'azione, non solo nei permessi.
+  Nessun altro passaggio è possibile con le azioni normali: il ciclo si controlla nell'azione, non solo nei permessi. L'unica eccezione è "Correggi stato" (§30.2).
 - **Prendo io:** chi esegue gli ordini può prendere in carico un ordine senza assegnatari.
 - **Assegnatari:** solo persone che possono eseguire gli ordini. Chi viene aggiunto riceve una notifica, urgente se l'ordine è critico.
 - **Checklist:**
@@ -635,6 +635,26 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
 
 È verificata dai test `tests/Feature/Maintenance/RolePermissionsTest.php`, una riga per ruolo.
 
+### 30.2 Correggi stato (solo amministratore, dalla 0.5.1)
+
+- **Chi:** solo il ruolo Amministratore (policy `correctStatus`). Tutti gli altri ruoli, responsabile compreso, restano nel ciclo normale.
+- **Cosa fa:** porta un ordine in **qualunque stato**, anche dopo la chiusura o l'annullamento. Il motivo è obbligatorio.
+- **Dove resta traccia:**
+  - nello storico dell'ordine, segnato "correzione";
+  - nel registro attività, con stato, date di completamento e chiusura, e fermi prima e dopo.
+- **Campi resi coerenti:**
+  - stati attivi: date di completamento e chiusura azzerate;
+  - completato o chiuso: data di completamento modificabile, ma non prima dell'inizio del lavoro; alla chiusura si fissa il costo orario;
+  - in attesa: motivo obbligatorio;
+  - i cronometri si fermano se l'ordine non è in corso.
+- **Fermi macchina collegati** (dell'ordine o della sua segnalazione):
+  - "Automatico" chiude i fermi aperti se l'ordine diventa completato, chiuso o annullato;
+  - "Chiudi" li chiude alla data di completamento;
+  - "Riapri" riapre l'ultimo fermo chiuso, se la macchina non ne ha già uno aperto;
+  - "Lascia com'è" non li tocca.
+  - In ogni caso, se cambia la data di completamento, i fermi che si erano chiusi con il completamento si spostano con lei.
+- Lo stato della macchina non cambia da solo: si corregge dalla sua scheda.
+
 ## 31. Impostazioni manutenzione (`/ordini/impostazioni`)
 
 - **Modelli di checklist:**
@@ -655,4 +675,11 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
   - "Segnala un guasto";
   - **storico interventi** (ordini e segnalazioni aperte) con le ore di fermo degli ultimi 90 giorni;
   - "Nuovo ordine" per quella macchina.
+
+## 33. Account dimostrativi (dalla 0.5.1)
+
+- Gli account dimostrativi (`operatore@`, `responsabile@`, `tecnico1@`, `tecnico2@`, `admin@example.com`, password `manutrack-demo`) li crea **solo** il seeder di sviluppo (`php artisan migrate --seed`). Fuori da produzione, oppure con `MANUTRACK_DEMO=true`, li crea anche `DemoMaintenanceSeeder`.
+- `manutrack:install` e l'installazione dal browser creano soltanto l'amministratore indicato, senza dati dimostrativi. Lo verificano i test `tests/Feature/Setup/DemoAccountsTest.php`.
+- I seeder dimostrativi non fanno nulla in produzione, salvo installazione dimostrativa.
+- **Avviso:** se in produzione (non dimostrativa) esistono account `@example.com`, `@example.org` o `@example.net`, la pagina Sistema li elenca e invita a disattivarli o a dar loro un indirizzo vero.
 

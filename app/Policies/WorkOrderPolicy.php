@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Enums\WorkOrderStatus;
 use App\Models\User;
 use App\Models\WorkOrder;
+use App\Support\Access\Access;
 
 /**
  * Chi può fare cosa su un ordine di lavoro.
@@ -16,6 +17,7 @@ use App\Models\WorkOrder;
  * - Prendere in carico un ordine senza assegnatari: "Eseguire gli ordini".
  * - Assegnare, pianificare, annullare, modificare: "Pianificare e assegnare".
  * - Chiudere e riaprire: "Chiudere e riaprire gli ordini".
+ * - Correggere lo stato fuori dal ciclo: solo l'amministratore.
  */
 class WorkOrderPolicy
 {
@@ -64,6 +66,16 @@ class WorkOrderPolicy
         }
 
         return $permission !== 'work_orders.execute' || $this->execute($user, $order);
+    }
+
+    /**
+     * "Correggi stato": solo l'amministratore, in qualunque momento (anche dopo
+     * la chiusura). Gli altri ruoli restano vincolati al ciclo normale, anche se
+     * hanno tutti i permessi degli ordini.
+     */
+    public function correctStatus(User $user, WorkOrder $order): bool
+    {
+        return $user->hasRole(Access::ADMIN);
     }
 
     public function comment(User $user, WorkOrder $order): bool

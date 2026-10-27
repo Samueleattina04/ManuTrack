@@ -3,6 +3,7 @@
 namespace App\Support\Setup;
 
 use App\Models\SystemVersion;
+use App\Models\User;
 use App\Support\AppVersion;
 use App\Support\Backup\DatabaseBackup;
 use App\Support\Files\PhotoProcessor;
@@ -67,6 +68,29 @@ class SystemStatus
         }
     }
 
+    /** Domini riservati agli esempi: account così in produzione sono quasi certamente di prova */
+    public const EXAMPLE_DOMAINS = ['example.com', 'example.org', 'example.net'];
+
+    /**
+     * Account con indirizzi d'esempio in un ambiente di produzione (non dimostrativo).
+     *
+     * @return list<string>
+     */
+    public function exampleAccounts(): array
+    {
+        if (! app()->isProduction() || config('manutrack.demo')) {
+            return [];
+        }
+
+        return User::query()
+            ->where(function ($q): void {
+                foreach (self::EXAMPLE_DOMAINS as $domain) {
+                    $q->orWhere('email', 'like', '%@'.$domain);
+                }
+            })
+            ->orderBy('email')->pluck('email')->all();
+    }
+
     public function pushConfigured(): bool
     {
         return filled(config('manutrack.webpush.public_key')) && filled(config('manutrack.webpush.private_key'));
@@ -89,6 +113,7 @@ class SystemStatus
             'pending_jobs' => $this->pendingJobs(),
             'failed_jobs' => $this->failedJobs(),
             'push_configured' => $this->pushConfigured(),
+            'example_accounts' => $this->exampleAccounts(),
             'push_early_response' => PushDispatcher::earlyResponseMode(),
             'image_driver' => Requirements::imageDriver(),
             'photo_format' => PhotoProcessor::outputFormat(),

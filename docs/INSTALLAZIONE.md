@@ -277,7 +277,7 @@ Senza SSH: una voce di cron da eseguire una sola volta, come per le chiavi VAPID
 
 - [ ] `https://<dominio>` apre ManuTrack con il lucchetto e `http://` reindirizza su `https://`.
 - [ ] `https://<dominio>/.env` e `https://<dominio>/../.env` non sono raggiungibili.
-- [ ] **Sistema**: versione applicata, cron "attivo", requisiti senza voci rosse, notifiche push "chiavi configurate".
+- [ ] **Sistema**: versione applicata, cron "attivo", requisiti senza voci rosse, notifiche push "chiavi configurate", nessun avviso di account `@example.com`.
 - [ ] Prova di installazione su un telefono e "Invia notifica di prova": checklist in [`TEST-DISPOSITIVI.md`](TEST-DISPOSITIVI.md).
 
 ## 13. Aggiornamenti

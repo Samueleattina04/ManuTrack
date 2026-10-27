@@ -4,6 +4,7 @@ namespace App\Livewire\WorkOrders;
 
 use App\Actions\Assets\StoreAttachment;
 use App\Actions\Maintenance\AssignWorkOrder;
+use App\Actions\Maintenance\CorrectWorkOrderStatus;
 use App\Actions\Maintenance\CreateWorkOrder;
 use App\Actions\Maintenance\TransitionWorkOrder;
 use App\Actions\Maintenance\WorkTimer;
@@ -49,6 +50,11 @@ class Show extends Component
         'note' => '', 'waiting_reason' => 'ricambi', 'completion_notes' => '',
         'failure_problem_id' => '', 'failure_cause_id' => '', 'failure_remedy_id' => '', 'asset_operational' => true,
     ];
+
+    public bool $correcting = false;
+
+    /** @var array{to: string, reason: string, completed_at: string, waiting_reason: string, downtime: string} */
+    public array $correction = ['to' => '', 'reason' => '', 'completed_at' => '', 'waiting_reason' => 'ricambi', 'downtime' => ''];
 
     public bool $editingAssignees = false;
 
@@ -142,6 +148,44 @@ class Show extends Component
         $assign->handle($this->workOrder, [auth()->id()], auth()->user());
         $this->workOrder->refresh();
         $this->dispatch('toast', message: __('maintenance.order.taken'));
+    }
+
+    // ---------- Correggi stato (amministratore) ----------
+
+    public function startCorrection(): void
+    {
+        $this->authorize('correctStatus', $this->workOrder);
+        $this->resetErrorBag();
+        $this->correction = [
+            'to' => '',
+            'reason' => '',
+            'completed_at' => ($this->workOrder->completed_at ?? now())->format('Y-m-d\TH:i'),
+            'waiting_reason' => $this->workOrder->waiting_reason->value ?? 'ricambi',
+            'downtime' => '',
+        ];
+        $this->correcting = true;
+    }
+
+    public function saveCorrection(CorrectWorkOrderStatus $correct): void
+    {
+        $this->authorize('correctStatus', $this->workOrder);
+        $input = $this->correction;
+        $input['downtime'] = $input['downtime'] ?: null;
+        $input['completed_at'] = $input['completed_at'] ?: null;
+
+        try {
+            $correct->handle($this->workOrder, auth()->user(), $input);
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $field => $messages) {
+                $this->addError('correction.'.$field, $messages[0]);
+            }
+
+            return;
+        }
+
+        $this->correcting = false;
+        $this->workOrder->refresh();
+        $this->dispatch('toast', message: __('maintenance.correction.done', ['status' => $this->workOrder->status->label()]));
     }
 
     // ---------- Assegnatari e dati ----------
@@ -427,7 +471,10 @@ class Show extends Component
                 'update' => $user->can('update', $o),
                 'comment' => $user->can('comment', $o),
                 'costs' => $user->can('viewCosts', $o),
+                'correct' => $user->can('correctStatus', $o),
             ],
+            'linkedDowntimes' => $this->correcting ? app(CorrectWorkOrderStatus::class)->linkedDowntimes($o) : collect(),
+            'allStatuses' => WorkOrderStatus::cases(),
             'myTimer' => $entries->first(fn (TimeEntry $t) => $t->isRunning() && $t->user_id === $user->id),
             'running' => $entries->filter(fn (TimeEntry $t) => $t->isRunning()),
             'laborMinutes' => $o->laborMinutes(),

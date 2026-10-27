@@ -120,4 +120,9 @@ return [
         'jpeg' => 'JPEG ridotto: GD/Imagick senza supporto WebP',
         'none' => 'originali, non ridotte: mancano GD e Imagick',
     ],
+    'example_accounts' => [
+        'title' => '{1} C\'è un account con un indirizzo d\'esempio|[2,*] Ci sono :count account con indirizzi d\'esempio',
+        'text' => 'Indirizzi @example.com (o .org, .net) sono riservati agli esempi: in produzione sono quasi certamente account di prova, magari con una password nota. Disattivali o assegna loro un indirizzo vero.',
+        'open' => 'Apri Persone',
+    ],
 ];

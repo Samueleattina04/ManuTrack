@@ -23,7 +23,7 @@ class DemoMaintenanceSeeder extends Seeder
 {
     public function run(): void
     {
-        if (WorkOrder::query()->exists() || ! Asset::query()->exists()) {
+        if (! DatabaseSeeder::demoAllowed() || WorkOrder::query()->exists() || ! Asset::query()->exists()) {
             return;
         }
 

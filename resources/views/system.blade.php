@@ -9,6 +9,18 @@
     <div class="mx-auto flex max-w-6xl flex-col gap-6">
         <p class="max-w-prose text-fg-2">{{ __('system.intro') }}</p>
 
+        @if($status['example_accounts'] !== [])
+            <div class="alert alert-warn" role="alert">
+                <x-icon name="alert-triangle" />
+                <div class="min-w-0 flex-1">
+                    <strong>{{ trans_choice('system.example_accounts.title', count($status['example_accounts']), ['count' => count($status['example_accounts'])]) }}</strong>
+                    <p class="mt-1 text-fg-2">{{ __('system.example_accounts.text') }}</p>
+                    <p class="mt-1 font-mono text-[12.5px] break-words">{{ implode(', ', array_slice($status['example_accounts'], 0, 10)) }}@if(count($status['example_accounts']) > 10) …@endif</p>
+                    @can('users.manage')<a href="{{ route('users.index', ['q' => '@example.']) }}" class="btn btn-secondary btn-sm mt-3">{{ __('system.example_accounts.open') }}</a>@endcan
+                </div>
+            </div>
+        @endif
+
         @if($error)
             <div class="alert alert-ko" role="alert">
                 <x-icon name="alert-triangle" />

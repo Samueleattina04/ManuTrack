@@ -14,6 +14,7 @@ use Illuminate\Support\Carbon;
  * @property WorkOrderStatus $to
  * @property int|null $user_id
  * @property string|null $note
+ * @property bool $is_correction
  * @property Carbon $created_at
  * @property-read User|null $user
  */
@@ -21,11 +22,11 @@ class WorkOrderStatusChange extends Model
 {
     public const UPDATED_AT = null;
 
-    protected $fillable = ['from', 'to', 'user_id', 'note'];
+    protected $fillable = ['from', 'to', 'user_id', 'note', 'is_correction'];
 
     protected function casts(): array
     {
-        return ['from' => WorkOrderStatus::class, 'to' => WorkOrderStatus::class];
+        return ['from' => WorkOrderStatus::class, 'to' => WorkOrderStatus::class, 'is_correction' => 'boolean'];
     }
 
     /** @return BelongsTo<User, $this> */

@@ -3,6 +3,21 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.5.1] - Correzioni alla fase 5
+
+### Aggiunto
+- **Correggi stato** di un ordine di lavoro, solo per l'amministratore:
+  - qualunque stato, anche dopo la chiusura;
+  - motivo obbligatorio;
+  - registrazione nello storico dell'ordine (segnata "correzione") e nel registro attività;
+  - aggiustamento dei fermi macchina collegati (chiusura, riapertura, spostamento con la data di completamento).
+  - Gli altri ruoli restano vincolati al ciclo normale.
+- Avviso nella pagina Sistema se in produzione esistono account con indirizzi `@example.com`, `.org` o `.net`.
+- Test che verificano che `manutrack:install` e l'installazione dal browser non creano account né dati dimostrativi.
+
+### Modificato
+- I seeder dimostrativi non creano nulla in produzione, salvo con `MANUTRACK_DEMO=true`.
+
 ## [0.5.0] - Fase 5: segnalazioni e ordini di lavoro
 
 ### Aggiunto

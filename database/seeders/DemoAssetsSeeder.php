@@ -16,7 +16,7 @@ class DemoAssetsSeeder extends Seeder
 {
     public function run(): void
     {
-        if (Asset::query()->exists()) {
+        if (! DatabaseSeeder::demoAllowed() || Asset::query()->exists()) {
             return;
         }
 

@@ -51,8 +51,63 @@
                     <x-icon :name="$to === S::InProgress && $o->status === S::Completed ? 'refresh' : $to->icon()" />{{ $label($to) }}
                 </button>
             @endforeach
-            @if($can['update'])<button type="button" class="btn btn-ghost ml-auto" wire:click="editDetails"><x-icon name="pencil" />{{ __('app.edit') }}</button>@endif
+            <span class="ml-auto flex flex-wrap gap-2">
+                @if($can['correct'])<button type="button" class="btn btn-ghost" wire:click="startCorrection"><x-icon name="shield" />{{ __('maintenance.correction.button') }}</button>@endif
+                @if($can['update'])<button type="button" class="btn btn-ghost" wire:click="editDetails"><x-icon name="pencil" />{{ __('app.edit') }}</button>@endif
+            </span>
         </div>
+
+        {{-- Correggi stato: solo amministratore, fuori dal ciclo normale --}}
+        @if($correcting)
+            <form wire:submit="saveCorrection" class="flex flex-col gap-4 rounded-[var(--radius-md)] border border-[color-mix(in_oklab,var(--mt-warn)_55%,transparent)] p-4" aria-labelledby="corr-title">
+                <div>
+                    <h3 id="corr-title" class="font-bold">{{ __('maintenance.correction.title') }}</h3>
+                    <p class="text-sm text-fg-2">{{ __('maintenance.correction.intro') }}</p>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="field">
+                        <label for="corr-to" class="field-label">{{ __('maintenance.correction.to') }}</label>
+                        <select id="corr-to" wire:model.live="correction.to" class="input">
+                            <option value="">—</option>
+                            @foreach($allStatuses as $st)<option value="{{ $st->value }}">{{ $st->label() }}@if($st === $o->status) ({{ __('maintenance.correction.current') }})@endif</option>@endforeach
+                        </select>
+                        @error('correction.to')<span class="field-error">{{ $message }}</span>@enderror
+                    </div>
+                    @if(in_array($correction['to'], ['completato', 'chiuso'], true))
+                        <x-form.input name="correction.completed_at" type="datetime-local" :label="__('maintenance.correction.completed_at')" wire:model="correction.completed_at" />
+                    @elseif($correction['to'] === 'in_attesa')
+                        <div class="field">
+                            <label for="corr-wait" class="field-label">{{ __('maintenance.field.waiting_reason') }}</label>
+                            <select id="corr-wait" wire:model="correction.waiting_reason" class="input">@foreach($reasons as $r)<option value="{{ $r->value }}">{{ $r->label() }}</option>@endforeach</select>
+                        </div>
+                    @endif
+                </div>
+                <div class="field">
+                    <label for="corr-reason" class="field-label">{{ __('maintenance.correction.reason') }}</label>
+                    <textarea id="corr-reason" wire:model="correction.reason" rows="2" class="input py-2.5" placeholder="{{ __('maintenance.correction.reason_placeholder') }}"></textarea>
+                    @error('correction.reason')<span class="field-error"><x-icon name="alert-circle" class="!w-4 !h-4" />{{ $message }}</span>@enderror
+                </div>
+                @if($linkedDowntimes->isNotEmpty())
+                    <fieldset>
+                        <legend class="field-label mb-1">{{ __('maintenance.correction.downtime') }}</legend>
+                        <ul class="mb-2 text-sm text-muted">
+                            @foreach($linkedDowntimes as $d)<li>{{ $d->started_at->translatedFormat('j M H:i') }} → {{ $d->ended_at?->translatedFormat('j M H:i') ?? __('maintenance.correction.still_open') }}</li>@endforeach
+                        </ul>
+                        <div class="grid gap-2 sm:grid-cols-4">
+                            @foreach(['' => 'auto', 'keep' => 'keep', 'close' => 'close', 'reopen' => 'reopen'] as $value => $key)
+                                <label class="choice !items-center !p-2.5"><input type="radio" value="{{ $value }}" wire:model="correction.downtime" class="sr-only"><span class="text-sm font-medium">{{ __('maintenance.correction.downtime_'.$key) }}</span></label>
+                            @endforeach
+                        </div>
+                        <span class="field-hint">{{ __('maintenance.correction.downtime_hint') }}</span>
+                    </fieldset>
+                @endif
+                @error('correction.completed_at')<span class="field-error">{{ $message }}</span>@enderror
+                <div class="flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary"><x-icon name="check" />{{ __('maintenance.correction.save') }}</button>
+                    <button type="button" class="btn btn-ghost" wire:click="$set('correcting', false)">{{ __('app.cancel') }}</button>
+                </div>
+            </form>
+        @endif
         @error('transition.status')<div class="alert alert-ko" role="alert"><x-icon name="alert-triangle" /><span>{{ $message }}</span></div>@enderror
         @error('transition.checklist')<div class="alert alert-ko" role="alert"><x-icon name="alert-triangle" /><span>{{ $message }}</span></div>@enderror
 
@@ -240,7 +295,7 @@
                             @php $s = $e['item']; @endphp
                             <li class="flex items-start gap-2 text-sm text-fg-2">
                                 <x-icon :name="$s->to->icon()" class="mt-0.5 !w-4 !h-4 text-muted" />
-                                <span>{!! __('maintenance.comments.status', ['name' => '<strong>'.e($s->user?->name ?? '—').'</strong>', 'status' => '<strong>'.e($s->to->label()).'</strong>']) !!}@if($s->note) · {{ $s->note }}@endif <span class="text-muted">· {{ $s->created_at->translatedFormat('j M H:i') }}</span></span>
+                                <span>@if($s->is_correction)<x-status tone="warn" icon="shield" class="mr-1">{{ __('maintenance.correction.badge') }}</x-status>@endif{!! __('maintenance.comments.status', ['name' => '<strong>'.e($s->user?->name ?? '—').'</strong>', 'status' => '<strong>'.e($s->to->label()).'</strong>']) !!}@if($s->note) · {{ $s->note }}@endif <span class="text-muted">· {{ $s->created_at->translatedFormat('j M H:i') }}</span></span>
                             </li>
                         @else
                             @php $c = $e['item']; @endphp

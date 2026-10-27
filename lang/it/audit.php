@@ -85,6 +85,7 @@ return [
             'updated' => 'Ordine di lavoro modificato',
             'assigned' => 'Assegnatari cambiati',
             'status_changed' => 'Stato dell\'ordine cambiato',
+            'status_corrected' => 'Stato dell\'ordine corretto dall\'amministratore',
             'template_saved' => 'Modello di checklist salvato',
             'template_deleted' => 'Modello di checklist eliminato',
         ],
