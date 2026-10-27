@@ -5,11 +5,13 @@ use App\Models\MaintenancePlan;
 use App\Models\Part;
 use App\Models\User;
 use App\Models\WorkOrder;
+use App\Support\Demo\Edition;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\DemoAssetsSeeder;
 use Database\Seeders\DemoInventorySeeder;
 use Database\Seeders\DemoMaintenanceSeeder;
 use Database\Seeders\DemoPreventiveSeeder;
+use Illuminate\Support\Facades\File;
 
 /** Account dimostrativi creati dal seeder di sviluppo */
 const DEMO_EMAILS = ['operatore@example.com', 'responsabile@example.com', 'tecnico1@example.com', 'tecnico2@example.com', 'magazzino@example.com', 'admin@example.com'];
@@ -80,7 +82,14 @@ it('la pagina Sistema avvisa se in produzione ci sono account @example.com', fun
     $this->app['env'] = 'production';
     $page()->assertOk()->assertSee(trans_choice('system.example_accounts.title', 1, ['count' => 1]))->assertSee('tecnico1@example.com');
 
-    // Installazione dimostrativa: gli account d'esempio sono voluti
+    // MANUTRACK_DEMO=true da solo non basta a nascondere l'avviso
     config(['manutrack.demo' => true]);
+    $page()->assertOk()->assertSee('tecnico1@example.com');
+
+    // Installazione demo confermata da pacchetto, .env e database: gli account d'esempio sono voluti
+    $dir = (string) config('manutrack.update.base_path');
+    File::ensureDirectoryExists($dir);
+    file_put_contents($dir.'/release.json', json_encode(['version' => '9.9.9', 'edition' => 'demo', 'files' => []]));
+    settings()->set(Edition::SETTING, Edition::DEMO);
     $page()->assertOk()->assertDontSee('tecnico1@example.com');
 });

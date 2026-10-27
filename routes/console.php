@@ -1,6 +1,8 @@
 <?php
 
 use App\Actions\Preventive\GeneratePlanOrders;
+use App\Support\Demo\DemoInstaller;
+use App\Support\Demo\Edition;
 use App\Support\Setup\SystemStatus;
 use App\Support\Update\Updater;
 use Illuminate\Support\Facades\Artisan;
@@ -48,6 +50,13 @@ Schedule::call(function (): void {
 Schedule::call(function (): void {
     app(GeneratePlanOrders::class)->run();
 })->everyFifteenMinutes()->name('manutrack:preventive')->withoutOverlapping(30);
+
+// Installazione demo: si azzera ogni notte (solo se pacchetto, .env e database sono tutti "demo")
+Schedule::call(function (): void {
+    if (Edition::isDemo()) {
+        app(DemoInstaller::class)->run();
+    }
+})->dailyAt((string) config('manutrack.demo_reset_at', '03:00'))->name('manutrack:demo-reset')->withoutOverlapping(60);
 
 // Pulizie periodiche
 Schedule::call(function (): void {

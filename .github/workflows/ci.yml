@@ -79,6 +79,8 @@ jobs:
         with:
           node-version: '22'
       - run: scripts/release.sh
+      # Pacchetto demo separato (con i dati dimostrativi): mai da consegnare ai clienti
+      - run: scripts/release.sh --demo
       - uses: actions/upload-artifact@v4
         with:
           name: manutrack-pacchetto

@@ -6,7 +6,7 @@ Software per la gestione della manutenzione di macchine e impianti (CMMS): ordin
 
 **Un'installazione per cliente:** ogni azienda ha la sua cartella con una copia dell'app e un suo database MySQL. Gira su un normale hosting condiviso con **PHP 8.3 e MySQL**, anche senza SSH (pannello DirectAdmin).
 
-> Stato: **fase 7 di 11** (versione 0.7.0): manutenzione preventiva con piani a tempo e a contatore, generazione automatica degli ordini, calendario e rispetto dei piani; magazzino ricambi con movimenti, costo medio, scorta minima, prelievo sugli ordini e distinta per macchina; segnalazioni rapide dal telefono (QR, foto, anche senza rete) e ordini di lavoro con ciclo di vita, checklist, tempi, fermi e codici guasto; macchine e impianti; foto in WebP; app installabile con notifiche urgenti. Il test sui telefoni reali è descritto in [`docs/TEST-DISPOSITIVI.md`](docs/TEST-DISPOSITIVI.md). Il piano completo è in [`docs/PROPOSTA.md`](docs/PROPOSTA.md).
+> Stato: **fase 8 di 11** (versione 0.8.0): dashboard degli indicatori (definizioni in [`docs/KPI.md`](docs/KPI.md)) e installazione demo separata; manutenzione preventiva con piani a tempo e a contatore, generazione automatica degli ordini, calendario e rispetto dei piani; magazzino ricambi con movimenti, costo medio, scorta minima, prelievo sugli ordini e distinta per macchina; segnalazioni rapide dal telefono (QR, foto, anche senza rete) e ordini di lavoro con ciclo di vita, checklist, tempi, fermi e codici guasto; macchine e impianti; foto in WebP; app installabile con notifiche urgenti. Il test sui telefoni reali è descritto in [`docs/TEST-DISPOSITIVI.md`](docs/TEST-DISPOSITIVI.md). Il piano completo è in [`docs/PROPOSTA.md`](docs/PROPOSTA.md).
 
 ## Tecnologie
 

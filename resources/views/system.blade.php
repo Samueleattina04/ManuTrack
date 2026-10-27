@@ -9,6 +9,10 @@
     <div class="mx-auto flex max-w-6xl flex-col gap-6">
         <p class="max-w-prose text-fg-2">{{ __('system.intro') }}</p>
 
+        @foreach($status['edition']['mismatches'] as $problem)
+            <div class="alert alert-ko" role="alert"><x-icon name="alert-triangle" /><span>{{ $problem }}</span></div>
+        @endforeach
+
         @if($status['example_accounts'] !== [])
             <div class="alert alert-warn" role="alert">
                 <x-icon name="alert-triangle" />
@@ -68,6 +72,7 @@
             </div>
             <div class="card p-4">
                 <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
+                    <dt class="text-muted">{{ __('demo.system.title') }}</dt><dd>{{ __('demo.system.'.($status['edition']['database'] ?? $status['edition']['package']), ['time' => config('manutrack.demo_reset_at'), 'last' => $status['edition']['reset_at'] ? \Illuminate\Support\Carbon::parse($status['edition']['reset_at'])->translatedFormat('j M H:i') : __('demo.system.never')]) }}</dd>
                     <dt class="text-muted">{{ __('system.cards.php') }}</dt><dd class="font-mono">{{ $status['php'] }}</dd>
                     <dt class="text-muted">{{ __('system.cards.database') }}</dt><dd class="font-mono truncate">{{ $status['database'] }}</dd>
                     <dt class="text-muted">{{ __('system.cards.images') }}</dt><dd>{{ $status['image_driver'] ? strtoupper($status['image_driver']) : __('install.req.missing') }}</dd>

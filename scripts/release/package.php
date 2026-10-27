@@ -4,7 +4,12 @@
  * Crea il pacchetto di rilascio da una cartella già preparata
  * (dipendenze di produzione installate e frontend compilato).
  *
- *   php scripts/release/package.php <cartella-build> <cartella-dist>
+ *   php scripts/release/package.php <cartella-build> <cartella-dist> [--edition=cliente|demo]
+ *
+ * Due edizioni, mai mischiate:
+ * - cliente (predefinita): senza seeder, factory né tracce dei dati dimostrativi;
+ * - demo: con i seeder, file manutrack-demo-<versione>.zip, "edition": "demo"
+ *   in release.json. Si installa solo con "php artisan manutrack:demo".
  *
  * - scrive release.json con versione, data ed elenco dei file con la dimensione;
  * - crea dist/manutrack-<versione>.zip con release.json come ULTIMO file;
@@ -20,6 +25,15 @@ if ($argc < 3) {
 
 $build = rtrim(realpath($argv[1]) ?: '', DIRECTORY_SEPARATOR);
 $dist = $argv[2];
+$edition = 'cliente';
+foreach (array_slice($argv, 3) as $arg) {
+    if (preg_match('/^--edition=(cliente|demo)$/', $arg, $m)) {
+        $edition = $m[1];
+    } else {
+        fwrite(STDERR, "Opzione sconosciuta: {$arg}\n");
+        exit(2);
+    }
+}
 
 if ($build === '' || ! is_file($build.'/VERSION') || ! is_file($build.'/artisan')) {
     fwrite(STDERR, "Cartella di build non valida: {$argv[1]}\n");
@@ -38,7 +52,13 @@ if (! preg_match('/^\d+\.\d+\.\d+([.-][0-9A-Za-z.-]+)?$/', $version)) {
 
 // Cose che non devono mai finire nel pacchetto: configurazione, dati e
 // dati dimostrativi (seeder, factory, database di prova, test)
-$forbidden = ['.env', 'public/hot', 'auth.json', 'database/seeders', 'database/factories', 'database/database.sqlite', 'tests'];
+$forbidden = ['.env', 'public/hot', 'auth.json', 'database/factories', 'database/database.sqlite', 'tests'];
+if ($edition === 'cliente') {
+    $forbidden[] = 'database/seeders';
+} elseif (! is_file($build.'/database/seeders/DatabaseSeeder.php')) {
+    fwrite(STDERR, "Il pacchetto demo deve contenere database/seeders: interrotto.\n");
+    exit(1);
+}
 foreach ($forbidden as $f) {
     if (file_exists($build.'/'.$f)) {
         fwrite(STDERR, "Il pacchetto conterrebbe {$f}: interrotto.\n");
@@ -48,7 +68,7 @@ foreach ($forbidden as $f) {
 
 // Nessuna traccia dei dati dimostrativi nel codice dell'app: la password
 // degli account di prova e i nomi dei seeder
-$demoMarkers = ['manutrack-demo', 'DemoAssetsSeeder', 'DemoMaintenanceSeeder', 'DemoInventorySeeder', 'DemoPreventiveSeeder'];
+$demoMarkers = $edition === 'demo' ? [] : ['manutrack-demo', 'DemoAssetsSeeder', 'DemoMaintenanceSeeder', 'DemoInventorySeeder', 'DemoPreventiveSeeder', 'DemoHistorySeeder'];
 foreach (['app', 'bootstrap', 'config', 'database', 'lang', 'public', 'resources', 'routes'] as $dir) {
     if (! is_dir($build.'/'.$dir)) {
         continue;
@@ -61,14 +81,16 @@ foreach (['app', 'bootstrap', 'config', 'database', 'lang', 'public', 'resources
         }
         $content = (string) file_get_contents($file->getPathname());
         foreach ($demoMarkers as $marker) {
-            if (str_contains($content, $marker)) {
+            // La password di prova ("manutrack-demo"), non il nome del pacchetto demo ("manutrack-demo-<versione>.zip")
+            $pattern = '/'.preg_quote($marker, '/').($marker === 'manutrack-demo' ? '(?!-)' : '').'/';
+            if (preg_match($pattern, $content) === 1) {
                 fwrite(STDERR, "Il pacchetto conterrebbe dati dimostrativi ({$marker}) in ".substr($file->getPathname(), strlen($build) + 1).": interrotto.\n");
                 exit(1);
             }
         }
     }
 }
-if (preg_match_all('/\\\\?Database\\\\+(Seeders|Factories)\\\\/', (string) @file_get_contents($build.'/vendor/composer/autoload_classmap.php'), $m)) {
+if ($edition === 'cliente' && preg_match_all('/\\\\?Database\\\\+(Seeders|Factories)\\\\/', (string) @file_get_contents($build.'/vendor/composer/autoload_classmap.php'), $m)) {
     fwrite(STDERR, "L'autoload del pacchetto contiene ancora seeder o factory: interrotto.\n");
     exit(1);
 }
@@ -99,6 +121,7 @@ sort($all);
 $manifest = [
     'name' => 'ManuTrack',
     'version' => $version,
+    'edition' => $edition,
     'built_at' => gmdate('c'),
     'php' => '>=8.3',
     'count' => count($files),
@@ -109,7 +132,7 @@ file_put_contents($build.'/release.json', json_encode($manifest, JSON_PRETTY_PRI
 if (! is_dir($dist)) {
     mkdir($dist, 0775, true);
 }
-$zipPath = rtrim($dist, '/\\').DIRECTORY_SEPARATOR."manutrack-{$version}.zip";
+$zipPath = rtrim($dist, '/\\').DIRECTORY_SEPARATOR.($edition === 'demo' ? "manutrack-demo-{$version}.zip" : "manutrack-{$version}.zip");
 @unlink($zipPath);
 
 $zip = new ZipArchive;

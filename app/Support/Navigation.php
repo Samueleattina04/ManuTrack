@@ -23,6 +23,7 @@ class Navigation
             ['assets', 'factory', 'assets.index', 'g m', 'macchine impianti ubicazioni categorie qr etichette contatori', 'assets.view'],
             ['plant', 'cube', null, null, 'stabilimento 3d gemello', 'assets.view'],
             ['preventive', 'calendar', 'preventive.index', 'g p', 'preventiva piani calendario scadenze rispetto contatore', 'preventive.view'],
+            ['kpi', 'bar-chart', 'kpi', 'g k', 'indicatori kpi mttr mtbf fermi arretrato costi report', 'reports.view'],
             ['inventory', 'box', 'inventory.parts.index', 'g r', 'ricambi magazzino fornitori movimenti riordino scorta', 'inventory.view'],
             ['notifications', 'bell', null, 'g n', 'avvisi', null],
             ['app', 'smartphone', 'pwa.install', null, 'app installa telefono notifiche push diagnostica', null],

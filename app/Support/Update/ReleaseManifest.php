@@ -12,7 +12,7 @@ class ReleaseManifest
     public const FILE = 'release.json';
 
     /**
-     * @param  array{version?: string, built_at?: string, files?: array<string, int>}  $data
+     * @param  array{version?: string, edition?: string, built_at?: string, files?: array<string, int>}  $data
      */
     public function __construct(
         private array $data,
@@ -40,6 +40,12 @@ class ReleaseManifest
     public function version(): ?string
     {
         return $this->data['version'] ?? null;
+    }
+
+    /** "cliente" o "demo" (i pacchetti precedenti alla 0.8.0 non lo scrivevano: cliente) */
+    public function edition(): string
+    {
+        return ($this->data['edition'] ?? 'cliente') === 'demo' ? 'demo' : 'cliente';
     }
 
     public function builtAt(): ?string

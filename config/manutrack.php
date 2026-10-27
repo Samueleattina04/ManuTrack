@@ -84,6 +84,9 @@ return [
     // Installazione dimostrativa con azzeramento notturno
     'demo' => (bool) env('MANUTRACK_DEMO', false),
 
+    // Ora dell'azzeramento notturno dell'installazione demo (solo pacchetto demo)
+    'demo_reset_at' => env('MANUTRACK_DEMO_RESET_AT', '03:00'),
+
     // Foto e documenti allegati (disco privato, mai raggiungibili direttamente dal web)
     'attachments' => [
         'disk' => env('MANUTRACK_ATTACHMENTS_DISK', 'local'),

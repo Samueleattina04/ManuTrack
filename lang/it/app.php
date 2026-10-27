@@ -26,6 +26,7 @@ return [
         'plant' => 'Stabilimento 3D',
         'preventive' => 'Preventiva',
         'inventory' => 'Magazzino',
+        'kpi' => 'Indicatori',
         'notifications' => 'Avvisi',
         'system' => 'Sistema',
         'design' => 'Design system',

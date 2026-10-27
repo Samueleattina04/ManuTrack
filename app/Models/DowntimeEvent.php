@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $ended_at
  * @property string|null $note
  * @property-read Asset $asset
+ * @property-read WorkOrder|null $workOrder
  */
 class DowntimeEvent extends Model
 {
@@ -32,6 +33,12 @@ class DowntimeEvent extends Model
     public function asset(): BelongsTo
     {
         return $this->belongsTo(Asset::class);
+    }
+
+    /** @return BelongsTo<WorkOrder, $this> */
+    public function workOrder(): BelongsTo
+    {
+        return $this->belongsTo(WorkOrder::class);
     }
 
     /** @param Builder<DowntimeEvent> $query */

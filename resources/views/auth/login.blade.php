@@ -6,6 +6,9 @@
             <div class="alert alert-ok" role="status"><x-icon name="check-circle" /><span>{{ session('status') }}</span></div>
         @endif
 
+        @if(\App\Support\Demo\Edition::isDemo())
+            <div class="alert alert-info" role="note"><x-icon name="info" /><span>{{ __('demo.banner', ['time' => config('manutrack.demo_reset_at')]) }} {{ __('demo.login_hint', ['email' => \Database\Seeders\DatabaseSeeder::DEMO_EMAIL, 'password' => \Database\Seeders\DatabaseSeeder::DEMO_PASSWORD]) }}</span></div>
+        @endif
         <form method="POST" action="{{ route('login') }}" class="flex flex-col gap-4" x-data="{ busy: false }" @submit="busy = true">
             @csrf
             <x-form.input name="email" type="email" :label="__('auth_ui.email')" autocomplete="username" inputmode="email" autofocus required />

@@ -6,6 +6,7 @@ use App\Models\SystemVersion;
 use App\Models\User;
 use App\Support\AppVersion;
 use App\Support\Backup\DatabaseBackup;
+use App\Support\Demo\Edition;
 use App\Support\Files\PhotoProcessor;
 use App\Support\Push\PushDispatcher;
 use App\Support\Update\Updater;
@@ -78,7 +79,8 @@ class SystemStatus
      */
     public function exampleAccounts(): array
     {
-        if (! app()->isProduction() || config('manutrack.demo')) {
+        // In demo gli account d'esempio sono voluti, ma solo se pacchetto, .env e database lo confermano
+        if (! app()->isProduction() || Edition::isDemo()) {
             return [];
         }
 
@@ -114,6 +116,12 @@ class SystemStatus
             'failed_jobs' => $this->failedJobs(),
             'push_configured' => $this->pushConfigured(),
             'example_accounts' => $this->exampleAccounts(),
+            'edition' => [
+                'package' => Edition::package(),
+                'database' => Edition::database(),
+                'mismatches' => Edition::mismatches(),
+                'reset_at' => settings('demo.reset_at'),
+            ],
             'push_early_response' => PushDispatcher::earlyResponseMode(),
             'image_driver' => Requirements::imageDriver(),
             'photo_format' => PhotoProcessor::outputFormat(),

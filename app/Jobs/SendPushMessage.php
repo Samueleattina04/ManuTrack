@@ -40,14 +40,32 @@ class SendPushMessage implements ShouldQueue
 
     public function handle(PushSender $sender): void
     {
-        if ($this->inline) {
-            // La risposta è già partita: l'invio non deve interrompersi se il browser chiude
-            ignore_user_abort(true);
-            if (function_exists('set_time_limit')) {
-                @set_time_limit(60);
-            }
+        if (! $this->inline) {
+            $this->deliver($sender);
+
+            return;
         }
 
+        // La risposta è già partita: l'invio non deve interrompersi se il browser chiude,
+        // ma non deve durare all'infinito. Il limite precedente torna al suo posto subito
+        // dopo, così chi lavora nello stesso processo (cron, test) non lo eredita.
+        ignore_user_abort(true);
+        $previous = (int) ini_get('max_execution_time');
+        $canLimit = function_exists('set_time_limit');
+        if ($canLimit) {
+            @set_time_limit(60);
+        }
+        try {
+            $this->deliver($sender);
+        } finally {
+            if ($canLimit) {
+                @set_time_limit($previous);
+            }
+        }
+    }
+
+    private function deliver(PushSender $sender): void
+    {
         $subscriptions = PushSubscription::query()
             ->whereIn('user_id', $this->userIds)
             ->whereHas('user', fn ($q) => $q->where('is_active', true))

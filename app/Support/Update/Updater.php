@@ -5,6 +5,7 @@ namespace App\Support\Update;
 use App\Models\SystemVersion;
 use App\Support\AppVersion;
 use App\Support\Backup\DatabaseBackup;
+use App\Support\Demo\Edition;
 use App\Support\FileLock;
 use App\Support\Settings;
 use App\Support\Setup\InstallState;
@@ -49,6 +50,11 @@ class Updater
             return UpdateResult::notInstalled();
         }
 
+        // Un pacchetto demo sopra un cliente (o viceversa) non si applica mai
+        if ($reason = self::editionBlocker()) {
+            return UpdateResult::skipped($reason);
+        }
+
         $lock = new FileLock('manutrack-update');
         if (! $lock->acquire()) {
             return UpdateResult::locked();
@@ -72,6 +78,10 @@ class Updater
 
         if (! InstallState::isInstalled()) {
             return __('system.update.not_installed');
+        }
+
+        if ($reason = self::editionBlocker()) {
+            return $reason;
         }
 
         $code = AppVersion::code();
@@ -111,6 +121,18 @@ class Updater
         }
 
         return null;
+    }
+
+    /** Pacchetto e database di edizioni diverse (demo / cliente) */
+    public static function editionBlocker(): ?string
+    {
+        $package = Edition::package();
+        $db = Edition::database();
+        if ($package === Edition::DEV || $db === null || $db === Edition::DEV || $package === $db) {
+            return null;
+        }
+
+        return __('demo.blocked.update', ['package' => $package, 'database' => $db]);
     }
 
     public function runAutomatic(): UpdateResult

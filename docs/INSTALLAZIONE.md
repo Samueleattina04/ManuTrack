@@ -363,6 +363,28 @@ Le copie non sostituiscono il backup dell'hosting: tieni attivo anche quello di 
 | L'importazione accetta solo CSV | Manca l'estensione `zip`: attivala dal selettore della versione PHP, oppure salva da Excel in "CSV UTF-8". |
 | Le notifiche non arrivano su iPhone | L'app deve essere aggiunta alla schermata Home (iOS 16.4+) e il permesso concesso da lì. Vedi la pagina diagnostica (dalla fase 3). |
 
+## 15 bis. Installazione demo (pacchetto separato)
+
+La demo è un'installazione a sé, con dati inventati e **azzeramento ogni notte**. Non si crea mai da un pacchetto cliente e non si mischia con i clienti.
+
+1. Sul PC prepara il **pacchetto demo**: `scripts/release.sh --demo` (Windows: `scripts\release.ps1 -Demo`). Ottieni `dist/manutrack-demo-<versione>.zip`. Il pacchetto normale `manutrack-<versione>.zip` non contiene i dati dimostrativi e non può creare una demo.
+2. Usa un **dominio e un database dedicati** (es. `demo.tuodominio.it`), mai quelli di un cliente.
+3. Carica ed estrai il pacchetto come al paragrafo 6, poi nel file `.env` aggiungi:
+   ```
+   MANUTRACK_DEMO=true
+   # facoltativo, ora dell'azzeramento (predefinita 03:00)
+   MANUTRACK_DEMO_RESET_AT=03:00
+   ```
+4. Con SSH: `php artisan manutrack:demo`. Senza SSH: chiedi al supporto di lanciarlo una volta (l'installazione dal browser e `manutrack:install` si rifiutano con il pacchetto demo).
+5. Configura il cron come al paragrafo 9: ogni notte all'ora indicata il database viene ricreato, i file caricati e le sessioni cancellati, i dati dimostrativi rimessi.
+
+**Controlli di sicurezza:**
+- `manutrack:demo` e l'azzeramento notturno partono solo se **tutti e tre** dicono "demo": il pacchetto (in `release.json`), il file `.env` (`MANUTRACK_DEMO=true`) e il database (registrato all'installazione demo). Un database cliente non viene mai toccato, anche se per errore ci finisce sopra il pacchetto demo o `MANUTRACK_DEMO=true`.
+- L'aggiornamento si rifiuta se il pacchetto caricato è di un'edizione diversa da quella dell'installazione (demo sopra cliente o viceversa).
+- La pagina **Sistema** mostra l'edizione e segnala in rosso ogni discordanza.
+- Nella demo, ogni pagina e la schermata di accesso mostrano "Versione dimostrativa" con le credenziali di prova (`admin@example.com` / `manutrack-demo`).
+- Per azzerare a mano: `php artisan manutrack:demo --azzera`.
+
 ## 16. Sviluppo in locale
 
 ```bash

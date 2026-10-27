@@ -251,8 +251,8 @@ Ogni fase si chiude con:
 | 5 | Segnalazioni e ordini di lavoro | segnalazione rapida e da QR, ciclo di vita, checklist, tempi, commenti, foto, fermi, codici guasto, elenchi con filtri e scorciatoie, storico macchina. **Anticipati dalla fase 8:** invio differito delle segnalazioni senza rete e notifica urgente per le segnalazioni critiche. **Aggiunta:** foto in WebP in tutta l'app (telefono e server) e `manutrack:foto-ottimizza` |
 | 6 | Magazzino | ricambi, magazzini, movimenti, fornitori, distinta per macchina, prelievo su OdL, scorta minima |
 | 7 | Manutenzione preventiva | piani a tempo e a contatore, generazione automatica, calendario, rispetto dei piani |
-| 8 | Notifiche complete e offline | eventi e preferenze, email per ruolo, raggruppamento, badge, centro notifiche, avviso nuova versione, coda offline delle segnalazioni |
-| 9 | Dashboard e report | KPI, filtri per periodo e sito, grafici animati, esportazioni CSV/XLSX |
+| 8 | Dashboard KPI | indicatori con definizioni in `docs/KPI.md` (MTTR, MTBF, fermi, arretrato, preventivo/correttivo, costi per macchina, rispetto dei piani), filtri per periodo, ubicazione e categoria (anticipata su richiesta) |
+| 9 | Notifiche complete, report ed esportazioni | eventi e preferenze, email per ruolo, raggruppamento, badge, centro notifiche, avviso nuova versione; grafici animati ed esportazioni CSV/XLSX |
 | 10 | 3D | M 3D d'ingresso, gemello digitale con editor e vista 2D di riserva, anteprima 3D della macchina |
 | 11 | GDPR, demo e consegna | esportazione, anonimizzazione, cancellazione totale, installazione demo con azzeramento notturno, revisione di sicurezza, README, `docs/INSTALLAZIONE.md` completa, licenze delle librerie, verifica finale PC, iPhone e Android, `scripts/deploy-many` facoltativo |
 

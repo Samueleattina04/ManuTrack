@@ -6,6 +6,7 @@ use App\Models\SystemVersion;
 use App\Models\User;
 use App\Support\Access\Access;
 use App\Support\AppVersion;
+use App\Support\Demo\Edition;
 use App\Support\Settings;
 use App\Support\Setup\InstallState;
 use App\Support\Setup\SystemSync;
@@ -30,7 +31,8 @@ class DatabaseSeeder extends Seeder
      */
     public static function demoAllowed(): bool
     {
-        return ! app()->isProduction() || (bool) config('manutrack.demo');
+        // In produzione servono il pacchetto demo e MANUTRACK_DEMO=true (in pratica: manutrack:demo)
+        return ! app()->isProduction() || (Edition::package() === Edition::DEMO && Edition::envSaysDemo());
     }
 
     public function run(): void
@@ -43,6 +45,7 @@ class DatabaseSeeder extends Seeder
 
         app(Settings::class)->setMany([
             'company.name' => config('manutrack.company.name') ?: 'Officine Demo',
+            Edition::SETTING => Edition::package() === Edition::DEMO ? Edition::DEMO : Edition::DEV,
         ]);
         app(SystemSync::class)->run();
 
@@ -67,6 +70,7 @@ class DatabaseSeeder extends Seeder
         $this->call(DemoAssetsSeeder::class);
         $this->call(DemoMaintenanceSeeder::class);
         $this->call(DemoInventorySeeder::class);
+        $this->call(DemoHistorySeeder::class);
         $this->call(DemoPreventiveSeeder::class);
 
         InstallState::writeLock(['version' => AppVersion::code(), 'seeded' => true]);

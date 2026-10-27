@@ -18,9 +18,9 @@ function fakeBuild(string $root, array $files): string
     return $build;
 }
 
-function runPackager(string $build, string $dist): array
+function runPackager(string $build, string $dist, string $edition = 'cliente'): array
 {
-    $proc = proc_open([PHP_BINARY, base_path('scripts/release/package.php'), $build, $dist], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    $proc = proc_open([PHP_BINARY, base_path('scripts/release/package.php'), $build, $dist, '--edition='.$edition], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
     $out = stream_get_contents($pipes[1]).stream_get_contents($pipes[2]);
 
     return [proc_close($proc), $out];
@@ -42,3 +42,22 @@ it('si rifiuta se la build contiene dati dimostrativi', function (array $files, 
     'password demo nel codice' => [['config/demo.php' => "<?php return ['password' => 'manutrack-demo'];\n"], 'manutrack-demo'],
     'seeder nell\'autoload' => [['vendor/composer/autoload_classmap.php' => "<?php return ['Database\\\\Seeders\\\\DemoAssetsSeeder' => 'x'];\n"], 'autoload'],
 ]);
+
+it('il pacchetto demo è separato: nome, edizione in release.json e seeder obbligatori', function () {
+    $build = fakeBuild($this->sandbox, ['database/seeders/DatabaseSeeder.php' => "<?php // manutrack-demo\n"]);
+    [$code] = runPackager($build, $this->sandbox.'/dist', 'demo');
+
+    expect($code)->toBe(0)
+        ->and(file_exists($this->sandbox.'/dist/manutrack-demo-9.9.9.zip'))->toBeTrue()
+        ->and(file_exists($this->sandbox.'/dist/manutrack-9.9.9.zip'))->toBeFalse()
+        ->and(json_decode((string) file_get_contents($build.'/release.json'), true)['edition'])->toBe('demo');
+
+    // Il pacchetto cliente scrive la sua edizione
+    [$code] = runPackager(fakeBuild($this->sandbox.'/c', []), $this->sandbox.'/dist');
+    expect($code)->toBe(0)->and(json_decode((string) file_get_contents($this->sandbox.'/c/build/release.json'), true)['edition'])->toBe('cliente');
+});
+
+it('il pacchetto demo senza seeder non si crea', function () {
+    [$code, $out] = runPackager(fakeBuild($this->sandbox, []), $this->sandbox.'/dist', 'demo');
+    expect($code)->toBe(1)->and($out)->toContain('database/seeders');
+});

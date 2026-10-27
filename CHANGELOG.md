@@ -3,6 +3,37 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.8.0] - Fase 8: dashboard degli indicatori; installazione demo separata
+
+### Aggiunto
+- **Dashboard degli indicatori** (`/indicatori`): MTTR, MTBF, numero e durata dei fermi, arretrato, preventivo/correttivo, costi per macchina, rispetto dei piani, tabella per macchina.
+- **`docs/KPI.md`**, con:
+  - la formula esatta di ogni indicatore;
+  - cosa è incluso o escluso (ordini annullati, fermi aperti, fermi pianificati, macchine dismesse o senza storico);
+  - il fuso orario Europe/Rome e l'ora legale;
+  - il comportamento ai bordi del periodo;
+  - i minimi sotto i quali si mostra "dati insufficienti".
+- Periodi rapidi o a scelta, filtri per ubicazione (con sotto-ubicazioni) e categoria; scorciatoia `G K`.
+- Test con dati noti e risultati calcolati a mano: ora legale, bordi, fermi aperti, dismesse, filtri.
+- **Installazione demo separata:**
+  - pacchetto `manutrack-demo-<versione>.zip` (`scripts/release.sh --demo`, `release.ps1 -Demo`, preparato anche dalla CI);
+  - comando `php artisan manutrack:demo [--azzera]`;
+  - azzeramento ogni notte (`MANUTRACK_DEMO_RESET_AT`, predefinito 03:00): database ricreato, file caricati e sessioni cancellati;
+  - banner "Versione dimostrativa" e credenziali di prova nella pagina di accesso.
+- **Edizione** (cliente, demo, sviluppo) scritta nel pacchetto (`release.json`) e nel database:
+  - l'installazione normale rifiuta il pacchetto demo;
+  - demo e azzeramento partono solo se pacchetto, `.env` e database dicono tutti "demo", e mai su un database illeggibile;
+  - l'aggiornamento rifiuta pacchetti di un'altra edizione;
+  - la pagina Sistema mostra l'edizione e ogni discordanza.
+- Sei mesi di storico dimostrativo per gli indicatori.
+
+### Modificato
+- L'avviso degli account `@example.com` in produzione si spegne solo in una demo confermata da pacchetto, `.env` e database (non più con il solo `MANUTRACK_DEMO=true`).
+- Piano a fasi: la dashboard KPI è la fase 8; notifiche complete, grafici ed esportazioni passano alla fase 9.
+
+### Corretto
+- L'invio immediato di una notifica fissava un limite di 60 secondi a tutto il processo PHP e non lo toglieva più. Il resto del lavoro nello stesso processo (cron, generazione dei piani, azzeramento demo) poteva interrompersi. Ora il limite precedente viene ripristinato subito dopo l'invio; test di regressione.
+
 ## [0.7.0] - Fase 7: manutenzione preventiva
 
 ### Aggiunto

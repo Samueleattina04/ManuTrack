@@ -9,6 +9,7 @@ use App\Support\Access\Access;
 use App\Support\Push\PushDispatcher;
 use App\Support\Push\PushMessage;
 use App\Support\Push\PushResult;
+use App\Support\Push\PushSender;
 use App\Support\Push\PushTransport;
 use App\Support\Push\PushUrgency;
 use Illuminate\Support\Facades\Artisan;
@@ -159,4 +160,12 @@ it('cambiare lo stato richiede il permesso', function () {
         ->set('newStatus', 'guasto')->call('changeStatus')->assertForbidden();
 
     expect($asset->fresh()->status->value)->toBe('operativa');
+});
+
+it('dopo un invio immediato il limite di tempo del processo torna quello di prima', function () {
+    set_time_limit(0);
+    (new SendPushMessage([$this->manager->id], new PushMessage('Prova', 'corpo'), PushUrgency::Immediate, inline: true))->handle(app(PushSender::class));
+
+    expect($this->transport->sent)->toHaveCount(1)
+        ->and(ini_get('max_execution_time'))->toBe('0');
 });

@@ -21,11 +21,12 @@ use Illuminate\Support\Collection;
 class PlanCompliance
 {
     /**
+     * @param  list<int>|null  $assetIds  solo gli ordini di queste macchine (null = tutte)
      * @return array{on_time: int, late: int, skipped: int, overdue: int, total: int, rate: float|null}
      */
-    public function summary(CarbonInterface $from, CarbonInterface $to, ?int $planId = null): array
+    public function summary(CarbonInterface $from, CarbonInterface $to, ?int $planId = null, ?array $assetIds = null): array
     {
-        return $this->count($this->orders($from, $to, $planId));
+        return $this->count($this->orders($from, $to, $planId, $assetIds));
     }
 
     /**
@@ -53,15 +54,17 @@ class PlanCompliance
     }
 
     /**
+     * @param  list<int>|null  $assetIds
      * @return Collection<int, WorkOrder>
      */
-    private function orders(CarbonInterface $from, CarbonInterface $to, ?int $planId): Collection
+    private function orders(CarbonInterface $from, CarbonInterface $to, ?int $planId, ?array $assetIds = null): Collection
     {
         $to = CarbonImmutable::parse($to->toDateString())->min(CarbonImmutable::today());
 
         return WorkOrder::query()
             ->whereNotNull('maintenance_plan_id')
             ->when($planId, fn ($q) => $q->where('maintenance_plan_id', $planId))
+            ->when($assetIds !== null, fn ($q) => $q->whereIn('asset_id', $assetIds))
             ->whereBetween('plan_due_on', [$from->toDateString(), $to->toDateString()])
             ->get(['id', 'maintenance_plan_id', 'status', 'plan_due_on', 'completed_at']);
     }

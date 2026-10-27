@@ -31,6 +31,7 @@ use App\Livewire\Inventory\PartShow;
 use App\Livewire\Inventory\Reorder as PartsReorder;
 use App\Livewire\Inventory\Suppliers;
 use App\Livewire\Inventory\Warehouses;
+use App\Livewire\Kpi\Dashboard as KpiDashboard;
 use App\Livewire\Maintenance\Settings as MaintenanceSettings;
 use App\Livewire\Preventive\Calendar as PreventiveCalendar;
 use App\Livewire\Preventive\Form as PlanForm;
@@ -137,6 +138,9 @@ Route::middleware(['installed', 'auth', 'active'])->group(function () {
     });
     Route::get('/ordini/nuovo', WorkOrderCreate::class)->middleware('can:work_orders.create')->name('work-orders.create');
     Route::get('/ordini/impostazioni', MaintenanceSettings::class)->middleware('can:work_orders.settings')->name('work-orders.settings');
+
+    // Indicatori
+    Route::get('/indicatori', KpiDashboard::class)->middleware('can:reports.view')->name('kpi');
 
     // Manutenzione preventiva
     Route::middleware('can:preventive.view')->group(function () {

@@ -166,6 +166,14 @@ I numeri in colonna usano `.num` (`tabular-nums`). Le etichette in maiuscolo (`.
   - checklist con caselle da 24 px e barra di avanzamento verde;
   - cronometro con il tempo che scorre nel pulsante "Ferma".
 
+## Indicatori
+
+- **Quattro riquadri** in alto (MTTR, MTBF, fermi, arretrato): valore grande in cifre tabellari con l'unità in grigio; sotto, su quanti eventi è calcolato.
+- **"Dati insufficienti"** in grigio al posto del numero, con la frase che spiega cosa manca: mai un numero fuorviante, mai uno zero inventato.
+- **Preventivo/correttivo:** barra orizzontale a due colori (verde preventivo, ambra correttivo) con le percentuali scritte accanto, mai solo il colore.
+- **Periodo** con le pastiglie dei periodi rapidi; sotto, in piccolo, l'intervallo esatto con il fuso orario.
+- In fondo "Come si calcolano", in parole semplici; le definizioni complete sono in `docs/KPI.md`.
+
 ## Manutenzione preventiva
 
 - **Stato del piano** sempre con icona e testo: "In regola" (verde), "In scadenza" (ambra, orologio), "Scaduto" (rosso, triangolo), "Sospeso" (grigio, pausa).

@@ -142,6 +142,7 @@ Una sola voce di cron (`schedule:run` ogni minuto). Tutti i compiti girano nello
 | Aggiornamento automatico (§3.3) | ogni minuto |
 | Coda: `queue:work --stop-when-empty --max-time=50`, saltata con `QUEUE_CONNECTION=sync` | ogni minuto, senza sovrapposizioni |
 | Ordini dei piani preventivi in scadenza (§36), senza sovrapposizioni | ogni 15 minuti |
+| Azzeramento dell'installazione demo (§38), solo se demo | ogni notte (predefinito 3:00, `MANUTRACK_DEMO_RESET_AT`) |
 | Pulizia dei job falliti (30 giorni) e dei lotti (7 giorni) | ogni giorno alle 3:30 |
 
 ## 6. Interfaccia (fase 1)
@@ -201,6 +202,7 @@ Una sola voce di cron (`schedule:run` ogni minuto). Tutti i compiti girano nello
 | `manutrack:icons [--palette=] [--path=]` | icone dell'app dal logo |
 | `manutrack:foto-ottimizza [--prova] [--limite=]` | foto già salvate in WebP (§27) |
 | `manutrack:preventiva [--prova]` | genera subito gli ordini dei piani preventivi in scadenza (§36) |
+| `manutrack:demo [--azzera]` | installa o azzera l'installazione demo; solo con il pacchetto demo (§38) |
 
 ---
 
@@ -684,9 +686,9 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
   - **ricambi della macchina** (distinta) con giacenza e stato, per chi vede il magazzino (dalla 0.6.0);
   - **piani preventivi** della macchina con la prossima scadenza e "Nuovo piano" (dalla 0.7.0).
 
-## 33. Account dimostrativi (dalla 0.5.1)
+## 33. Account dimostrativi (dalla 0.5.1; installazione demo dalla 0.8.0, §38)
 
-- Gli account dimostrativi (`operatore@`, `responsabile@`, `tecnico1@`, `tecnico2@`, `magazzino@` (dalla 0.6.0), `admin@example.com`, password `manutrack-demo`) li crea **solo** il seeder di sviluppo (`php artisan migrate --seed`). Fuori da produzione, oppure con `MANUTRACK_DEMO=true`, li creano anche `DemoMaintenanceSeeder` e `DemoInventorySeeder`.
+- Gli account dimostrativi (`operatore@`, `responsabile@`, `tecnico1@`, `tecnico2@`, `magazzino@` (dalla 0.6.0), `admin@example.com`, password `manutrack-demo`) li crea **solo** il seeder di sviluppo (`php artisan migrate --seed`) o l'installazione demo (`php artisan manutrack:demo`, §38). Fuori da produzione, oppure con `MANUTRACK_DEMO=true`, li creano anche `DemoMaintenanceSeeder` e `DemoInventorySeeder`.
 - `manutrack:install` e l'installazione dal browser creano soltanto l'amministratore indicato, senza dati dimostrativi. Lo verificano i test `tests/Feature/Setup/DemoAccountsTest.php`.
 - I seeder dimostrativi non fanno nulla in produzione, salvo installazione dimostrativa.
 - **Avviso:** se in produzione (non dimostrativa) esistono account `@example.com`, `@example.org` o `@example.net`, la pagina Sistema li elenca e invita a disattivarli o a dar loro un indirizzo vero.
@@ -838,4 +840,42 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
 
 ## 37. Registro attività: modifiche prima e dopo (correzione nella 0.7.0)
 - Le modifiche registravano il valore nuovo sia come "prima" sia come "dopo". Ora il "prima" è il valore precedente al salvataggio (vale per macchine, ricambi, magazzini, fornitori, ubicazioni, categorie, profilo, ordini e piani).
+
+## 38. Edizioni: cliente, demo, sviluppo (dalla 0.8.0)
+
+- **Due pacchetti distinti** dallo stesso codice:
+  - `manutrack-<versione>.zip` (cliente): senza seeder, factory né tracce dei dati dimostrativi (§35);
+  - `manutrack-demo-<versione>.zip` (demo): con i seeder; `scripts/release.sh --demo` / `release.ps1 -Demo`; la CI li prepara entrambi.
+- **L'edizione è scritta in due posti:** nel pacchetto (`release.json`, campo `edition`) e nel database (impostazione `install.edition`, all'installazione). Senza `release.json` (repository) l'edizione è "sviluppo"; i pacchetti e le installazioni precedenti alla 0.8.0 contano come cliente.
+- **Regole:**
+  - `manutrack:install` e l'installazione dal browser si rifiutano con il pacchetto demo;
+  - `manutrack:demo` e l'azzeramento notturno partono solo se pacchetto demo, `MANUTRACK_DEMO=true` e database vuoto o già demo; un database cliente non viene mai toccato;
+  - i seeder dimostrativi in produzione girano solo con pacchetto demo e `MANUTRACK_DEMO=true`;
+  - l'aggiornamento (manuale o automatico) si rifiuta se pacchetto e database sono di edizioni diverse;
+  - l'avviso degli account `@example.com` in produzione si spegne solo in una demo confermata da pacchetto, `.env` e database;
+  - la pagina Sistema mostra l'edizione (per la demo, anche l'ultimo azzeramento) e ogni discordanza.
+- **Azzeramento:** app in manutenzione, `migrate:fresh`, cancellazione dei file caricati (`storage/app/private`, `storage/app/public`) e delle sessioni, dati dimostrativi di nuovo. Le copie del database (`storage/app/backups`) restano.
+- Verificato da `tests/Feature/Setup/DemoEditionTest.php` e `ReleasePackageTest.php`.
+
+## 39. Indicatori (`/indicatori`, fase 8)
+
+- **Definizioni:** in `docs/KPI.md`, la fonte ufficiale con le formule esatte, ciò che è incluso o escluso, il fuso orario e il comportamento ai bordi del periodo. Il codice (`app/Support/Kpi/KpiCalculator.php`) le segue alla lettera.
+- **Indicatori:**
+  - MTTR;
+  - MTBF di flotta;
+  - numero e durata dei fermi (per guasto e pianificati, aperti);
+  - arretrato (situazione di adesso);
+  - percentuale preventivo/correttivo;
+  - costi per macchina;
+  - rispetto dei piani.
+  - Tabella per macchina con fermi, MTTR, MTBF e costi.
+- **Periodo:**
+  - rapido (ultimi 30 giorni, mese corrente, mese precedente, ultimi 3 mesi, anno corrente, ultimi 12 mesi) o a scelta;
+  - giorni interi in ora locale (Europe/Rome);
+  - se finisce nel futuro si ferma ad adesso.
+- **Filtri:** ubicazione (con le sotto-ubicazioni) e categoria.
+- **Dati insufficienti:** sotto i minimi di `docs/KPI.md` §1.6 la dashboard scrive "dati insufficienti" e cosa manca, invece di un numero.
+- **Permessi:** "Vedere i report" (amministratore, responsabile, magazziniere, osservatore); i costi anche con "Vedere i costi".
+- **Test con dati noti e risultati calcolati a mano** (`tests/Feature/Kpi/KpiCalculatorTest.php`): marzo 2026, con il passaggio all'ora legale (743 ore), fermi a cavallo dei bordi, fermo aperto, macchina dismessa, macchina senza storico, ordini annullati e fuori periodo, filtri.
+- **Dati dimostrativi:** sei mesi di storico inventato (`DemoHistorySeeder`), solo nel seeder di sviluppo e nel pacchetto demo.
 

@@ -6,6 +6,7 @@ use App\Models\SystemVersion;
 use App\Models\User;
 use App\Support\Access\Access;
 use App\Support\AppVersion;
+use App\Support\Demo\Edition;
 use App\Support\FileLock;
 use App\Support\Settings;
 use App\Support\Setup\EnvWriter;
@@ -53,6 +54,11 @@ class InstallApplication
                 throw new RuntimeException(__('install.requirements_failed'));
             }
 
+            // Il pacchetto demo si installa solo con "manutrack:demo", mai come cliente
+            if (Edition::package() === Edition::DEMO) {
+                throw new RuntimeException(__('demo.blocked.install'));
+            }
+
             $this->ensureAppKey($say);
 
             $say(__('install.step.migrate'));
@@ -69,6 +75,7 @@ class InstallApplication
                 $palette = 'rame';
             }
             $this->settings->setMany([
+                Edition::SETTING => Edition::package() === Edition::DEV ? Edition::DEV : Edition::CLIENT,
                 'company.name' => $data['company'],
                 'company.palette' => $palette,
             ]);

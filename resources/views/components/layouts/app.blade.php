@@ -83,6 +83,9 @@
         </div>
 
         <main id="contenuto" class="app-content pt-5 lg:pt-7 page-enter" tabindex="-1">
+            @if(\App\Support\Demo\Edition::isDemo())
+                <div class="mx-auto mb-5 max-w-6xl alert alert-info" role="note"><x-icon name="info" /><span>{{ __('demo.banner', ['time' => config('manutrack.demo_reset_at')]) }}</span></div>
+            @endif
             @if(session('status') && ! request()->routeIs('settings.company'))
                 <div class="mx-auto mb-5 max-w-6xl alert alert-ok" role="status"><x-icon name="check-circle" /><span>{{ session('status') }}</span></div>
             @endif

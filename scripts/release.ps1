@@ -4,12 +4,14 @@
 #  Uso (dalla cartella del progetto):
 #     powershell -ExecutionPolicy Bypass -File scripts\release.ps1
 #     powershell -ExecutionPolicy Bypass -File scripts\release.ps1 -Dirty
+#     powershell -ExecutionPolicy Bypass -File scripts\release.ps1 -Demo   (pacchetto DEMO separato)
 #
 #  Requisiti sul PC: git, PHP 8.3 con zip, Composer, Node 20+ con npm (tutti nel PATH).
 #  Risultato: dist\manutrack-<versione>.zip (+ .sha256).
 # =====================================================================
 param(
-    [switch]$Dirty
+    [switch]$Dirty,
+    [switch]$Demo
 )
 
 $ErrorActionPreference = 'Stop'
@@ -22,7 +24,9 @@ function Invoke-Step([string]$Command, [string[]]$Arguments) {
 }
 
 $Version = (Get-Content VERSION -Raw).Trim()
-$Build = Join-Path $Root "build\manutrack-$Version"
+$Edition = if ($Demo) { 'demo' } else { 'cliente' }
+$Suffix = if ($Demo) { '-demo' } else { '' }
+$Build = Join-Path $Root "build\manutrack$Suffix-$Version"
 $Dist = Join-Path $Root 'dist'
 
 Write-Host "ManuTrack $Version - preparazione del pacchetto"
@@ -59,7 +63,9 @@ Set-Location $Build
 try {
     # Seeder e factory creano dati e account dimostrativi: non vanno ai clienti.
     # Si tolgono prima di Composer, così non finiscono nemmeno nell'autoload.
-    foreach ($d in @('database\seeders', 'database\factories')) { if (Test-Path $d) { Remove-Item $d -Recurse -Force } }
+    # Il pacchetto demo tiene i seeder (le factory servono solo ai test)
+    $strip = if ($Demo) { @('database\factories') } else { @('database\seeders', 'database\factories') }
+    foreach ($d in $strip) { if (Test-Path $d) { Remove-Item $d -Recurse -Force } }
 
     Write-Host '-> Dipendenze PHP di produzione'
     Invoke-Step composer @('install', '--no-dev', '--optimize-autoloader', '--classmap-authoritative', '--no-interaction', '--no-progress', '--prefer-dist')
@@ -82,5 +88,5 @@ try {
 }
 
 Write-Host '-> Pacchetto'
-Invoke-Step php @('scripts\release\package.php', $Build, $Dist)
+Invoke-Step php @('scripts\release\package.php', $Build, $Dist, "--edition=$Edition")
 Write-Host 'Fatto.'
