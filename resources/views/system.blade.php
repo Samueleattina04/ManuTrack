@@ -60,6 +60,7 @@
                     <dt class="text-muted">{{ __('system.cards.database') }}</dt><dd class="font-mono truncate">{{ $status['database'] }}</dd>
                     <dt class="text-muted">{{ __('system.cards.images') }}</dt><dd>{{ $status['image_driver'] ? strtoupper($status['image_driver']) : __('install.req.missing') }}</dd>
                     <dt class="text-muted">{{ __('system.cards.push') }}</dt><dd>{{ $status['push_configured'] ? __('app.home.push_ok') : __('app.home.push_missing') }}</dd>
+                    <dt class="text-muted">{{ __('system.cards.push_urgent') }}</dt><dd>{{ __('system.push_urgent.'.$status['push_early_response']) }}</dd>
                 </dl>
             </div>
         </section>

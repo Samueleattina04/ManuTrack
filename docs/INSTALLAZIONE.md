@@ -30,10 +30,11 @@ Questa guida spiega come creare una **nuova installazione per un cliente** su un
 |---|---|
 | PHP **8.3** | In DirectAdmin: *Account Manager › Domain Setup › PHP Version* (o *Select PHP Version*). |
 | Estensioni PHP indispensabili | `pdo_mysql`, `mbstring`, `openssl`, `curl`, `fileinfo`, `tokenizer`, `xml`, `ctype`, `json`, `filter` |
-| Estensioni consigliate | `gd` **o** `imagick` (foto e icone), `zip` (esportazioni), `intl`, `bcmath` o `gmp` (facoltative: velocizzano la cifratura delle notifiche push, che funzionano anche senza) |
+| Estensioni consigliate | `gd` **o** `imagick` (foto e icone), `zip` (importazione da Excel ed esportazioni), `intl`, `bcmath` o `gmp` (facoltative: velocizzano la cifratura delle notifiche push, che funzionano anche senza) |
 | Database | MySQL 8 o MariaDB 10.6+, con charset `utf8mb4` |
 | HTTPS | Obbligatorio: senza HTTPS l'app non si installa sui telefoni e le notifiche non funzionano |
 | Cron | Una voce ogni minuto (*Advanced Features › Cron Jobs*) |
+| Limiti PHP consigliati | `upload_max_filesize` 20M, `post_max_size` 25M (foto e documenti), `memory_limit` 256M (ridimensionamento delle foto). In DirectAdmin: *Select PHP Version › Options* oppure *PHP Settings*, a seconda del server. |
 | Spazio | circa 40 MB per l'app, più foto e documenti caricati |
 
 L'installazione controlla tutti questi requisiti e mostra cosa manca.
@@ -241,6 +242,16 @@ Imposta `VAPID_SUBJECT` con un indirizzo email reale (`mailto:...`): i servizi p
 
 **Non cambiare le chiavi senza motivo:** chi aveva attivato le notifiche dovrebbe riattivarle. Ogni installazione (cliente) ha le sue chiavi.
 
+### Notifiche urgenti
+
+Le notifiche urgenti (per esempio una macchina di criticità A in guasto) **non aspettano il cron**: partono appena l'app ha risposto a chi ha fatto l'azione. Le altre passano dalla coda, che il cron svuota ogni minuto.
+
+Non c'è niente da configurare. La pagina **Sistema** mostra alla voce "Push urgenti" come si comporta il server:
+- **PHP-FPM** o **LiteSpeed** (i casi più comuni su DirectAdmin): la pagina si libera subito e l'invio avviene subito dopo;
+- **altro** (per esempio PHP come modulo di Apache): l'invio parte comunque subito, ma la pagina di chi ha cambiato lo stato può restare in attesa qualche secondo.
+
+Se l'invio immediato fallisce per un problema di rete, la notifica viene ritentata dalla coda al giro di cron successivo.
+
 ## 12. Verifica finale
 
 - [ ] `https://<dominio>` apre ManuTrack con il lucchetto e `http://` reindirizza su `https://`.
@@ -323,6 +334,9 @@ Le copie non sostituiscono il backup dell'hosting: tieni attivo anche quello di 
 | `/install` risponde 404 | L'app è già installata: è il comportamento previsto. |
 | Le modifiche a `.env` non hanno effetto | Hai impostato `MANUTRACK_CACHE_CONFIG=true`: lancia `php artisan manutrack:update --force` o rimetti `false`. |
 | Le icone non hanno i colori dell'azienda | Manca GD/Imagick: si usano le icone della palette più vicina. Attiva GD dal pannello. |
+| Le foto o i documenti non si caricano | Il file supera il limite di PHP: il limite effettivo è scritto sotto i documenti della macchina. Alza `upload_max_filesize` e `post_max_size` dal pannello. |
+| Le foto grandi danno errore | Memoria insufficiente per ridimensionarle: porta `memory_limit` a 256M. |
+| L'importazione accetta solo CSV | Manca l'estensione `zip`: attivala dal selettore della versione PHP, oppure salva da Excel in "CSV UTF-8". |
 | Le notifiche non arrivano su iPhone | L'app deve essere aggiunta alla schermata Home (iOS 16.4+) e il permesso concesso da lì. Vedi la pagina diagnostica (dalla fase 3). |
 
 ## 16. Sviluppo in locale

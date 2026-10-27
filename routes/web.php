@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AssetQrController;
+use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\DesignController;
 use App\Http\Controllers\HomeController;
@@ -12,6 +14,12 @@ use App\Http\Controllers\Pwa\PwaController;
 use App\Http\Controllers\Pwa\ServiceWorkerController;
 use App\Http\Controllers\SystemActionsController;
 use App\Http\Controllers\SystemController;
+use App\Livewire\Assets\Categories as AssetCategories;
+use App\Livewire\Assets\Form as AssetForm;
+use App\Livewire\Assets\Import as AssetImport;
+use App\Livewire\Assets\Index as AssetsIndex;
+use App\Livewire\Assets\Locations as AssetLocations;
+use App\Livewire\Assets\Show as AssetShow;
 use App\Livewire\Audit\Index as AuditIndex;
 use App\Livewire\Profile;
 use App\Livewire\Settings\Company;
@@ -76,6 +84,28 @@ Route::middleware(['installed', 'auth', 'active'])->group(function () {
         Route::delete('/push/dispositivi/{subscription}', [PushSubscriptionController::class, 'remove'])->name('push.devices.remove');
     });
     Route::post('/push/prova', PushTestController::class)->middleware('throttle:push-test')->name('push.test');
+
+    // Macchine e impianti
+    Route::middleware('can:assets.view')->group(function () {
+        Route::get('/macchine', AssetsIndex::class)->name('assets.index');
+        Route::get('/macchine/ubicazioni', AssetLocations::class)->name('assets.locations');
+        Route::get('/macchine/etichette', [AssetQrController::class, 'labels'])->name('assets.labels');
+        Route::get('/macchine/{asset}', AssetShow::class)->whereNumber('asset')->name('assets.show');
+        Route::get('/macchine/{asset}/qr.svg', [AssetQrController::class, 'svg'])->whereNumber('asset')->name('assets.qr.svg');
+        // Indirizzo stampato sulle etichette: chi non ha fatto l'accesso ci torna dopo il login
+        Route::get('/q/{token}', [AssetQrController::class, 'resolve'])->name('assets.qr');
+    });
+    Route::middleware('can:assets.manage')->group(function () {
+        Route::get('/macchine/nuova', AssetForm::class)->name('assets.create');
+        Route::get('/macchine/{asset}/modifica', AssetForm::class)->whereNumber('asset')->name('assets.edit');
+        Route::get('/macchine/categorie', AssetCategories::class)->name('assets.categories');
+        Route::get('/macchine/importa', AssetImport::class)->name('assets.import');
+        Route::get('/macchine/importa/modello.csv', [AssetQrController::class, 'template'])->name('assets.import.template');
+    });
+
+    // Allegati (il controllo dei permessi dipende dall'oggetto a cui appartengono)
+    Route::get('/allegati/{attachment}', [AttachmentController::class, 'show'])->whereNumber('attachment')->name('attachments.show');
+    Route::get('/allegati/{attachment}/scarica', [AttachmentController::class, 'download'])->whereNumber('attachment')->name('attachments.download');
 
     Route::get('/utenti', UsersIndex::class)->middleware('can:users.view')->name('users.index');
     Route::get('/ruoli', Roles::class)->middleware('can:users.manage')->name('roles.index');

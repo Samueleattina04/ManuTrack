@@ -54,6 +54,8 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        $this->call(DemoAssetsSeeder::class);
+
         InstallState::writeLock(['version' => AppVersion::code(), 'seeded' => true]);
 
         $this->command?->info('Amministratore di prova: '.self::DEMO_EMAIL.' / '.self::DEMO_PASSWORD);

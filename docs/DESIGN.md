@@ -119,6 +119,11 @@ I numeri in colonna usano `.num` (`tabular-nums`). Le etichette in maiuscolo (`.
 | `<x-theme-switcher />` | scelta del tema | |
 | `x-tilt` (Alpine) | inclinazione 3D al passaggio del mouse | solo puntatori fini, disattivata con movimento ridotto |
 | `x-count-up` (Alpine) | numero che si anima | il valore finale è già nel markup |
+| `<x-criticality :value="$enum" />` | criticità A/B/C | lettera in un quadratino del colore di stato (A rosso, B ambra, C grigio) e testo completo per gli screen reader |
+| `<x-asset-thumb :asset="$a" />` | miniatura della macchina | foto principale (400 px) oppure l'icona della categoria |
+| `.status-filter` (+ `.is-active`, `--c`) | pastiglie di filtro con conteggio | altezza 40 px; sul telefono scorrono in orizzontale |
+| `.choice` | scelta a schede (radio nascosto) | bordo d'accento sulla scheda scelta; usata per criticità, stato della macchina e icone |
+| `.tree-children` | rami dell'albero delle ubicazioni | rientro con filo verticale |
 
 ## Logo
 
@@ -136,6 +141,12 @@ I numeri in colonna usano `.num` (`tabular-nums`). Le etichette in maiuscolo (`.
   - `favicon-32`, `favicon.svg`.
   Lo sfondo è pieno, grafite con un alone del colore della palette.
 - **Schermate di avvio iPhone:** fondo `#0C0F14` con la M al centro (34% della larghezza), 11 formati per palette (`splash-<larghezza>x<altezza>.png`).
+
+## Macchine
+
+- **Elenco:** tabella densa su PC; sul telefono schede con miniatura, codice, ubicazione, stato e criticità, con la ricerca sempre visibile e gli altri filtri dietro "Filtri" (pallino con il numero di filtri attivi).
+- **Scheda:** in alto la foto (sul telefono una miniatura quadrata accanto al nome), poi il cambio di stato con schede grandi da toccare; le macchine A mostrano un avviso rosso "notifica urgente" prima della conferma. Contatori con il valore in grande e il campo della lettura con l'unità dentro (`inputmode="decimal"`).
+- **Etichette QR:** pagina di stampa a sé, sempre chiara, misure in millimetri, codice in IBM Plex Mono; tratteggio di taglio solo a schermo.
 
 ## App installabile
 

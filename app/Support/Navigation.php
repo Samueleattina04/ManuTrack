@@ -19,7 +19,7 @@ class Navigation
         return self::build([
             ['dashboard', 'gauge', 'home', 'g d', 'cruscotto panoramica', null],
             ['work_orders', 'clipboard-list', null, 'g o', 'odl interventi lavori', 'work_orders.view'],
-            ['assets', 'factory', null, 'g m', 'macchine impianti', 'assets.view'],
+            ['assets', 'factory', 'assets.index', 'g m', 'macchine impianti ubicazioni categorie qr etichette contatori', 'assets.view'],
             ['plant', 'cube', null, null, 'stabilimento 3d gemello', 'assets.view'],
             ['preventive', 'calendar', null, 'g p', 'piani calendario', 'preventive.view'],
             ['inventory', 'box', null, 'g r', 'ricambi magazzino', 'inventory.view'],

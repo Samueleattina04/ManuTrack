@@ -20,6 +20,8 @@ return [
         'settings' => 'Impostazioni',
         'system' => 'Sistema',
         'profile' => 'Profilo',
+        'assets' => 'Macchine',
+        'push' => 'Notifiche',
     ],
 
     'actions' => [
@@ -50,6 +52,28 @@ return [
             'company_updated' => 'Impostazioni dell\'azienda modificate',
             'logo_uploaded' => 'Logo caricato',
             'logo_removed' => 'Logo rimosso',
+        ],
+        'assets' => [
+            'created' => 'Macchina creata',
+            'updated' => 'Macchina modificata',
+            'deleted' => 'Macchina eliminata',
+            'status_changed' => 'Stato della macchina cambiato',
+            'imported' => 'Macchine importate',
+            'file_added' => 'File allegato',
+            'file_deleted' => 'File eliminato',
+            'meter_saved' => 'Contatore salvato',
+            'meter_deleted' => 'Contatore eliminato',
+            'qr_regenerated' => 'Nuovo codice QR',
+            'location_created' => 'Ubicazione creata',
+            'location_updated' => 'Ubicazione modificata',
+            'location_deleted' => 'Ubicazione eliminata',
+            'category_created' => 'Categoria creata',
+            'category_updated' => 'Categoria modificata',
+            'category_deleted' => 'Categoria eliminata',
+        ],
+        'push' => [
+            'device_added' => 'Notifiche attivate su un dispositivo',
+            'device_removed' => 'Dispositivo rimosso dalle notifiche',
         ],
         'profile' => [
             'updated' => 'Profilo modificato',

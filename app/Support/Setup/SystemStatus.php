@@ -5,6 +5,7 @@ namespace App\Support\Setup;
 use App\Models\SystemVersion;
 use App\Support\AppVersion;
 use App\Support\Backup\DatabaseBackup;
+use App\Support\Push\PushDispatcher;
 use App\Support\Update\Updater;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -87,6 +88,7 @@ class SystemStatus
             'pending_jobs' => $this->pendingJobs(),
             'failed_jobs' => $this->failedJobs(),
             'push_configured' => $this->pushConfigured(),
+            'push_early_response' => PushDispatcher::earlyResponseMode(),
             'image_driver' => Requirements::imageDriver(),
             'php' => PHP_VERSION,
             'database' => $this->requirements->databaseCheck()['detail'],

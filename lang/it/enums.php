@@ -14,4 +14,14 @@ return [
         'alta' => 'Alta',
         'critica' => 'Critica',
     ],
+    'location_type' => [
+        'sito' => 'Sito',
+        'area' => 'Area',
+        'linea' => 'Linea',
+    ],
+    'criticality' => [
+        'A' => 'A · ferma la linea',
+        'B' => 'B · rallenta',
+        'C' => 'C · non blocca',
+    ],
 ];

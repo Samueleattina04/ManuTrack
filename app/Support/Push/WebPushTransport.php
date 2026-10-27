@@ -9,7 +9,7 @@ use RuntimeException;
 
 class WebPushTransport implements PushTransport
 {
-    public function send(iterable $subscriptions, string $payload, int $ttl): array
+    public function send(iterable $subscriptions, string $payload, int $ttl, string $urgency = 'normal'): array
     {
         $publicKey = (string) config('manutrack.webpush.public_key');
         $privateKey = (string) config('manutrack.webpush.private_key');
@@ -21,7 +21,7 @@ class WebPushTransport implements PushTransport
         // sugli hosting condivisi capita spesso e non deve bloccare l'invio.
         set_error_handler(fn (int $no, string $msg) => $no === E_USER_NOTICE && str_contains($msg, 'GMP or BCMath'), E_USER_NOTICE);
         try {
-            return $this->dispatch($subscriptions, $payload, $ttl, $publicKey, $privateKey);
+            return $this->dispatch($subscriptions, $payload, $ttl, $urgency, $publicKey, $privateKey);
         } finally {
             restore_error_handler();
         }
@@ -31,7 +31,7 @@ class WebPushTransport implements PushTransport
      * @param  iterable<PushSubscription>  $subscriptions
      * @return list<PushResult>
      */
-    private function dispatch(iterable $subscriptions, string $payload, int $ttl, string $publicKey, string $privateKey): array
+    private function dispatch(iterable $subscriptions, string $payload, int $ttl, string $urgency, string $publicKey, string $privateKey): array
     {
         $webPush = new WebPush([
             'VAPID' => [
@@ -39,7 +39,7 @@ class WebPushTransport implements PushTransport
                 'publicKey' => $publicKey,
                 'privateKey' => $privateKey,
             ],
-        ], ['TTL' => $ttl, 'urgency' => 'high'], 20);
+        ], ['TTL' => $ttl, 'urgency' => $urgency], 20);
         $webPush->setReuseVAPIDHeaders(true);
 
         $byEndpoint = [];

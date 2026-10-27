@@ -21,6 +21,7 @@ return [
         'cron' => 'Cron',
         'queue' => 'Coda',
         'push' => 'Notifiche push',
+        'push_urgent' => 'Push urgenti',
         'php' => 'PHP',
         'database' => 'Database',
         'images' => 'Immagini',
@@ -105,5 +106,12 @@ return [
         'done' => 'Database ripristinato da :file.',
         'failed' => 'Ripristino non riuscito: :message',
         'interrupted' => 'Interrotto dal ripristino della copia :file.',
+    ],
+
+    // Come partono le notifiche urgenti su questo server
+    'push_urgent' => [
+        'fpm' => 'subito dopo la risposta (PHP-FPM)',
+        'litespeed' => 'subito dopo la risposta (LiteSpeed)',
+        'none' => 'subito, ma la pagina può attendere qualche secondo l\'invio',
     ],
 ];

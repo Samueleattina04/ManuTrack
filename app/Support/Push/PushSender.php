@@ -25,22 +25,22 @@ class PushSender
     /**
      * @return array{sent: int, expired: int, failed: int, results: list<PushResult>}
      */
-    public function toUser(User $user, PushMessage $message, int $ttl = 3600): array
+    public function toUser(User $user, PushMessage $message, int $ttl = 3600, string $urgency = 'normal'): array
     {
-        return $this->send(PushSubscription::query()->where('user_id', $user->id)->get(), $message, $ttl);
+        return $this->send(PushSubscription::query()->where('user_id', $user->id)->get(), $message, $ttl, $urgency);
     }
 
     /**
      * @param  Collection<int, PushSubscription>  $subscriptions
      * @return array{sent: int, expired: int, failed: int, results: list<PushResult>}
      */
-    public function send(Collection $subscriptions, PushMessage $message, int $ttl = 3600): array
+    public function send(Collection $subscriptions, PushMessage $message, int $ttl = 3600, string $urgency = 'normal'): array
     {
         if ($subscriptions->isEmpty()) {
             return ['sent' => 0, 'expired' => 0, 'failed' => 0, 'results' => []];
         }
 
-        $results = $this->transport->send($subscriptions, $message->toJson(), $ttl);
+        $results = $this->transport->send($subscriptions, $message->toJson(), $ttl, $urgency);
         $byId = $subscriptions->keyBy('id');
         $summary = ['sent' => 0, 'expired' => 0, 'failed' => 0, 'results' => $results];
 

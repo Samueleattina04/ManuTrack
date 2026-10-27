@@ -10,7 +10,7 @@ const STATIC_CACHE = 'mt-static-' + VERSION;
 const RUNTIME_CACHE = 'mt-runtime';
 const OFFLINE_URL = @json(route('pwa.offline', absolute: false));
 const PRECACHE = @json($precache);
-const NO_CACHE = [/^\/livewire/, /^\/push\//, /^\/sw\.js$/, /^\/login/, /^\/logout/, /^\/user\//, /^\/two-factor/];
+const NO_CACHE = [/^\/livewire/, /^\/push\//, /^\/allegati\//, /^\/q\//, /^\/sw\.js$/, /^\/login/, /^\/logout/, /^\/user\//, /^\/two-factor/];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(caches.open(STATIC_CACHE).then((cache) => cache.addAll(PRECACHE)));

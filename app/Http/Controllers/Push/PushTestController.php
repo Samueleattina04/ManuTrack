@@ -41,7 +41,7 @@ class PushTestController extends Controller
                 url: route('pwa.diagnostics', absolute: false),
                 tag: 'manutrack-test',
                 count: 1,
-            ), ttl: 300);
+            ), ttl: 300, urgency: 'high');
         } catch (Throwable $e) {
             report($e);
 

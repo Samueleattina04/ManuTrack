@@ -12,7 +12,8 @@ interface PushTransport
 {
     /**
      * @param  iterable<PushSubscription>  $subscriptions
+     * @param  string  $urgency  intestazione Urgency: very-low, low, normal, high
      * @return list<PushResult>
      */
-    public function send(iterable $subscriptions, string $payload, int $ttl): array;
+    public function send(iterable $subscriptions, string $payload, int $ttl, string $urgency = 'normal'): array;
 }

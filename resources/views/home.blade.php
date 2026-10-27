@@ -35,6 +35,34 @@
             </div>
         </section>
 
+        @if($down !== null)
+            <section class="card overflow-hidden" aria-labelledby="home-down">
+                <div class="flex items-center gap-2 border-b border-line-soft px-4 py-3">
+                    <h2 id="home-down" class="flex-1 text-base font-bold">{{ __('app.home.down_title') }}</h2>
+                    <a href="{{ route('assets.index') }}" class="btn btn-ghost btn-sm shrink-0">{{ __('app.home.all_assets') }}<x-icon name="chevron-right" class="!w-4 !h-4" /></a>
+                </div>
+                @if($down->isEmpty())
+                    <p class="flex items-center gap-2 px-4 py-4 text-sm text-fg-2"><x-icon name="check-circle" class="text-ok" />{{ $assetCount ? __('app.home.down_none') : __('app.home.no_assets') }}</p>
+                @else
+                    <ul>
+                        @foreach($down as $a)
+                            <li class="border-b border-line-soft last:border-0">
+                                <a href="{{ route('assets.show', $a) }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2">
+                                    <x-asset-thumb :asset="$a" size="h-10 w-10" />
+                                    <span class="min-w-0 flex-1">
+                                        <span class="block truncate font-medium">{{ $a->name }}</span>
+                                        <span class="block truncate text-xs text-muted"><span class="font-mono">{{ $a->code }}</span>@if($a->location) · {{ $a->location->fullName() }}@endif · {{ $a->status_changed_at?->diffForHumans() }}</span>
+                                    </span>
+                                    <span class="hidden sm:block"><x-criticality :value="$a->criticality" /></span>
+                                    <x-status :status="$a->status" />
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </section>
+        @endif
+
         @can('system.view')
         <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="{{ __('system.title') }}">
             <div class="card tilt p-4" x-tilt>

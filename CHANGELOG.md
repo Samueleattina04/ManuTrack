@@ -3,6 +3,40 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.4.0] - Fase 4: macchine e impianti
+
+### Aggiunto
+- **Notifiche push urgenti:** il guasto o il fermo di una macchina di criticità A (che ferma la linea) avvisa subito i responsabili.
+  - L'invio parte appena l'app ha risposto, senza aspettare il cron, ad alta priorità.
+  - Se fallisce per un problema temporaneo, si ritenta dalla coda.
+  - Le altre notifiche restano in coda.
+  - La pagina Sistema mostra come il server gestisce l'invio immediato.
+- **Ubicazioni** a tre livelli (sito › area › linea), con spostamenti che aggiornano tutto il ramo.
+- **Categorie** con icona e forma per la futura vista 3D.
+- **Macchine:**
+  - elenco con ricerca, filtri (anche per ramo dell'ubicazione), conteggi per stato e quattro ordinamenti;
+  - scheda con stato, criticità A/B/C, sottogruppi, dati tecnici, garanzia e costo (visibile solo a chi vede i costi);
+  - modulo di creazione e modifica;
+  - eliminazione protetta.
+- **Cambio di stato** dalla scheda, con nota, registro attività e notifiche ai responsabili.
+- **Contatori** con letture (numeri all'italiana), controllo dei valori progressivi, sostituzione del contatore e storico.
+- **Foto e documenti** su disco privato:
+  - si scaricano solo con il permesso;
+  - le foto sono raddrizzate e ridimensionate (1600 px più miniatura 400 px), senza metadati né posizione GPS.
+- **Codici QR** per macchina (codice casuale rigenerabile) ed **etichette A4** in tre formati, con "salta le prime" per i fogli già usati.
+- **Importazione** da Excel (XLSX) o CSV:
+  - anteprima con errori per riga;
+  - creazione di ubicazioni e categorie mancanti;
+  - aggiornamento per codice senza cancellare i dati con le celle vuote;
+  - tutto o niente.
+- Permessi nuovi: cambiare lo stato, registrare letture, aggiungere foto e documenti (predefiniti per responsabile e tecnico).
+- Panoramica: elenco delle macchine ferme o in guasto.
+- Macchine dimostrative inventate per lo sviluppo.
+- Libreria `openspout/openspout` (MIT) per leggere i file Excel.
+
+### Corretto
+- La guida `TEST-DISPOSITIVI.md` consigliava `config:cache` dopo aver generato le chiavi VAPID: ora indica `config:clear`. Con `config:cache` le modifiche successive a `.env` sarebbero state ignorate.
+
 ## [0.3.0] - Fase 3: app installabile e notifiche push di prova
 
 ### Aggiunto

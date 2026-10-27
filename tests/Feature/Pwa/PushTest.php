@@ -95,7 +95,7 @@ it('la notifica di prova va ai miei dispositivi e pulisce quelli scaduti', funct
 
         public function __construct(private int $ok, private int $gone) {}
 
-        public function send(iterable $subscriptions, string $payload, int $ttl): array
+        public function send(iterable $subscriptions, string $payload, int $ttl, string $urgency = 'normal'): array
         {
             $this->payloads[] = json_decode($payload, true);
 
@@ -129,7 +129,7 @@ it('dopo troppi errori di fila un dispositivo viene tolto', function () {
     {
         public function __construct(private int $id) {}
 
-        public function send(iterable $subscriptions, string $payload, int $ttl): array
+        public function send(iterable $subscriptions, string $payload, int $ttl, string $urgency = 'normal'): array
         {
             return [new PushResult($this->id, false, false, 500, 'errore temporaneo')];
         }

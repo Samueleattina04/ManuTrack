@@ -2,7 +2,7 @@
 
 Documento scritto man mano, fase per fase. Descrive cosa fa l'app dal punto di vista di chi la usa e di chi la gestisce. Le decisioni di progetto sono in `docs/PROPOSTA.md`.
 
-**Stato:** fase 3 completata (versione 0.3.0).
+**Stato:** fase 4 completata (versione 0.4.0).
 
 | Fase | Contenuto | Stato |
 |---|---|---|
@@ -356,3 +356,129 @@ Una sola voce di cron (`schedule:run` ogni minuto). Tutti i compiti girano nello
   - **Copia rapporto** (testo senza chiavi né endpoint completi).
 - Elenco dei propri dispositivi iscritti, con l'ultimo invio riuscito e l'ultimo errore, e la rimozione.
 - La guida passo passo per i telefoni reali è in [`TEST-DISPOSITIVI.md`](TEST-DISPOSITIVI.md).
+
+## 20. Notifiche push urgenti e normali (fase 4)
+
+- **Urgenti** (guasto o fermo di una macchina di criticità A, che ferma la linea; dalla fase 5 anche le segnalazioni critiche):
+  - partono **subito dopo la risposta** a chi ha fatto l'azione (`dispatchAfterResponse`), senza aspettare il cron della coda;
+  - la pagina non aspetta l'invio;
+  - ai servizi push si chiede la consegna ad alta priorità (`Urgency: high`, durata 6 ore): il telefono si sveglia anche in risparmio energetico.
+- **Se l'invio immediato fallisce** per un problema temporaneo (rete, 429, 5xx), i dispositivi non raggiunti passano alla coda normale e vengono ritentati al giro di cron successivo. I dispositivi scaduti (404/410) vengono eliminati come prima.
+- **Normali** (tutto il resto, per esempio una macchina non critica in guasto, o una macchina di nuovo operativa):
+  - vanno nella coda su database, che il cron svuota ogni minuto;
+  - `Urgency: normal`, durata 24 ore.
+- **Destinatari degli avvisi sulle macchine:** chi ha il permesso "Accettare o respingere le segnalazioni" (responsabili e amministratori), attivo, esclusa la persona che ha fatto il cambio.
+- **Pagina Sistema:** indica come il server libera la pagina prima dell'invio urgente:
+  - PHP-FPM o LiteSpeed: la connessione si chiude prima dell'invio;
+  - altrimenti la risposta arriva comunque, ma il browser può attendere qualche secondo.
+- Con `QUEUE_CONNECTION=sync` anche le notifiche normali partono subito.
+
+## 21. Ubicazioni (`/macchine/ubicazioni`)
+
+- Albero a tre livelli: **sito › area › linea**. Il tipo dipende dal livello.
+- Nome unico tra i fratelli, codice e descrizione facoltativi.
+- Lo spostamento di un'ubicazione resta allo stesso livello e aggiorna il percorso di tutte le ubicazioni contenute.
+- Non si elimina un'ubicazione che contiene altre ubicazioni o macchine.
+- Il conteggio delle macchine porta all'elenco già filtrato.
+
+## 22. Macchine (`/macchine`)
+
+- **Dati:**
+  - codice unico, nome, categoria, ubicazione (a qualunque livello);
+  - macchina principale (sottogruppi, senza cicli);
+  - matricola, costruttore, modello, anno, data di installazione, garanzia;
+  - costo d'acquisto (visibile solo con "Vedere i costi"), note.
+- **Criticità A/B/C:**
+  - A ferma la linea, B rallenta, C non blocca;
+  - decide l'urgenza degli avvisi.
+- **Stati:** operativa, in guasto, in manutenzione, ferma, dismessa, sempre con icona e testo.
+  - Lo stato si cambia dalla scheda (permesso "Cambiare lo stato"), con una nota facoltativa.
+  - Il cambio si registra nel registro attività e avvisa come al paragrafo 20.
+- **Elenco:**
+  - ricerca su codice, nome, matricola, costruttore e modello;
+  - filtri per ubicazione (compresi i livelli sotto), categoria, stato (pastiglie con i conteggi) e criticità;
+  - quattro ordinamenti;
+  - tabella su PC, schede su telefono, con i filtri richiudibili;
+  - scelta delle macchine per le etichette (anche "scegli tutte", fino a 500).
+- **Scheda:** foto principale, stato e da quando, ubicazione, sottogruppi, contatori, foto, documenti, dati tecnici, QR.
+- **Eliminazione:**
+  - solo senza sottogruppi;
+  - porta via contatori, foto e documenti;
+  - per conservare lo storico si consiglia lo stato "Dismessa".
+- **Panoramica:** chi vede le macchine trova l'elenco di quelle ferme o in guasto, prima le critiche.
+
+### 22.1 Permessi nuovi
+
+| Permesso | Predefinito per |
+|---|---|
+| `assets.status` Cambiare lo stato | responsabile, tecnico |
+| `assets.readings` Registrare le letture dei contatori | responsabile, tecnico |
+| `assets.attach` Aggiungere foto e documenti | responsabile, tecnico |
+
+Con l'aggiornamento vengono aggiunti ai ruoli esistenti senza toccare le altre modifiche dell'amministratore. "Creare e modificare" (`assets.manage`) comprende anche l'importazione, le categorie e l'eliminazione.
+
+## 23. Contatori
+
+- Uno o più per macchina: nome, unità (h, cicli, pezzi, km… o libera), progressivo sì/no.
+- **Letture:**
+  - numeri anche all'italiana ("1.250,5");
+  - mai negative né nel futuro;
+  - nei contatori progressivi una lettura non può essere più bassa della precedente né più alta della successiva, salvo la casella "contatore sostituito o azzerato".
+- Una lettura con data passata non cambia il valore attuale.
+- Storico con data, valore e persona.
+- Saranno la base dei piani preventivi a contatore (fase 7).
+
+## 24. Foto e documenti
+
+- **Disco privato** (`storage/app/private/attachments/...`), nomi casuali. Si scaricano solo da `/allegati/{id}`, che controlla il permesso sull'oggetto (macchine: "Vedere le macchine").
+- **Foto** (JPEG, PNG, WebP):
+  - raddrizzate secondo l'orientamento del telefono;
+  - lato lungo 1600 px più miniatura da 400 px;
+  - ricodificate in JPEG, quindi **senza metadati e senza posizione GPS**.
+  - Senza GD né Imagick si salvano senza ridimensionare, ma dai JPEG si tolgono comunque EXIF e GPS.
+  - La prima foto è la principale; si può cambiare.
+- **Documenti:** pdf, doc(x), xls(x), odt, ods, txt, csv, immagini, dwg, dxf.
+- **Limite:** il minore tra `MANUTRACK_UPLOAD_MAX_MB` (20) e i limiti PHP del server (`upload_max_filesize`, `post_max_size`), mostrato sotto i documenti.
+- **Intestazioni dei file serviti:**
+  - immagini e PDF si aprono nel browser, gli altri file si scaricano;
+  - `nosniff` e cache solo privata;
+  - le immagini hanno anche una CSP `sandbox`.
+  - Il service worker non mette mai in cache gli allegati.
+- Il tecnico elimina solo i file che ha caricato lui; chi gestisce le macchine li elimina tutti.
+
+## 25. Codici QR ed etichette
+
+- Ogni macchina ha un codice casuale (`qr_token`, 24 caratteri) che non rivela l'id. Il QR contiene `https://<dominio>/q/<codice>`:
+  - chi non ha fatto l'accesso passa dal login e poi arriva alla scheda;
+  - un codice sconosciuto porta all'elenco con un avviso.
+- "Genera un nuovo codice" invalida le etichette stampate (con conferma).
+- QR in SVG generato in PHP (nitido in stampa, senza GD). Dalla scheda si scarica anche il file SVG.
+- **Etichette** (`/macchine/etichette`): fogli A4 in tre formati.
+  - piccole: 24 da 70 × 37 mm;
+  - medie: 8 da 105 × 74 mm;
+  - grandi: 4 da 105 × 148,5 mm.
+  - Ogni etichetta ha QR, codice, nome, ubicazione e nome dell'azienda.
+  - "Salta le prime" serve a riusare fogli già in parte usati.
+  - Si stampa al 100% senza margini.
+- Sui telefoni il QR si inquadra con la fotocamera. Su Android, con l'app installata, il link si apre nell'app; su iPhone si apre in Safari. Lo scanner dentro l'app arriva con la segnalazione da QR (fase 5).
+
+## 26. Importazione (`/macchine/importa`)
+
+- **File:**
+  - Excel `.xlsx` (serve l'estensione PHP `zip`) oppure CSV;
+  - separatore `;` `,` o tabulazione e codifica UTF-8 o Windows-1252, riconosciuti da soli;
+  - fino a 5000 righe.
+  - Modello CSV scaricabile.
+- **Colonne:** riconosciute dal nome, anche con varianti (`codice`, `nome`, `categoria`, `ubicazione`, `macchina_padre`, `matricola`, `costruttore`, `modello`, `anno`, `data_installazione`, `criticita`, `stato`, `costo_acquisto`, `garanzia_fino_al`, `note`). Le colonne sconosciute vengono ignorate e segnalate.
+- **Anteprima:**
+  - quante macchine nuove, da aggiornare e righe con errori (con numero di riga e motivo);
+  - ubicazioni e categorie che verranno create;
+  - prime righe.
+  - Nulla si salva prima della conferma.
+- **Regole:**
+  - le macchine si riconoscono dal codice (senza distinguere maiuscole e minuscole);
+  - in aggiornamento le celle vuote non cancellano i dati;
+  - le ubicazioni si scrivono "Sito > Area > Linea" e si creano se mancano;
+  - la macchina padre può essere nello stesso file;
+  - date gg/mm/aaaa (anche le date di Excel), numeri all'italiana.
+- **Conferma:** tutto in una transazione, una voce nel registro attività.

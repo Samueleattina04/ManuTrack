@@ -2,7 +2,7 @@
 
 Elenco delle librerie usate da ManuTrack e delle loro licenze, con la verifica di compatibilità per un **uso commerciale** (software installato presso clienti e venduto come servizio).
 
-Aggiornato alla versione **0.3.0** (fase 3: nessuna libreria nuova; il service worker è generato da Laravel, quindi `vite-plugin-pwa` e Workbox non servono). Le fasi successive aggiungono le librerie previste in `docs/PROPOSTA.md`, ciascuna verificata prima dell'uso.
+Aggiornato alla versione **0.4.0** (fase 4: aggiunta `openspout/openspout`, MIT, per leggere i file Excel). Il service worker è generato da Laravel, quindi `vite-plugin-pwa` e Workbox non servono. Le fasi successive aggiungono le librerie previste in `docs/PROPOSTA.md`, ciascuna verificata prima dell'uso.
 
 ## In sintesi
 
@@ -28,7 +28,8 @@ Le icone sono di **Lucide** (licenza ISC): il contenuto SVG è copiato in `resou
 | laravel/fortify | 1.x | MIT | accesso, reset della password, verifica in due passaggi |
 | spatie/laravel-permission | 6.x | MIT | ruoli e permessi |
 | intervention/image | 3.x | MIT | ridimensionamento di logo e foto |
-| bacon/bacon-qr-code | 3.x | BSD-2-Clause | codice QR per l'app di autenticazione |
+| bacon/bacon-qr-code | 3.x | BSD-2-Clause | codici QR: etichette delle macchine e app di autenticazione |
+| openspout/openspout | 4.x | MIT | lettura dei file Excel (XLSX) per l'importazione delle macchine; scriverà le esportazioni |
 | pragmarx/google2fa | 8.x | MIT | codici della verifica in due passaggi (dipendenza di Fortify) |
 | Tailwind CSS | 4.x | MIT | stile (solo compilazione) |
 | Vite, laravel-vite-plugin | 7.x / 2.x | MIT | compilazione del frontend |
@@ -87,10 +88,11 @@ Generato con `composer licenses --no-dev`.
 | `minishlink/web-push` | v9.0.4 | MIT |
 | `monolog/monolog` | 3.12.1 | MIT |
 | `nesbot/carbon` | 3.15.1 | MIT |
-| `nette/schema` | v1.4.0 | BSD-3-Clause o GPL-2.0-only o GPL-3.0-only |
-| `nette/utils` | v4.1.6 | BSD-3-Clause o GPL-2.0-only o GPL-3.0-only |
+| `nette/schema` | v1.4.0 | BSD-3-Clause, GPL-2.0-only, GPL-3.0-only |
+| `nette/utils` | v4.1.6 | BSD-3-Clause, GPL-2.0-only, GPL-3.0-only |
 | `nikic/php-parser` | v5.9.0 | BSD-3-Clause |
 | `nunomaduro/termwind` | v2.4.0 | MIT |
+| `openspout/openspout` | v4.32.0 | MIT |
 | `paragonie/constant_time_encoding` | v3.1.3 | MIT |
 | `phpdocumentor/reflection-common` | 2.2.1 | MIT |
 | `phpdocumentor/reflection-docblock` | 6.0.3 | MIT |

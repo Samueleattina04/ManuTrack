@@ -17,6 +17,7 @@
         "laravel/tinker": "^2.10.1",
         "livewire/livewire": "^3.6",
         "minishlink/web-push": "^9.0",
+        "openspout/openspout": "^4.28",
         "spatie/laravel-permission": "^6.10"
     },
     "require-dev": {

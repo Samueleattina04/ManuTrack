@@ -6,7 +6,7 @@ Software per la gestione della manutenzione di macchine e impianti (CMMS): ordin
 
 **Un'installazione per cliente:** ogni azienda ha la sua cartella con una copia dell'app e un suo database MySQL. Gira su un normale hosting condiviso con **PHP 8.3 e MySQL**, anche senza SSH (pannello DirectAdmin).
 
-> Stato: **fase 3 di 11** (versione 0.3.0): app installabile su PC, iPhone e Android, notifica push di prova, diagnostica delle notifiche e procedura guidata, oltre ad accesso, ruoli, inviti e impostazioni dell'azienda. Il test sui telefoni reali è descritto in [`docs/TEST-DISPOSITIVI.md`](docs/TEST-DISPOSITIVI.md). Il piano completo è in [`docs/PROPOSTA.md`](docs/PROPOSTA.md).
+> Stato: **fase 4 di 11** (versione 0.4.0): macchine e impianti (ubicazioni, categorie, contatori, foto e documenti protetti, etichette QR, importazione da Excel) con avvisi push urgenti, oltre all'app installabile, alle notifiche, ad accesso, ruoli e impostazioni dell'azienda. Il test sui telefoni reali è descritto in [`docs/TEST-DISPOSITIVI.md`](docs/TEST-DISPOSITIVI.md). Il piano completo è in [`docs/PROPOSTA.md`](docs/PROPOSTA.md).
 
 ## Tecnologie
 

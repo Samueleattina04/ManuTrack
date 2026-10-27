@@ -1,6 +1,6 @@
 # Prova su iPhone e Android reali
 
-Questa guida serve a provare su telefoni veri l'app installabile e la notifica push di prova (fase 3).
+Questa guida serve a provare su telefoni veri l'app installabile e la notifica push di prova (fase 3), poi gli avvisi urgenti, i QR e le foto delle macchine (fase 4, paragrafo 9).
 Ci vuole circa mezz'ora la prima volta.
 
 Indice:
@@ -12,6 +12,7 @@ Indice:
 6. Problemi frequenti
 7. In alternativa: tunnel HTTPS verso il PC
 8. Cosa è già stato verificato e cosa no
+9. Fase 4: avvisi urgenti, QR e foto dal telefono
 
 Negli esempi `prova.example.com` è il sottodominio di prova: sostituiscilo con il tuo.
 
@@ -94,7 +95,7 @@ In `/install` lascia spuntato *Genera le chiavi per le notifiche push*. La pagin
 ```bash
 cd ~/domains/example.com/manutrack-prova
 php artisan manutrack:vapid          # genera e scrive in .env
-php artisan config:cache             # rilegge .env
+php artisan config:clear             # rilegge .env
 php artisan manutrack:vapid --show   # controllo: stampa la chiave pubblica
 ```
 
@@ -102,7 +103,7 @@ php artisan manutrack:vapid --show   # controllo: stampa la chiave pubblica
 
 1. In *Advanced Features › Cron Jobs* aggiungi una voce temporanea che parta tra due minuti (usa il percorso di PHP 8.3 del tuo server):
    ```
-   cd /home/<utente>/domains/example.com/manutrack-prova && /usr/local/bin/php artisan manutrack:vapid --no-interaction && /usr/local/bin/php artisan config:cache
+   cd /home/<utente>/domains/example.com/manutrack-prova && /usr/local/bin/php artisan manutrack:vapid --no-interaction && /usr/local/bin/php artisan config:clear
    ```
 2. Dopo che è partita, **cancella la voce**: rieseguita, si fermerebbe comunque perché le chiavi esistono già.
 
@@ -111,7 +112,7 @@ php artisan manutrack:vapid --show   # controllo: stampa la chiave pubblica
 Il comando stampa due righe `VAPID_PUBLIC_KEY=…` e `VAPID_PRIVATE_KEY=…`.
 1. Con il cron le trovi nell'email di DirectAdmin o nel file indicato con `>> …/vapid.txt`. Cancella quel file subito dopo.
 2. Copiale in `.env` con *File Manager › Edit*.
-3. Esegui `php artisan config:cache` (anche con la voce di cron una tantum).
+3. Esegui `php artisan config:clear` (anche con la voce di cron una tantum).
 
 **Verifica.** In ManuTrack, la pagina **Sistema** deve indicare "notifiche push: chiavi configurate".
 
@@ -210,7 +211,7 @@ Requisiti:
 |---|---|
 | Sull'iPhone manca "Aggiungi alla schermata Home" | Stai usando un'app diversa da Safari, o un'anteprima di link (da WhatsApp, Mail…). Apri il link direttamente in Safari. |
 | Su iPhone "Attiva notifiche" non compare o la diagnostica dice "serve l'app installata" | Hai aperto il sito in Safari invece che dall'icona sulla schermata Home. |
-| Diagnostica: "Chiavi push del server: no" | Mancano le chiavi VAPID o la configurazione è in cache: vedi paragrafo 2, poi `php artisan config:cache`. |
+| Diagnostica: "Chiavi push del server: no" | Mancano le chiavi VAPID o la configurazione è in cache: vedi paragrafo 2, poi `php artisan config:clear`. |
 | Diagnostica: "Service worker attivo: no" | Ricarica la pagina una volta. Se resta "no": controlla `https://…/sw.js` (deve essere JavaScript) e che il sito sia in HTTPS valido. |
 | "Notifica inviata a 0 dispositivi" | L'iscrizione è scaduta o le chiavi sono cambiate: in diagnostica **Disattiva su questo dispositivo** e poi **Attiva notifiche**. ManuTrack elimina da solo le iscrizioni rifiutate dal servizio push. |
 | La notifica arriva solo con l'app aperta | Modalità *Full immersion*/*Non disturbare* o risparmio energetico. Su iPhone controlla anche *Impostazioni › Notifiche › ManuTrack › Stile avvisi*. |
@@ -255,3 +256,52 @@ Verificato con i test automatici (Pest):
 - la consegna reale tramite i servizi push di Apple e Google (dal sandbox di sviluppo non sono raggiungibili);
 - il pallino sull'icona;
 - le schermate di avvio iPhone.
+
+---
+
+## 9. Fase 4: avvisi urgenti, QR e foto dal telefono
+
+Servono due persone, cioè due account:
+- un **responsabile** (ruolo "Responsabile manutenzione"), con l'app installata e le notifiche attive sul telefono, come ai paragrafi 4 e 5;
+- un **tecnico**, che può usare il PC o un secondo telefono.
+
+Crea due macchine di prova (*Macchine › Nuova macchina*):
+- `PRS-01` con criticità **A**;
+- `AVV-01` con criticità **C**.
+
+### 9.1 Notifica urgente (macchina che ferma la linea)
+- [ ] Sul telefono del responsabile **blocca lo schermo**.
+- [ ] Il tecnico apre una macchina di **criticità A** (es. `PRS-01`) › *Stato della macchina* › **In guasto**.
+  - Sotto compare l'avviso rosso "i responsabili ricevono subito una notifica urgente".
+  - Scrive una nota e conferma.
+- [ ] Entro pochi secondi, senza aspettare il cron, sul telefono del responsabile arriva "Linea ferma · PRS-01 … In guasto", con la nota e il nome del tecnico.
+- [ ] Toccando la notifica si apre la scheda della macchina.
+- [ ] La pagina del tecnico si è aggiornata subito, senza restare in attesa.
+  - Se resta qualche secondo in caricamento, guarda la voce "Push urgenti" nella pagina **Sistema** (vedi `INSTALLAZIONE.md`, "Notifiche urgenti").
+- [ ] Controprova:
+  1. togli per un momento la voce del cron;
+  2. rimetti `PRS-01` operativa e poi di nuovo in guasto: la notifica urgente arriva lo stesso;
+  3. rimetti la voce del cron.
+
+### 9.2 Notifica normale (in coda)
+- [ ] Con il cron attivo, il tecnico mette **Ferma** una macchina di **criticità C** (es. `AVV-01`).
+- [ ] La notifica arriva entro circa un minuto, al giro di cron successivo.
+- [ ] Rimettendo la macchina **Operativa** arriva "… di nuovo operativa", sempre in coda.
+- [ ] Chi cambia lo stato non riceve la notifica sul proprio telefono.
+
+### 9.3 QR ed etichette
+- [ ] Da *Macchine* scegli due o tre macchine › **Stampa etichette** › formato "Medie" › **Stampa**.
+  - Nella finestra di stampa scegli scala 100% e nessun margine.
+- [ ] Con la **fotocamera** del telefono inquadra il QR:
+  - si apre la scheda della macchina;
+  - se non avevi fatto l'accesso, passa prima dal login e poi arriva alla scheda.
+  - Su Android, con l'app installata, il link si apre nell'app; su iPhone si apre in Safari.
+- [ ] Dalla scheda tocca **Genera un nuovo codice** e inquadra di nuovo l'etichetta vecchia: deve dire che il codice non corrisponde più a nessuna macchina.
+
+### 9.4 Foto e contatori dal telefono
+- [ ] Nella scheda di una macchina tocca **Aggiungi foto** e scatta una foto.
+  - Dopo il caricamento compare la miniatura, e la prima foto diventa la principale.
+- [ ] Scarica la foto dal PC e guardane le proprietà: lato lungo 1600 px, **nessuna posizione GPS**.
+- [ ] Aggiungi un PDF (manuale) con **Aggiungi documenti** e riaprilo.
+- [ ] Registra una lettura del contatore scrivendo "1.250,5". Poi prova una lettura più bassa: viene rifiutata con la spiegazione.
+- [ ] Su iPhone, se la foto viene rifiutata come HEIC: *Impostazioni › Fotocamera › Formati › Più compatibile*.

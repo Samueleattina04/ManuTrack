@@ -15,4 +15,10 @@ final class PushResult
         public readonly ?int $status = null,
         public readonly ?string $reason = null,
     ) {}
+
+    /** Errore che può risolversi riprovando: rete, troppe richieste, servizio push in difficoltà */
+    public function temporary(): bool
+    {
+        return ! $this->success && ! $this->expired && ($this->status === null || $this->status === 429 || $this->status >= 500);
+    }
 }

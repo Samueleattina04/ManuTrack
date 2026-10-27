@@ -35,7 +35,7 @@ final class Access
         'users' => ['users.view', 'users.manage'],
         'settings' => ['settings.manage'],
         'system' => ['system.view', 'system.update', 'audit.view', 'data.export'],
-        'assets' => ['assets.view', 'assets.manage'],
+        'assets' => ['assets.view', 'assets.manage', 'assets.status', 'assets.readings', 'assets.attach'],
         'requests' => ['requests.create', 'requests.view_all', 'requests.triage'],
         'work_orders' => ['work_orders.view', 'work_orders.create', 'work_orders.execute', 'work_orders.assign', 'work_orders.close', 'work_orders.view_costs'],
         'preventive' => ['preventive.view', 'preventive.manage'],
@@ -51,7 +51,7 @@ final class Access
     public const DEFAULTS = [
         self::MANAGER => [
             'users.view',
-            'assets.view', 'assets.manage',
+            'assets.view', 'assets.manage', 'assets.status', 'assets.readings', 'assets.attach',
             'requests.create', 'requests.view_all', 'requests.triage',
             'work_orders.view', 'work_orders.create', 'work_orders.execute', 'work_orders.assign', 'work_orders.close', 'work_orders.view_costs',
             'preventive.view', 'preventive.manage',
@@ -59,7 +59,7 @@ final class Access
             'reports.view', 'reports.export',
         ],
         self::TECHNICIAN => [
-            'assets.view',
+            'assets.view', 'assets.status', 'assets.readings', 'assets.attach',
             'requests.create', 'requests.view_all',
             'work_orders.view', 'work_orders.create', 'work_orders.execute',
             'preventive.view',

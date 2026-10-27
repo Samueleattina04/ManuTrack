@@ -84,6 +84,16 @@ return [
     // Installazione dimostrativa con azzeramento notturno
     'demo' => (bool) env('MANUTRACK_DEMO', false),
 
+    // Foto e documenti allegati (disco privato, mai raggiungibili direttamente dal web)
+    'attachments' => [
+        'disk' => env('MANUTRACK_ATTACHMENTS_DISK', 'local'),
+        'max_mb' => (int) env('MANUTRACK_UPLOAD_MAX_MB', 20),
+        // Lato lungo delle foto salvate e delle miniature
+        'photo_max' => 1600,
+        'thumb_max' => 400,
+        'documents' => ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'odt', 'ods', 'txt', 'csv', 'jpg', 'jpeg', 'png', 'webp', 'dwg', 'dxf'],
+    ],
+
     // Notifiche push (chiavi generate con "php artisan manutrack:vapid")
     'webpush' => [
         'subject' => env('VAPID_SUBJECT', env('APP_URL')),
