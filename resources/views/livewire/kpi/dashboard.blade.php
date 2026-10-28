@@ -53,13 +53,7 @@
         {{-- MTBF --}}
         <section class="card flex flex-col gap-1 p-4" aria-labelledby="k-mtbf">
             <h2 id="k-mtbf" class="text-sm font-semibold text-fg-2">{{ __('kpi.mtbf.title') }}</h2>
-            @if($mtbf['insufficient'])
-                <p class="text-lg font-bold text-muted">{{ $mtbf['failures'] === 0 && $mtbf['assets'] > 0 ? __('kpi.mtbf.no_failures') : __('kpi.insufficient') }}</p>
-                <p class="text-xs text-muted">{{ __('kpi.mtbf.need', ['n' => $mtbf['failures'], 'min' => \App\Support\Kpi\KpiCalculator::MIN_MTBF_FAILURES, 'days' => $h($mtbf['observed_hours'] / 24)]) }}</p>
-            @else
-                <p class="num font-display text-3xl font-bold">{{ $h($mtbf['value']) }} <span class="text-base font-normal text-muted">h</span></p>
-                <p class="text-xs text-muted">{{ __('kpi.mtbf.on', ['n' => $mtbf['failures'], 'assets' => $mtbf['assets'], 'days' => $h($mtbf['value'] / 24)]) }}</p>
-            @endif
+            <x-kpi-mtbf :mtbf="$mtbf" />
         </section>
         {{-- Fermi --}}
         <section class="card flex flex-col gap-1 p-4" aria-labelledby="k-down">
@@ -159,7 +153,11 @@
                             <td class="num text-right">{{ $r['downtime']['count'] }}</td>
                             <td class="num text-right">{{ $h($r['downtime']['hours']) }}</td>
                             <td class="num text-right">@if($r['mttr']['insufficient'])<span class="text-xs text-muted" title="{{ trans_choice('kpi.mttr.need', $r['mttr']['n'], ['n' => $r['mttr']['n'], 'min' => \App\Support\Kpi\KpiCalculator::MIN_MTTR_EVENTS]) }}">{{ __('kpi.insufficient_short') }}</span>@else{{ $h($r['mttr']['value']) }} h @endif</td>
-                            <td class="num text-right">@if($r['mtbf'] === null)<span class="text-xs text-muted">{{ __('kpi.retired') }}</span>@elseif($r['mtbf']['insufficient'])<span class="text-xs text-muted">{{ __('kpi.insufficient_short') }}</span>@else{{ $h($r['mtbf']['value']) }} h @endif</td>
+                            <td class="num text-right">@if($r['mtbf'] === null)<span class="text-xs text-muted">{{ __('kpi.retired') }}</span>@else
+                                @php $primary = $r['mtbf']['work'] ?? $r['mtbf']; @endphp
+                                @if($primary['insufficient'])<span class="text-xs text-muted">{{ __('kpi.insufficient_short') }}</span>@else{{ $h($primary['value']) }} h @endif
+                                @if($r['mtbf']['work'])<span class="block text-[11px] text-muted">{{ $r['mtbf']['insufficient'] ? __('worktime.kpi.h24_insufficient') : __('worktime.kpi.h24_secondary', ['value' => $h($r['mtbf']['value']).' h']) }}</span>@endif
+                            @endif</td>
                             @if($canCosts)<td class="num text-right">{{ $r['cost'] ? $eur($r['cost']['total']) : '—' }}</td>@endif
                         </tr>
                     @empty

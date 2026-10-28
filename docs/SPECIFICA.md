@@ -991,3 +991,14 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
 - **Disegno solo quando serve:** la vista dello stabilimento disegna solo quando qualcosa cambia (rotazione, stato, guasti che pulsano); pianta, anteprima e M **si fermano** quando la scheda del browser è nascosta o la vista è fuori dallo schermo, e ripartono da sole. Un solo fotogramma prenotato alla volta. Risoluzione al massimo doppia anche sugli schermi più densi.
 - **Memoria liberata:** lasciando la pagina (anche verso la cache indietro/avanti del browser), passando al 2D o chiudendo l'anteprima, geometrie, materiali e texture vengono liberati e il contesto WebGL rilasciato; tornando indietro la vista si riapre.
 - **Controllo automatico:** `scripts/e2e/three-lifecycle-check.cjs` misura i fotogrammi disegnati (visibile, scheda nascosta, fuori schermo), verifica che dopo l'uscita restino 0 geometrie e 0 texture e il contesto sia perso, e che un GLB con un indirizzo esterno non faccia richieste fuori dal sito.
+
+## 48. Orario di lavoro e MTBF sulle ore di lavoro (dopo la fase 10)
+
+- **Dove:** *Impostazioni › Orario di lavoro* (`/impostazioni/orario`), per chi gestisce le impostazioni (amministratore). Definizioni e formule in `docs/KPI.md` §2.9.
+- **Calendari** con un nome, creati da un modello (un turno, due turni, tre turni, ciclo continuo, vuoto):
+  - **orario settimanale** a turni per ogni giorno (anche più turni al giorno e turni di notte che finiscono il giorno dopo), con **versioni** "valido dal": un orario già in vigore non si modifica, se ne crea uno nuovo da oggi o da una data futura;
+  - **giorni speciali** per anno: festività nazionali italiane proposte in automatico (anche ogni notte per l'anno in corso e il successivo, `manutrack:festivita`) e modificabili (togli = si lavora, rimetti = festa); chiusure aziendali su più giorni e santo patrono a mano; orari speciali di un giorno. I giorni passati non si modificano.
+- **Assegnazioni** con "valido dal": a tutta l'azienda o a un'ubicazione (vale anche per quelle che contiene; "Eredita" toglie la scelta). La pagina mostra la situazione di oggi per ogni ubicazione, con l'eredità, e lo storico. L'assegnazione alla singola macchina è prevista dal calcolo ma non compare nelle pagine.
+- **Indicatori:** con un calendario, l'MTBF principale è sulle ore di lavoro (dashboard, tabella per macchina, rapporto mensile, esportazione); sotto resta quello sulle 24 ore. Quando alcune macchine o alcuni giorni non hanno un calendario si legge "sulle ore di lavoro (in parte su 24 ore)". Minimo: 3 guasti e 40 ore di lavoro.
+- **Senza calendari assegnati non cambia nulla.**
+- Tutte le modifiche nel registro attività (Impostazioni).

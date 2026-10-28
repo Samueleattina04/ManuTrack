@@ -49,6 +49,8 @@ use App\Livewire\Requests\Index as RequestsIndex;
 use App\Livewire\Requests\Show as RequestShow;
 use App\Livewire\Settings\Company;
 use App\Livewire\Settings\Notifications as NotificationRules;
+use App\Livewire\Settings\WorkCalendarEdit;
+use App\Livewire\Settings\WorkCalendars;
 use App\Livewire\Users\Index as UsersIndex;
 use App\Livewire\Users\Roles;
 use App\Livewire\WorkOrders\Create as WorkOrderCreate;
@@ -152,6 +154,8 @@ Route::middleware(['installed', 'auth', 'active'])->group(function () {
     Route::get('/avvisi/preferenze', NotificationPreferences::class)->name('notifications.preferences');
     Route::get('/avvisi/conteggio', [NotificationController::class, 'count'])->name('notifications.count');
     Route::get('/impostazioni/avvisi', NotificationRules::class)->middleware('can:settings.manage')->name('settings.notifications');
+    Route::get('/impostazioni/orario', WorkCalendars::class)->middleware('can:settings.manage')->name('settings.worktime');
+    Route::get('/impostazioni/orario/{calendar}', WorkCalendarEdit::class)->whereNumber('calendar')->middleware('can:settings.manage')->name('settings.worktime.edit');
 
     // Stabilimento: pianta in 3D o 2D, editor, modelli 3D delle macchine
     Route::middleware('can:assets.view')->group(function () {

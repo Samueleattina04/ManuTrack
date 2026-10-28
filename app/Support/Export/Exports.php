@@ -153,7 +153,14 @@ final class Exports
             [$k('planned_hours'), round($downtime['planned_hours'], 1), $k('unit_hours'), $on($downtime['planned_count']), null],
             [$k('open'), $downtime['open'], $k('unit_n'), null, null],
             [$k('mttr'), $mttr['insufficient'] ? null : round((float) $mttr['value'], 1), $k('unit_hours'), $on($mttr['n']), $or($mttr)],
-            [$k('mtbf'), $mtbf['value'] === null || $mtbf['insufficient'] ? null : round($mtbf['value'], 1), $k('unit_hours'), $on($mtbf['failures']), $mtbf['failures'] === 0 ? $k('no_failures') : $or($mtbf)],
+            ...($mtbf['work'] !== null ? [[
+                $k('mtbf_work'),
+                $mtbf['work']['insufficient'] ? null : round((float) $mtbf['work']['value'], 1),
+                $k('unit_hours'),
+                $on($mtbf['failures']),
+                $mtbf['failures'] === 0 ? $k('no_failures') : ($mtbf['work']['insufficient'] ? $k('insufficient') : ($mtbf['work']['basis'] === 'misto' ? $k('mixed') : null)),
+            ]] : []),
+            [$mtbf['work'] !== null ? $k('mtbf_24') : $k('mtbf'), $mtbf['value'] === null || $mtbf['insufficient'] ? null : round($mtbf['value'], 1), $k('unit_hours'), $on($mtbf['failures']), $mtbf['failures'] === 0 ? $k('no_failures') : $or($mtbf)],
             [$k('backlog'), $backlog['open'], $k('unit_n'), null, null],
             [$k('overdue'), $backlog['overdue'], $k('unit_n'), null, null],
             [$k('age'), $backlog['avg_age_days'] === null ? null : round($backlog['avg_age_days'], 1), $k('unit_days'), null, null],
@@ -173,7 +180,7 @@ final class Exports
 
         $assetColumns = [
             $c('code') => 'text', $c('name') => 'text', $c('downtime_count') => 'int', $c('downtime_hours') => 'hours', $c('failure_count') => 'int', $c('failure_hours') => 'hours',
-            $c('mttr_hours') => 'hours', $c('mttr_n') => 'int', $c('mtbf_hours') => 'hours', $c('failures') => 'int', $c('note') => 'text',
+            $c('mttr_hours') => 'hours', $c('mttr_n') => 'int', $c('mtbf_hours') => 'hours', $c('mtbf_work_hours') => 'hours', $c('failures') => 'int', $c('note') => 'text',
         ];
         if ($costs) {
             $assetColumns += [$c('orders') => 'int', $c('total_cost') => 'decimal'];
@@ -187,7 +194,9 @@ final class Exports
                 $row = [
                     $r['asset']->code, $r['asset']->name, $r['downtime']['count'], round($r['downtime']['hours'], 1), $r['downtime']['failure_count'], round($r['downtime']['failure_hours'], 1),
                     $r['mttr']['insufficient'] ? null : round((float) $r['mttr']['value'], 1), $r['mttr']['n'],
-                    $r['mtbf'] === null || $r['mtbf']['insufficient'] || $r['mtbf']['value'] === null ? null : round($r['mtbf']['value'], 1), $r['mtbf']['failures'] ?? null,
+                    $r['mtbf'] === null || $r['mtbf']['insufficient'] || $r['mtbf']['value'] === null ? null : round($r['mtbf']['value'], 1),
+                    $r['mtbf'] === null || $r['mtbf']['work'] === null || $r['mtbf']['work']['insufficient'] ? null : round((float) $r['mtbf']['work']['value'], 1),
+                    $r['mtbf']['failures'] ?? null,
                     implode(' · ', $notes),
                 ];
                 if ($costs) {

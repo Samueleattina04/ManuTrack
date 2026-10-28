@@ -10,6 +10,8 @@ use App\Models\DowntimeEvent;
 use App\Models\Location;
 use App\Models\WorkOrder;
 use App\Support\Preventive\PlanCompliance;
+use App\Support\WorkTime\Intervals;
+use App\Support\WorkTime\WorkTime;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,6 +33,9 @@ class KpiCalculator
 
     public const MIN_MTBF_OBSERVED_HOURS = 7 * 24;
 
+    /** MTBF sulle ore di lavoro (§2.9): almeno 40 ore di lavoro osservate */
+    public const MIN_MTBF_WORK_HOURS = 40;
+
     public const MIN_MIX_ORDERS = 5;
 
     public const MIN_COMPLIANCE = 3;
@@ -40,6 +45,8 @@ class KpiCalculator
 
     /** @var Collection<int, DowntimeEvent>|null */
     private ?Collection $events = null;
+
+    private ?WorkTime $workTime = null;
 
     public function __construct(private KpiPeriod $period, private ?int $locationId = null, private ?int $categoryId = null)
     {
@@ -180,9 +187,11 @@ class KpiCalculator
     }
 
     /**
-     * §2.3 MTBF: funzionamento / guasti, sulle macchine non dismesse.
+     * §2.3 MTBF: funzionamento / guasti, sulle macchine non dismesse (24 ore su 24).
+     * Se esiste un calendario di lavoro, in "work" anche l'MTBF sulle ore di lavoro (§2.9):
+     * stesso numero di guasti, tempo = ore di lavoro previste meno i fermi dentro quelle ore.
      *
-     * @return array{value: float|null, failures: int, observed_hours: float, uptime_hours: float, assets: int, insufficient: bool}
+     * @return array{value: float|null, failures: int, observed_hours: float, uptime_hours: float, assets: int, insufficient: bool, work: array{value: float|null, observed_hours: float, uptime_hours: float, insufficient: bool, basis: string, assets_with_calendar: int}|null}
      */
     public function mtbf(?int $assetId = null): array
     {
@@ -190,8 +199,15 @@ class KpiCalculator
             ->where('status', '!=', AssetStatus::Retired->value)
             ->when($this->assetIds !== null, fn (Builder $q) => $q->whereIn('id', $this->assetIds))
             ->when($assetId !== null, fn (Builder $q) => $q->whereKey($assetId))
-            ->get(['id', 'installed_on', 'created_at']);
+            ->with('location:id,path')
+            ->get(['id', 'location_id', 'installed_on', 'created_at']);
         $events = $this->overlapping()->groupBy('asset_id');
+        $this->workTime ??= new WorkTime;
+        $work = $this->workTime->enabled();
+        $workObserved = 0.0;
+        $workUptime = 0.0;
+        $withCalendar = 0;
+        $fullCalendar = 0;
 
         $observed = 0.0;
         $uptime = 0.0;
@@ -215,9 +231,35 @@ class KpiCalculator
             }
             $observed += $window;
             $uptime += max(0, $window - $down);
+
+            if ($work) {
+                $time = $this->workTime->forAsset($asset, $from, $to);
+                $workSeconds = Intervals::seconds($time['intervals']);
+                $downInWork = 0;
+                foreach ($events->get($asset->id, collect()) as $e) {
+                    $downInWork += Intervals::overlap($time['intervals'], $e->started_at->getTimestamp(), min($e->ended_at?->getTimestamp() ?? $to->getTimestamp(), $to->getTimestamp()));
+                }
+                $workObserved += $workSeconds / 3600;
+                $workUptime += max(0, $workSeconds - $downInWork) / 3600;
+                $withCalendar += $time['calendar_days'] > 0 ? 1 : 0;
+                $fullCalendar += $time['calendar_days'] === $time['days'] ? 1 : 0;
+            }
         }
 
         $insufficient = $failures < self::MIN_MTBF_FAILURES || $observed < self::MIN_MTBF_OBSERVED_HOURS;
+        $workResult = null;
+        if ($work && $withCalendar > 0) {
+            $workInsufficient = $failures < self::MIN_MTBF_FAILURES || $workObserved < self::MIN_MTBF_WORK_HOURS;
+            $workResult = [
+                'value' => $workInsufficient ? null : $workUptime / $failures,
+                'observed_hours' => $workObserved,
+                'uptime_hours' => $workUptime,
+                'insufficient' => $workInsufficient,
+                // lavoro = tutte le macchine con un calendario per tutto il periodo; misto = in parte
+                'basis' => $fullCalendar === $counted ? 'lavoro' : 'misto',
+                'assets_with_calendar' => $withCalendar,
+            ];
+        }
 
         return [
             'value' => $insufficient ? null : $uptime / $failures,
@@ -226,6 +268,7 @@ class KpiCalculator
             'uptime_hours' => $uptime,
             'assets' => $counted,
             'insufficient' => $insufficient,
+            'work' => $workResult,
         ];
     }
 

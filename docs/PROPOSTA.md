@@ -256,7 +256,7 @@ Ogni fase si chiude con:
 | 10 | 3D | M 3D d'ingresso, gemello digitale con editor e vista 2D di riserva, anteprima 3D della macchina (fatta: 0.10.0). Poi l'orario di lavoro per l'MTBF, prima della fase 11 |
 | 11 | GDPR, demo e consegna | esportazione, anonimizzazione, cancellazione totale, installazione demo con azzeramento notturno, revisione di sicurezza, README, `docs/INSTALLAZIONE.md` completa, licenze delle librerie, verifica finale PC, iPhone e Android, `scripts/deploy-many` facoltativo |
 
-### Proposta: orario di lavoro per l'MTBF (approvata dopo la fase 9, si fa dopo la fase 10)
+### Proposta: orario di lavoro per l'MTBF (approvata dopo la fase 9; fatta nella 0.11.0)
 
 **Il problema.** Oggi l'MTBF usa il tempo di calendario, 24 ore su 24 (`docs/KPI.md` §2.3). Per una macchina che lavora un turno di 8 ore dal lunedì al venerdì, il tempo di calendario è circa 4 volte quello di lavoro: l'MTBF risulta 4 volte più alto e non si confronta con quello di una macchina su tre turni.
 

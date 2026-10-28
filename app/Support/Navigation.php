@@ -42,6 +42,7 @@ class Navigation
             ['users', 'users', 'users.index', 'g u', 'persone utenti inviti ruoli permessi', 'users.view'],
             ['settings', 'settings', 'settings.company', 'g i', 'impostazioni azienda logo colori', 'settings.manage'],
             ['notification_rules', 'mail', 'settings.notifications', null, 'avvisi email ruoli riepilogo regole', 'settings.manage'],
+            ['worktime', 'clock', 'settings.worktime', null, 'orario di lavoro turni calendario festività chiusure mtbf', 'settings.manage'],
             ['audit', 'clipboard-list', 'audit.index', null, 'registro attività log', 'audit.view'],
             ['system', 'server', 'system', 'g s', 'sistema versione aggiornamento copie', 'system.view'],
             ['design', 'palette', 'design', null, 'design system stile componenti', 'settings.manage'],

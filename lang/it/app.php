@@ -28,6 +28,7 @@ return [
         'inventory' => 'Magazzino',
         'kpi' => 'Indicatori',
         'notification_rules' => 'Avvisi via email',
+        'worktime' => 'Orario di lavoro',
         'notifications' => 'Avvisi',
         'system' => 'Sistema',
         'design' => 'Design system',

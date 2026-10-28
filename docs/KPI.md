@@ -2,7 +2,7 @@
 
 Questo documento è la definizione ufficiale di ogni indicatore della dashboard (`/indicatori`).
 Il codice (`app/Support/Kpi/KpiCalculator.php`) segue queste formule alla lettera.
-I test (`tests/Feature/Kpi/KpiCalculatorTest.php`) le verificano con dati noti e risultati calcolati a mano.
+I test (`tests/Feature/Kpi/KpiCalculatorTest.php` e, per l'orario di lavoro, `tests/Feature/Kpi/WorkTimeTest.php`) le verificano con dati noti e risultati calcolati a mano.
 
 ## 1. Regole comuni
 
@@ -65,6 +65,7 @@ Quando i dati non bastano per un numero affidabile, la dashboard mostra **"dati 
 |---|---|
 | MTTR | 3 fermi per guasto conclusi nel periodo |
 | MTBF | 3 guasti nel periodo e almeno 7 giorni-macchina di osservazione (somma delle finestre di osservazione di tutte le macchine considerate) |
+| MTBF sulle ore di lavoro (§2.9) | 3 guasti nel periodo e almeno 40 ore di lavoro previste nelle finestre di osservazione |
 | Preventivo/correttivo | 5 ordini preventivi + correttivi completati nel periodo |
 | Rispetto dei piani | 3 interventi dovuti nel periodo |
 | Fermi, arretrato, costi | nessun minimo: sono conteggi e somme (zero è un valore vero) |
@@ -97,7 +98,7 @@ Quando i dati non bastano per un numero affidabile, la dashboard mostra **"dati 
 - **Finestra di osservazione della macchina m:** `[max(inizio, inizio_storico(m)), fine)`. Se è vuota, la macchina è esclusa.
 - **funzionamento(m)** = durata della finestra − durata dei fermi di m dentro la finestra.
   - Tutti i fermi, anche quelli pianificati: in quel tempo la macchina non lavora.
-  - Il tempo è di **calendario, 24 ore su 24**: ManuTrack non conosce i turni. Per una macchina che lavora un turno solo, l'MTBF misura il tempo di calendario tra i guasti, non le ore di lavoro.
+  - Il tempo è di **calendario, 24 ore su 24**. Se l'azienda ha impostato l'orario di lavoro, accanto c'è l'MTBF sulle ore di lavoro (§2.9), che diventa il valore principale.
 - **guasti(m)** = fermi **per guasto** di m che **cominciano** nella finestra.
 - **Nessun guasto nel periodo:** l'MTBF non è calcolabile e si mostra "nessun guasto" con i giorni-macchina di osservazione. Non si inventa un valore "infinito".
 - È un MTBF **di flotta**: le macchine senza guasti contribuiscono con il loro tempo di funzionamento. Nella tabella per macchina ogni macchina ha il suo MTBF, con gli stessi minimi.
@@ -151,12 +152,32 @@ Quando i dati non bastano per un numero affidabile, la dashboard mostra **"dati 
 - **MTTR insufficiente** in un intervallo: il grafico interrompe la linea e la tabella scrive "insufficienti"; non si disegna uno zero.
 - La somma delle ore di fermo degli intervalli è uguale a quella del periodo intero, a meno degli arrotondamenti a un decimale.
 
+### 2.9 MTBF sulle ore di lavoro
+Vale quando almeno un calendario di lavoro è assegnato (*Impostazioni › Orario di lavoro*).
+
+- **Calendario di una macchina in un giorno:** quello assegnato al livello più specifico con "valido dal" non successivo a quel giorno: la macchina (previsto dal calcolo, non dalle pagine), poi la sua ubicazione e quelle che la contengono, dalla più vicina, poi l'azienda. Un'assegnazione vuota eredita dal livello sopra. Senza nessun calendario: 24 ore su 24.
+- **Ore di lavoro di un giorno**, nell'ordine:
+  1. l'eccezione di quel giorno: *chiuso* (festività, chiusura, patrono) = nessuna ora; *orario speciale* = quelle ore; *si lavora* (festività tolta) = orario normale;
+  2. altrimenti i turni del giorno della settimana nella versione dell'orario in vigore quel giorno (la versione con il "valido dal" più recente non successivo).
+- **Turni di notte:** un turno appartiene al giorno in cui comincia; se la fine non viene dopo l'inizio finisce il giorno dopo (22:00–06:00), anche se il giorno dopo è festa; 00:00–00:00 = tutto il giorno. Per questo si guarda anche il giorno prima dell'inizio della finestra: il turno di sabato notte conta per la domenica 1°.
+- **Ora legale:** le ore sono tempo reale trascorso (§1.1): il turno 22:00–06:00 della notte del passaggio all'ora legale dura 7 ore, quello del ritorno all'ora solare 9; 00:00–00:00 dura 23 o 25 ore in quei giorni.
+- **Formule**, sulla stessa finestra di osservazione del §2.3 per ogni macchina m:
+  - `lavoro(m)` = durata degli intervalli di lavoro di m dentro la finestra (nei giorni senza calendario: 24 ore);
+  - `fermo_in_lavoro(m)` = parte dei fermi di m (tutti, anche pianificati) che cade dentro quegli intervalli;
+  - `MTBF lavoro = Σ_m (lavoro(m) − fermo_in_lavoro(m)) / Σ_m guasti(m)`;
+  - **guasti** = gli stessi del §2.3, **anche se cominciano fuori orario** (trovato fermo il lunedì mattina, guasto di domenica, giorno chiuso): il guasto c'è stato comunque.
+- **Base del valore:** *lavoro* se tutte le macchine considerate hanno un calendario per tutto il periodo; *misto* se alcune macchine o alcuni giorni sono senza calendario (contano 24 ore su 24). La dashboard, il rapporto e l'esportazione lo scrivono.
+- **Come si mostra:** l'MTBF sulle ore di lavoro è il valore **principale**; l'MTBF sulle 24 ore resta sotto come valore secondario, con l'etichetta "24 ore su 24". Nella tabella per macchina, per le macchine con un calendario.
+- **Mesi passati invariati:** ogni orario settimanale e ogni assegnazione ha il suo "valido dal". Un orario già in vigore non si modifica (si crea un orario nuovo da oggi o da una data futura; il giorno della creazione si può ancora correggere); i giorni speciali passati non si modificano; un calendario già assegnato non si elimina. Un'assegnazione con una data passata è una scelta esplicita e la pagina avvisa che cambia gli indicatori da quella data.
+- **Festività:** le festività nazionali italiane (Capodanno, Epifania, Pasqua, Lunedì dell'Angelo, 25 aprile, 1° maggio, 2 giugno, Ferragosto, Ognissanti, 8 dicembre, Natale, Santo Stefano; dal 2026 anche il 4 ottobre, San Francesco d'Assisi) sono proposte in automatico per l'anno in corso e il successivo (alla creazione del calendario e ogni notte) e si possono togliere o rimettere; chiusure aziendali e santo patrono si inseriscono a mano.
+- **Escluso per ora:** MTTR sulle ore di lavoro e disponibilità (lavoro − fermi) / lavoro: si possono aggiungere con gli stessi dati.
+
 ## 3. Permessi
 - La dashboard richiede "Vedere i report" (amministratore, responsabile, magazziniere, osservatore).
 - I costi richiedono anche "Vedere i costi".
 - Esportazione degli indicatori: "Esportare CSV ed Excel" più "Vedere i report"; il foglio dei costi solo con "Vedere i costi".
 - Rapporto mensile (`docs/SPECIFICA.md` §43): "Vedere i report"; usa queste stesse formule sul mese di calendario intero.
 
-## 4. Limite noto: tempo di calendario
+## 4. Orario di lavoro
 
-L'MTBF usa il tempo di calendario (§2.3). La proposta per calcolarlo sulle sole ore di lavoro previste è in `docs/PROPOSTA.md`, "Proposta: orario di lavoro".
+Senza calendari assegnati l'MTBF resta solo sulle 24 ore (§2.3). Con un calendario si applica il §2.9; la decisione e le alternative scartate sono in `docs/PROPOSTA.md`, "Proposta: orario di lavoro".

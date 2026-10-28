@@ -190,6 +190,7 @@ In *Advanced Features › Cron Jobs* aggiungi **una** voce, ogni minuto (tutti i
   - genera gli ordini dei piani preventivi in scadenza (ogni 15 minuti; a mano: `php artisan manutrack:preventiva`);
   - manda il riepilogo giornaliero degli avvisi via email alle 07:10 (`php artisan manutrack:avvisi-riepilogo`) e cancella gli avvisi più vecchi di 90 giorni;
   - il 1° del mese alle 07:20 avvisa che il rapporto mensile è pronto (`php artisan manutrack:rapporto-mensile`);
+  - ogni notte alle 02:45 propone nei calendari di lavoro le festività nazionali dell'anno in corso e del successivo (`php artisan manutrack:festivita`);
   - fa le pulizie;
   - applica gli aggiornamenti caricati.
 - Nessun processo resta attivo e non servono `exec` o `proc_open`.

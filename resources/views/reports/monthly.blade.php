@@ -109,7 +109,20 @@
             </div>
             <div class="tile">
                 <div class="k">{{ __('kpi.mtbf.title') }}</div>
-                @if($mtbf['failures'] === 0)
+                @if($mtbf['work'])
+                    {{-- Con un calendario: principale sulle ore di lavoro, sotto le 24 ore (docs/KPI.md §2.9) --}}
+                    <div class="n">{{ $mtbf['work']['basis'] === 'lavoro' ? __('worktime.kpi.work_label') : __('worktime.kpi.mixed_label') }}</div>
+                    @if($mtbf['failures'] === 0)
+                        <div class="v na">{{ __('kpi.mtbf.no_failures') }}</div>
+                    @elseif($mtbf['work']['insufficient'])
+                        <div class="v na">{{ __('kpi.insufficient') }}</div>
+                        <div class="n">{{ __('worktime.kpi.work_need', ['n' => $mtbf['failures'], 'hours' => $h($mtbf['work']['observed_hours']), 'min' => KpiCalculator::MIN_MTBF_FAILURES, 'minh' => KpiCalculator::MIN_MTBF_WORK_HOURS]) }}</div>
+                    @else
+                        <div class="v">{{ $h($mtbf['work']['value']) }} h</div>
+                        <div class="n">{{ __('worktime.kpi.work_on', ['n' => $mtbf['failures'], 'hours' => $h($mtbf['work']['observed_hours'])]) }}</div>
+                    @endif
+                    <div class="n">{{ $mtbf['insufficient'] ? __('worktime.kpi.h24_insufficient') : __('worktime.kpi.h24_secondary', ['value' => $h($mtbf['value']).' h']) }}</div>
+                @elseif($mtbf['failures'] === 0)
                     <div class="v na">{{ __('kpi.mtbf.no_failures') }}</div>
                 @elseif($mtbf['insufficient'])
                     <div class="v na">{{ __('kpi.insufficient') }}</div>

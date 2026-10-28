@@ -500,3 +500,13 @@ Servono un **responsabile** (PC e telefono) e, se possibile, un telefono economi
 
 ### 14.5 La M d'ingresso
 - [ ] Senza logo del cliente, la pagina di accesso mostra la M in 3D: segue il mouse sul PC; su Android segue l'inclinazione; sull'iPhone, toccando la M, chiede il permesso per il movimento e poi la segue.
+
+## 15. Orario di lavoro (0.11.0)
+
+Serve l'**amministratore**, dal PC.
+
+- [ ] *Impostazioni › Orario di lavoro › Nuovo calendario*: "Un turno", modello "Un turno". Nel calendario si vedono le festività di quest'anno e del prossimo; togline una (diventa "Si lavora") e rimettila.
+- [ ] Aggiungi una chiusura aziendale (es. due settimane in agosto) e il santo patrono.
+- [ ] *Dove si applica*: "Tutta l'azienda" → "Un turno", valido da oggi. La tabella mostra il calendario anche per le ubicazioni (eredità).
+- [ ] *Indicatori*: il riquadro MTBF dice "sulle ore di lavoro" e sotto "24 ore su 24: …". Per i periodi prima di oggi il valore resta sulle 24 ore ("in parte su 24 ore" se il periodo è a cavallo).
+- [ ] Il giorno dopo, aprendo il calendario, l'orario risulta bloccato: crea "Nuovo orario dal" una data futura e modifica quello.

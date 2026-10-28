@@ -83,6 +83,7 @@ return [
         'Fermi: quelli che si sovrappongono al periodo; conta solo la parte dentro il periodo. Un fermo è "pianificato" se è legato a un ordine preventivo o di miglioramento, altrimenti è un guasto.',
         'MTTR: durata media dei fermi per guasto conclusi nel periodo (per intero), dal fermo alla ripartenza. I fermi aperti non contano.',
         'MTBF: tempo di funzionamento (calendario, 24 ore su 24, meno i fermi) diviso il numero di guasti iniziati nel periodo. Escluse le macchine dismesse e quelle non ancora installate.',
+        'MTBF sulle ore di lavoro (se c\'è un calendario in Impostazioni › Orario di lavoro): ore di lavoro previste meno i fermi dentro quelle ore, diviso gli stessi guasti; le macchine o i giorni senza calendario contano 24 ore su 24. Sotto resta l\'MTBF sulle 24 ore.',
         'Arretrato: ordini aperti adesso, indipendentemente dal periodo.',
         'Preventivo / correttivo e costi: ordini completati nel periodo; annullati esclusi; i miglioramenti sono a parte nel rapporto.',
         'Rispetto dei piani: interventi con scadenza prevista nel periodo, fino a oggi.',

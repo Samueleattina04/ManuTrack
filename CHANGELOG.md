@@ -3,6 +3,19 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.11.0] - Orario di lavoro per l'MTBF
+
+### Aggiunto
+- **Orario di lavoro** (*Impostazioni › Orario di lavoro*):
+  - calendari da modelli pronti (uno, due, tre turni, ciclo continuo) con turni per giorno, anche di notte;
+  - versioni "valido dal": un orario in vigore non si modifica, si crea il successivo, così i mesi passati non cambiano;
+  - festività nazionali italiane proposte in automatico e modificabili (comprese Pasquetta mobile e, dal 2026, San Francesco il 4 ottobre); chiusure aziendali, patrono e orari speciali a mano; giorni passati bloccati;
+  - assegnazione datata all'azienda e alle ubicazioni, con eredità verso le sotto-ubicazioni; alla singola macchina previsto dal calcolo ma non esposto.
+- **MTBF sulle ore di lavoro** come valore principale quando c'è un calendario, con l'MTBF sulle 24 ore come valore secondario etichettato: dashboard, tabella per macchina, rapporto mensile, esportazione. Guasti fuori orario contati comunque; turni di notte e ora legale sul tempo reale.
+- `docs/KPI.md` §2.9 con formule, eredità, bordi e minimi (3 guasti e 40 ore di lavoro); test con dati noti calcolati a mano (marzo 2026: ora legale, turno di notte, giorno chiuso, orario speciale, cambio di orario, assegnazione a metà mese).
+- Comando `manutrack:festivita`, eseguito ogni notte dal cron.
+- Orario dimostrativo nei dati di prova (due turni per l'azienda, tre sulla linea 1).
+
 ## [0.10.1] - Verifiche dopo la fase 10
 
 ### Aggiunto

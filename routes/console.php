@@ -68,6 +68,11 @@ Schedule::call(function (): void {
     Artisan::call('manutrack:rapporto-mensile');
 })->monthlyOn(1, '07:20')->name('manutrack:monthly-report')->withoutOverlapping(30);
 
+// Orario di lavoro: festività nazionali proposte per l'anno in corso e il prossimo
+Schedule::call(function (): void {
+    Artisan::call('manutrack:festivita');
+})->dailyAt('02:45')->name('manutrack:holidays')->withoutOverlapping(30);
+
 // Pulizie periodiche
 Schedule::call(function (): void {
     Artisan::call('queue:prune-failed', ['--hours' => 24 * 30]);

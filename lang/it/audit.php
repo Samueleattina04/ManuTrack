@@ -63,6 +63,12 @@ return [
             'logo_uploaded' => 'Logo caricato',
             'logo_removed' => 'Logo rimosso',
             'hourly_rate' => 'Costo orario cambiato',
+            'work_calendar_created' => 'Calendario di lavoro creato',
+            'work_calendar_deleted' => 'Calendario di lavoro eliminato',
+            'work_calendar_hours' => 'Orario settimanale modificato',
+            'work_calendar_version' => 'Nuovo orario settimanale',
+            'work_calendar_day' => 'Giorno speciale del calendario',
+            'work_calendar_assigned' => 'Calendario di lavoro assegnato',
         ],
         'assets' => [
             'created' => 'Macchina creata',

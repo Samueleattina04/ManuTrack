@@ -68,7 +68,7 @@ foreach ($forbidden as $f) {
 
 // Nessuna traccia dei dati dimostrativi nel codice dell'app: la password
 // degli account di prova e i nomi dei seeder
-$demoMarkers = $edition === 'demo' ? [] : ['manutrack-demo', 'DemoAssetsSeeder', 'DemoMaintenanceSeeder', 'DemoInventorySeeder', 'DemoPreventiveSeeder', 'DemoHistorySeeder', 'DemoPlantSeeder'];
+$demoMarkers = $edition === 'demo' ? [] : ['manutrack-demo', 'DemoAssetsSeeder', 'DemoMaintenanceSeeder', 'DemoInventorySeeder', 'DemoPreventiveSeeder', 'DemoHistorySeeder', 'DemoPlantSeeder', 'DemoWorkTimeSeeder'];
 foreach (['app', 'bootstrap', 'config', 'database', 'lang', 'public', 'resources', 'routes'] as $dir) {
     if (! is_dir($build.'/'.$dir)) {
         continue;
