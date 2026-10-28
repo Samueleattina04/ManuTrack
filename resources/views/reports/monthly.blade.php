@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
     <title>{{ __('kpi.report.title') }} · {{ $monthLabel }} · {{ $company }}</title>
-    <style>
+    <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         :root { color-scheme: light; --ink: #14181f; --muted: #5b6472; --line: #d5dae1; --soft: #f3f5f8; --ko: #b42318; }
         * { box-sizing: border-box; }
         html, body { margin: 0; background: #e9ecf1; color: var(--ink); font: 14px/1.45 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -73,7 +73,7 @@
         <a aria-disabled="true">{{ __('kpi.report.next') }} ›</a>
     @endif
     <span class="grow"></span>
-    <button type="button" class="primary" onclick="window.print()">{{ __('kpi.report.print') }}</button>
+    <button type="button" class="primary" data-print>{{ __('kpi.report.print') }}</button>
     <span class="hint">{{ __('kpi.report.print_hint') }}</span>
 </nav>
 
@@ -271,5 +271,6 @@
 
     <footer>{{ __('kpi.report.footer') }}</footer>
 </main>
+<x-page-actions />
 </body>
 </html>

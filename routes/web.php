@@ -171,16 +171,16 @@ Route::middleware(['installed', 'auth', 'active'])->group(function () {
     Route::middleware('can:assets.manage')->group(function () {
         Route::get('/stabilimento/piante/nuova', PlantEditor::class)->name('plant.create');
         Route::get('/stabilimento/piante/{plant}/modifica', PlantEditor::class)->whereNumber('plant')->name('plant.edit');
-        Route::post('/macchine/{asset}/modello', [PlantController::class, 'uploadModel'])->whereNumber('asset')->name('assets.model.upload');
+        Route::post('/macchine/{asset}/modello', [PlantController::class, 'uploadModel'])->whereNumber('asset')->middleware('throttle:uploads')->name('assets.model.upload');
         Route::delete('/macchine/{asset}/modello', [PlantController::class, 'deleteModel'])->whereNumber('asset')->name('assets.model.delete');
     });
 
     // Indicatori
     Route::get('/indicatori', KpiDashboard::class)->middleware('can:reports.view')->name('kpi');
-    Route::get('/indicatori/rapporto', [ReportController::class, 'monthly'])->middleware('can:reports.view')->name('kpi.report');
+    Route::get('/indicatori/rapporto', [ReportController::class, 'monthly'])->middleware(['can:reports.view', 'throttle:exports'])->name('kpi.report');
 
     // Esportazioni CSV ed Excel con i filtri dell'elenco
-    Route::middleware('can:reports.export')->prefix('/esporta')->name('export.')->group(function () {
+    Route::middleware(['can:reports.export', 'throttle:exports'])->prefix('/esporta')->name('export.')->group(function () {
         Route::get('/ordini.{format}', [ExportController::class, 'workOrders'])->whereIn('format', ['csv', 'xlsx'])->middleware('can:work_orders.view')->name('work-orders');
         Route::get('/macchine.{format}', [ExportController::class, 'assets'])->whereIn('format', ['csv', 'xlsx'])->middleware('can:assets.view')->name('assets');
         Route::get('/ricambi.{format}', [ExportController::class, 'parts'])->whereIn('format', ['csv', 'xlsx'])->middleware('can:inventory.view')->name('parts');

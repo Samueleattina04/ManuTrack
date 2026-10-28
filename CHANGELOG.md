@@ -3,6 +3,32 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.12.1] - Controllo di sicurezza
+
+Esito completo, con gravità, scenari e test: `docs/CONTROLLO-SICUREZZA-ESITO.md`. Intestazioni,
+CSP, limiti e proxy: `docs/SICUREZZA.md`.
+
+### Sicurezza
+- **Link per la nuova password avvelenabile** (alta): con `X-Forwarded-Host` (proxy fidati "*") chiunque poteva farsi mandare a un'altra persona un link verso il proprio sito. Gli indirizzi nelle email e nelle pagine vengono ora sempre da `APP_URL`.
+- **Proxy fidati solo locali** (alta): `X-Forwarded-For` era accettato da chiunque, quindi i limiti per IP (accesso, password dimenticata, installazione) si aggiravano cambiando intestazione e il registro poteva riportare un IP falso. Di serie solo questo server e le reti private; `MANUTRACK_TRUSTED_PROXIES` per proxy esterni.
+- **"users.manage" dato a un altro ruolo** (alta): permetteva di nominarsi amministratore (cambio del proprio ruolo, invito di un amministratore, matrice dei permessi). Ora gli amministratori, il proprio ruolo e la matrice li gestisce solo l'amministratore.
+- **Persone disattivate con la pagina aperta** (alta): le azioni Livewire continuavano a funzionare. `EnsureUserIsActive` è tra i middleware persistenti di Livewire.
+- **Password riconfermata** (media): Sistema e Dati e privacy la richiedevano solo all'apertura; ora anche per le azioni Livewire dopo la scadenza, senza scappatoie con `Accept: application/json`.
+- **Cambio della password** (media): ora chiude le altre sessioni e annulla i "ricordami" degli altri dispositivi.
+- **Iscrizioni push verso indirizzi qualunque** (media, SSRF): accettati solo i servizi push dei browser (`MANUTRACK_PUSH_HOSTS`).
+- **Limiti delle richieste** (media): password dimenticata, uso del link, conferma della password, password attuale nel profilo e nella cancellazione totale, inviti inviati (per chi invita e per indirizzo), link mandati dall'amministratore, esportazioni CSV/Excel e rapporto mensile, esportazione completa, caricamenti (temporanei e modelli 3D) per persona.
+- **Enumerazione degli account** (bassa): "password dimenticata" risponde allo stesso modo per ogni indirizzo; l'accesso costa lo stesso tempo anche senza account.
+- **Content-Security-Policy con nonce e intestazioni di sicurezza su tutte le pagine** (media): `frame-ancestors 'none'`, `nosniff`, `Referrer-Policy`, `Permissions-Policy` con la fotocamera solo in Segnala, HSTS configurabile, COOP. Eccezioni documentate (`'unsafe-eval'` per Alpine in Livewire 3, `data:`/`blob:` per foto e modelli 3D). Modalità `MANUTRACK_CSP=report` per le prove; `scripts/e2e/csp-check.cjs` visita tutte le pagine e fallisce a ogni violazione. Tolti i gestori `onclick=` dalle viste.
+- `public/.htaccess` non sostituisce più le intestazioni dell'app (su Apache la fotocamera era permessa ovunque e alcune intestazioni arrivavano doppie).
+- In produzione: `/design` non esiste, `migrate:fresh`, `migrate:reset`, `migrate:refresh` e `db:wipe` non partono (salvo l'azzeramento della demo, già protetto), `manutrack:install` non riparte sopra un'installazione cancellata.
+- Caricamenti temporanei di Livewire: tolti gli indirizzi `/storage/…` del disco privato, temporanei abbandonati cancellati dopo un giorno dalla pulizia notturna.
+- Snapshot Livewire modificati a mano: rifiutati con 419 senza riempire i registri del server; i tentativi sbagliati di cancellazione totale restano nel registro attività.
+- `.env.example`: `SESSION_ENCRYPT=true` per le nuove installazioni.
+
+### Aggiunto
+- Test di sicurezza in `tests/Feature/Security` (richieste costruite a mano verso `/livewire/update`, limiti, intestazioni, caricamenti, installazione e demo).
+- CI: `composer audit` e `npm audit` (pacchetto e strumenti di sviluppo).
+
 ## [0.12.0] - Fase 11: dati e privacy, demo finale
 
 ### Aggiunto

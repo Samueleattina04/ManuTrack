@@ -3,6 +3,7 @@
 return [
     'title' => 'Ruoli e permessi',
     'intro' => 'Ogni persona ha un ruolo. Qui decidi cosa può fare ciascun ruolo; l\'amministratore ha sempre tutti i permessi. Le modifiche valgono subito.',
+    'admin_only_edit' => 'Solo un amministratore può cambiare i permessi dei ruoli.',
     'matrix' => 'Permessi per ruolo',
     'permission' => 'Permesso',
     'always' => 'Sempre',

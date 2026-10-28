@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
     <title>Installazione cancellata · ManuTrack</title>
-    <style>
+    <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         :root { color-scheme: light dark; }
         body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background: Canvas; color: CanvasText; }
         main { max-width: 760px; margin: 0 auto; padding: 32px 16px; }

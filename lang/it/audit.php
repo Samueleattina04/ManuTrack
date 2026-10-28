@@ -145,6 +145,7 @@ return [
             'data_export_ready' => 'Esportazione completa dei dati pronta',
             'data_export_downloaded' => 'Esportazione completa dei dati scaricata',
             'data_export_deleted' => 'Esportazione completa dei dati eliminata',
+            'erase_refused' => 'Cancellazione totale rifiutata (conferma sbagliata)',
             'retention' => 'Conservazione dei dati applicata',
             'update_success' => 'Aggiornamento applicato',
             'update_failed' => 'Aggiornamento non riuscito',

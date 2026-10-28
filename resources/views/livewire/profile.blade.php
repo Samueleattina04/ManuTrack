@@ -80,7 +80,7 @@
         @can('system.view')
             <a href="{{ route('system') }}" class="card flex items-center gap-3 p-4 hover:bg-surface-2"><x-icon name="server" /><span class="flex-1 font-medium">{{ __('app.nav.system') }}</span><x-icon name="chevron-right" /></a>
         @endcan
-        <form method="POST" action="{{ route('logout') }}" onsubmit="try { window.caches && caches.delete('mt-pages'); sessionStorage.removeItem('mt-warm'); } catch (e) {}">
+        <form method="POST" action="{{ route('logout') }}" x-data x-on:submit="(() => { try { window.caches && caches.delete('mt-pages'); sessionStorage.removeItem('mt-warm'); } catch (e) {} })()">
             @csrf
             <button type="submit" class="btn btn-secondary w-full"><x-icon name="log-out" />{{ __('auth_ui.logout') }}</button>
         </form>

@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
     <title>{{ __('assets.labels.title') }} · {{ $company }}</title>
-    <style>
+    <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         :root { color-scheme: light; --w: {{ $spec['w'] }}mm; --h: {{ $spec['h'] }}mm; --qr: {{ $spec['qr'] }}mm; }
         * { box-sizing: border-box; }
         html, body { margin: 0; background: #e9ecf1; color: #111; font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -48,16 +48,16 @@
         <strong>{{ trans_choice('assets.labels.count', $assets->count(), ['count' => $assets->count()]) }}</strong>
         <input type="hidden" name="ids" value="{{ $ids }}">
         <label>{{ __('assets.labels.format') }}
-            <select name="formato" onchange="this.form.submit()">
+            <select name="formato" data-submit-on-change>
                 @foreach($formats as $key => $f)
                     <option value="{{ $key }}" @selected($key === $format)>{{ __('assets.labels.formats.'.$key, ['n' => $f['cols'] * $f['rows'], 'w' => str_replace('.', ',', (string) $f['w']), 'h' => str_replace('.', ',', (string) $f['h'])]) }}</option>
                 @endforeach
             </select>
         </label>
         <label>{{ __('assets.labels.skip') }}
-            <input type="number" name="salta" min="0" max="{{ $perPage - 1 }}" value="{{ $skip }}" style="width: 5.5rem" onchange="this.form.submit()">
+            <input type="number" name="salta" min="0" max="{{ $perPage - 1 }}" value="{{ $skip }}" style="width: 5.5rem" data-submit-on-change>
         </label>
-        <button type="button" class="primary" onclick="window.print()">{{ __('assets.labels.print') }}</button>
+        <button type="button" class="primary" data-print>{{ __('assets.labels.print') }}</button>
         <a href="{{ route('assets.index') }}">{{ __('assets.title') }}</a>
         <span class="hint">{{ __('assets.labels.hint') }}</span>
     </form>
@@ -84,5 +84,6 @@
     @empty
         <p style="padding: 24px; text-align: center">{{ __('assets.labels.none') }}</p>
     @endforelse
+<x-page-actions />
 </body>
 </html>

@@ -6,6 +6,8 @@ use App\Support\FileLock;
 use App\Support\Settings;
 use Closure;
 use Database\Seeders\DatabaseSeeder;
+use Illuminate\Database\Console\Migrations\FreshCommand;
+use Illuminate\Database\Console\WipeCommand;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use RuntimeException;
@@ -52,6 +54,10 @@ class DemoInstaller
             }
 
             $say(__('demo.step.database'));
+            // In produzione migrate:fresh è vietato (AppServiceProvider): qui pacchetto, .env e
+            // database hanno appena confermato che è la demo, l'unica che si può ricreare
+            FreshCommand::prohibit(false);
+            WipeCommand::prohibit(false);
             $this->call('migrate:fresh', ['--force' => true]);
             $this->settings->flush();
 

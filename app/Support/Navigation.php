@@ -46,7 +46,7 @@ class Navigation
             ['audit', 'clipboard-list', 'audit.index', null, 'registro attività log', 'audit.view'],
             ['privacy', 'shield', 'gdpr.exports', null, 'dati privacy gdpr esportazione anonimizza conservazione cancellazione', 'data.export'],
             ['system', 'server', 'system', 'g s', 'sistema versione aggiornamento copie', 'system.view'],
-            ['design', 'palette', 'design', null, 'design system stile componenti', 'settings.manage'],
+            ...(app()->isProduction() ? [] : [['design', 'palette', 'design', null, 'design system stile componenti', 'settings.manage']]),
         ]);
     }
 

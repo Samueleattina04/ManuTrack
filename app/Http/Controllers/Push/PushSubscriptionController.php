@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PushSubscription;
 use App\Support\Audit\Audit;
 use App\Support\Push\DeviceLabel;
+use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -54,7 +55,7 @@ class PushSubscriptionController extends Controller
     {
         $request->validate([
             'old_endpoint' => ['required', 'string', 'max:2048'],
-            'subscription.endpoint' => ['required', 'url:https', 'max:2048'],
+            'subscription.endpoint' => ['required', 'url:https', 'max:2048', self::pushService(...)],
             'subscription.keys.p256dh' => ['required', 'string', 'max:255'],
             'subscription.keys.auth' => ['required', 'string', 'max:255'],
         ]);
@@ -80,13 +81,24 @@ class PushSubscriptionController extends Controller
     }
 
     /**
+     * L'indirizzo deve essere di un servizio push dei browser: il server ci manda richieste,
+     * quindi non può essere un indirizzo qualunque (per esempio un servizio interno).
+     */
+    private static function pushService(string $attribute, mixed $value, Closure $fail): void
+    {
+        if (! PushSubscription::isAllowedEndpoint((string) $value)) {
+            $fail(__('pwa.push.endpoint_not_allowed'));
+        }
+    }
+
+    /**
      * @return array{endpoint: string, keys: array{p256dh: string, auth: string}, contentEncoding?: string}
      */
     private function validated(Request $request): array
     {
         /** @var array{endpoint: string, keys: array{p256dh: string, auth: string}, contentEncoding?: string} */
         return $request->validate([
-            'endpoint' => ['required', 'url:https', 'max:2048'],
+            'endpoint' => ['required', 'url:https', 'max:2048', self::pushService(...)],
             'keys.p256dh' => ['required', 'string', 'max:255'],
             'keys.auth' => ['required', 'string', 'max:255'],
             'contentEncoding' => ['nullable', 'in:aes128gcm,aesgcm'],

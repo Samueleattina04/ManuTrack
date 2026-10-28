@@ -6,6 +6,7 @@ use App\Jobs\ExportCompanyData;
 use App\Models\DataExport;
 use App\Support\Audit\Audit;
 use App\Support\Plant\AssetModel;
+use App\Support\Security\ActionLimit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
@@ -26,6 +27,12 @@ class DataExports extends Component
         $this->authorize('data.export');
         if (DataExport::query()->whereIn('status', ['in_coda', 'in_corso'])->exists()) {
             $this->dispatch('toast', message: __('gdpr.export.already'), tone: 'warn');
+
+            return;
+        }
+        // Ogni ZIP contiene tutti i dati e tutti i file: al massimo 3 l'ora (spazio su disco)
+        if (! ActionLimit::attempt('gdpr-export', 3, 3600)) {
+            $this->dispatch('toast', message: ActionLimit::message('gdpr-export'), tone: 'warn');
 
             return;
         }

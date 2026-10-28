@@ -9,6 +9,7 @@ use App\Support\Update\Updater;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schedule;
+use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,4 +89,14 @@ Schedule::call(function (): void {
 Schedule::call(function (): void {
     Artisan::call('queue:prune-failed', ['--hours' => 24 * 30]);
     Artisan::call('queue:prune-batches', ['--hours' => 24 * 7]);
+    // File temporanei di Livewire abbandonati (pagina chiusa prima di salvare): Livewire li
+    // toglie solo al caricamento successivo, che può non arrivare mai
+    if (! FileUploadConfiguration::isUsingS3()) {
+        $storage = FileUploadConfiguration::storage();
+        foreach ($storage->allFiles(FileUploadConfiguration::path()) as $file) {
+            if ($storage->lastModified($file) < now()->subDay()->getTimestamp()) {
+                $storage->delete($file);
+            }
+        }
+    }
 })->dailyAt('03:30')->name('manutrack:prune');

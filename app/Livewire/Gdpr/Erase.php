@@ -4,7 +4,9 @@ namespace App\Livewire\Gdpr;
 
 use App\Models\DataExport;
 use App\Support\Access\Access;
+use App\Support\Audit\Audit;
 use App\Support\Gdpr\Eraser;
+use App\Support\Security\ActionLimit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
@@ -38,12 +40,20 @@ class Erase extends Component
 
             return null;
         }
+        $key = ActionLimit::forUser('password-check');
+        if (! ActionLimit::attempt($key, 5, 60)) {
+            $this->addError('password', ActionLimit::message($key));
+
+            return null;
+        }
         try {
             $eraser->authorize(auth()->user(), $this->phrase, $this->password);
         } catch (ValidationException $e) {
             foreach ($e->errors() as $key => $messages) {
                 $this->addError($key, $messages[0]);
             }
+            // Solo quale controllo non è passato, mai la frase o la password scritte
+            Audit::log('system.erase_refused', null, implode(', ', array_keys($e->errors())));
             $this->password = '';
 
             return null;

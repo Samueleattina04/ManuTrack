@@ -98,7 +98,7 @@ Il charset predefinito di DirectAdmin (`utf8mb4`) va bene.
 3. Attiva **Force SSL with https redirect**: in *Domain Setup*, sul dominio, spunta *Force SSL with https redirect*.
 4. Verifica che `https://<dominio>` mostri il lucchetto senza avvisi.
 
-Il file `public/.htaccess` di ManuTrack reindirizza comunque su HTTPS e invia l'intestazione HSTS, che dice al browser di usare sempre HTTPS. Nel file `.env` lascia `SESSION_SECURE_COOKIE=true`.
+Il file `public/.htaccess` di ManuTrack reindirizza comunque su HTTPS e ManuTrack invia l'intestazione HSTS, che dice al browser di usare sempre HTTPS (`MANUTRACK_HSTS_SECONDS`). Nel file `.env` lascia `SESSION_SECURE_COOKIE=true` e controlla che `APP_URL` sia l'indirizzo pubblico in `https://`: i link nelle email usano sempre quello. Intestazioni, CSP, proxy fidati e limiti sono descritti in [SICUREZZA.md](SICUREZZA.md).
 
 > **Perché è indispensabile.** Il service worker (app installabile, uso senza rete) e le notifiche push funzionano solo in HTTPS. Su iPhone le notifiche richiedono inoltre che l'app sia aggiunta alla schermata Home (iOS 16.4 o successivo).
 

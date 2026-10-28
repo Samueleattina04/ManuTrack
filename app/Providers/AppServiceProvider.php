@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\RequirePassword;
 use App\Models\User;
 use App\Support\Access\Access;
 use App\Support\Audit\Audit;
@@ -14,13 +16,16 @@ use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
 use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +37,21 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Gli indirizzi nelle email (nuova password, inviti) e nelle pagine vengono sempre da
+        // APP_URL, mai dall'intestazione Host o X-Forwarded-Host della richiesta: altrimenti
+        // chiunque potrebbe farsi spedire a un'altra persona un link verso il proprio sito
+        $root = rtrim((string) config('app.url'), '/');
+        if ($root !== '') {
+            URL::forceRootUrl($root);
+            if (str_starts_with($root, 'https://')) {
+                URL::forceScheme('https');
+            }
+        }
+
+        // In produzione migrate:fresh, migrate:reset, migrate:refresh e db:wipe non partono,
+        // nemmeno con --force: un comando sbagliato non cancella i dati di un cliente
+        DB::prohibitDestructiveCommands($this->app->isProduction());
+
         // Regola unica per tutte le password
         Password::defaults(fn () => Password::min(10)->letters()->numbers());
 
@@ -47,6 +67,21 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('reports', fn (Request $request) => Limit::perMinute(30)->by('u'.$request->user()?->id));
         RateLimiter::for('push-test', fn (Request $request) => Limit::perMinute(10)->by((string) $request->user()?->id));
         RateLimiter::for('push', fn (Request $request) => Limit::perMinute(30)->by($request->user() ? 'u'.$request->user()->id : (string) $request->ip()));
+        // Link per la nuova password: per indirizzo IP. Per persona Laravel ne manda già uno al
+        // minuto; un limite per email permetterebbe a chiunque di bloccare il reset di un altro
+        RateLimiter::for('password-email', fn (Request $request) => Limit::perMinute(5)->by((string) $request->ip()));
+        RateLimiter::for('password-reset', fn (Request $request) => Limit::perMinute(10)->by((string) $request->ip()));
+        // Conferma della password: chi ha una sessione aperta non la prova a raffica
+        RateLimiter::for('password-confirm', fn (Request $request) => Limit::perMinute(5)->by('u'.$request->user()?->id.'|'.$request->ip()));
+        // Esportazioni CSV/Excel e rapporto mensile: query pesanti
+        RateLimiter::for('exports', fn (Request $request) => Limit::perMinute(10)->by('u'.$request->user()?->id));
+        // Caricamenti (temporanei di Livewire e modelli 3D): per persona, o per IP prima dell'accesso
+        RateLimiter::for('uploads', fn (Request $request) => Limit::perMinute(60)->by($request->user() ? 'u'.$request->user()->id : (string) $request->ip()));
+
+        // Le azioni Livewire (/livewire/update) ripassano dai middleware della pagina solo se
+        // sono in questo elenco: senza, una persona disattivata con la pagina aperta continua
+        // a lavorare e le pagine con la password riconfermata restano usabili dopo la scadenza
+        Livewire::addPersistentMiddleware([EnsureUserIsActive::class, RequirePassword::class]);
 
         $this->registerAuditListeners();
     }

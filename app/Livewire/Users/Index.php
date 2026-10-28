@@ -8,8 +8,10 @@ use App\Models\Invitation;
 use App\Models\User;
 use App\Support\Access\Access;
 use App\Support\Audit\Audit;
+use App\Support\Security\ActionLimit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -64,6 +66,11 @@ class Index extends Component
             'inviteName' => ['nullable', 'string', 'max:120'],
             'inviteRole' => ['required', 'in:'.implode(',', Access::ROLES)],
         ], attributes: ['inviteEmail' => __('users.field.email'), 'inviteName' => __('users.field.name'), 'inviteRole' => __('users.field.role')]);
+        if ($message = $this->inviteLimit($this->inviteEmail)) {
+            $this->addError('inviteEmail', $message);
+
+            return;
+        }
 
         try {
             $invite->handle(auth()->user(), $this->inviteEmail, $this->inviteRole, $this->inviteName ?: null);
@@ -81,8 +88,15 @@ class Index extends Component
     {
         $this->authorize('users.manage');
         $invitation = Invitation::query()->findOrFail($invitationId);
-        $invite->handle(auth()->user(), $invitation->email, $invitation->role, $invitation->name);
-        $this->dispatch('toast', message: __('users.invite.sent', ['email' => $invitation->email]));
+        if ($message = $this->inviteLimit($invitation->email)) {
+            $this->dispatch('toast', message: $message, tone: 'ko');
+
+            return;
+        }
+        $this->guarded(function () use ($invite, $invitation) {
+            $invite->handle(auth()->user(), $invitation->email, $invitation->role, $invitation->name);
+            $this->dispatch('toast', message: __('users.invite.sent', ['email' => $invitation->email]));
+        });
     }
 
     public function revoke(int $invitationId): void
@@ -109,17 +123,52 @@ class Index extends Component
     public function resetTwoFactor(int $userId, ManageUser $manage): void
     {
         $this->authorize('users.manage');
-        $manage->resetTwoFactor(auth()->user(), User::query()->findOrFail($userId));
-        $this->dispatch('toast', message: __('users.two_factor_reset_done'));
+        $this->guarded(function () use ($manage, $userId) {
+            $manage->resetTwoFactor(auth()->user(), User::query()->findOrFail($userId));
+            $this->dispatch('toast', message: __('users.two_factor_reset_done'));
+        });
     }
 
     public function sendPasswordReset(int $userId): void
     {
         $this->authorize('users.manage');
         $user = User::query()->whereNull('anonymized_at')->findOrFail($userId);
-        Password::sendResetLink(['email' => $user->email]);
+        if (! auth()->user()->isAdmin() && $user->isAdmin()) {
+            $this->dispatch('toast', message: __('users.admin_only'), tone: 'ko');
+
+            return;
+        }
+        $key = ActionLimit::forUser('reset-link');
+        if (! ActionLimit::attempt($key, 10, 600)) {
+            $this->dispatch('toast', message: ActionLimit::message($key), tone: 'ko');
+
+            return;
+        }
+        // Il link si invia al massimo una volta al minuto per persona (config/auth.php)
+        if (Password::sendResetLink(['email' => $user->email]) !== Password::RESET_LINK_SENT) {
+            $this->dispatch('toast', message: __('passwords.throttled'), tone: 'ko');
+
+            return;
+        }
         Audit::log('users.password_link_sent', $user, $user->email);
         $this->dispatch('toast', message: __('users.reset_link_sent', ['email' => $user->email]));
+    }
+
+    /**
+     * Inviti per email: al massimo 20 l'ora per chi invita e 3 l'ora per lo stesso indirizzo
+     * (niente raffiche di email né quota della posta esaurita). Messaggio se superato.
+     */
+    private function inviteLimit(string $email): ?string
+    {
+        foreach ([[ActionLimit::forUser('invite'), 20], ['invite-email:'.sha1(mb_strtolower(trim($email))), 3]] as [$key, $max]) {
+            if (RateLimiter::tooManyAttempts($key, $max)) {
+                return ActionLimit::message($key);
+            }
+        }
+        RateLimiter::hit(ActionLimit::forUser('invite'), 3600);
+        RateLimiter::hit('invite-email:'.sha1(mb_strtolower(trim($email))), 3600);
+
+        return null;
     }
 
     private function guarded(callable $action): void

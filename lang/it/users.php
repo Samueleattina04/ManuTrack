@@ -42,6 +42,7 @@ return [
     'deactivate_confirm' => ':name non potrà più accedere. I suoi interventi restano nello storico. Continuare?',
     'cannot_deactivate_self' => 'Non puoi disattivare il tuo account.',
     'last_admin' => 'Deve restare almeno un amministratore attivo.',
+    'admin_only' => 'Solo un amministratore può invitare o gestire gli amministratori e cambiare il proprio ruolo.',
 
     'invite' => [
         'button' => 'Invita',

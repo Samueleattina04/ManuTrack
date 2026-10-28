@@ -10,6 +10,7 @@ require_once __DIR__.'/Feature/Maintenance/helpers.php';
 require_once __DIR__.'/Feature/Inventory/helpers.php';
 require_once __DIR__.'/Feature/Preventive/helpers.php';
 require_once __DIR__.'/Feature/Plant/helpers.php';
+require_once __DIR__.'/Feature/Security/helpers.php';
 
 /**
  * Installa ManuTrack nel database di prova e restituisce l'amministratore.

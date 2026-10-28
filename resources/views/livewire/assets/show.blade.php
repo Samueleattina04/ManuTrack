@@ -394,7 +394,7 @@
                         </div>
                     </form>
                     @if($asset->hasModel())
-                        <form method="POST" action="{{ route('assets.model.delete', $asset) }}" onsubmit="return confirm(@js(__('plant.model.delete_confirm')))">
+                        <form method="POST" action="{{ route('assets.model.delete', $asset) }}" x-data x-on:submit="if (! confirm(@js(__('plant.model.delete_confirm')))) $event.preventDefault()">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-ghost btn-sm text-ko"><x-icon name="trash" class="!h-4 !w-4" />{{ __('plant.model.delete') }}</button>

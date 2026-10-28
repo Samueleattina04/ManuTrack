@@ -316,7 +316,8 @@ it('modello GLB: mai da un indirizzo pubblico, solo dalla rotta protetta', funct
         ->and(file_exists(public_path('storage/'.$path)))->toBeFalse()
         ->and(Storage::disk('local')->path($path))->toStartWith(config('filesystems.disks.local.root'))
         ->and(str_starts_with(config('filesystems.disks.local.root'), public_path()))->toBeFalse();
-    $this->get('/storage/'.$path)->assertStatus(403);
+    // Il disco privato non ha indirizzi /storage/… (controllo di sicurezza 0.3)
+    $this->get('/storage/'.$path)->assertNotFound();
 
     // Rotta protetta: accesso e permesso di vedere le macchine; tipo giusto, niente esecuzione
     $res = $this->get(route('assets.model', $asset))->assertOk()

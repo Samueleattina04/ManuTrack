@@ -75,7 +75,7 @@
                     </tr></thead>
                     <tbody>
                     @forelse($parts as $p)
-                        <tr wire:key="p-{{ $p->id }}" class="cursor-pointer" onclick="if (! event.target.closest('a')) window.location.assign('{{ route('inventory.parts.show', $p) }}')">
+                        <tr wire:key="p-{{ $p->id }}" class="cursor-pointer" x-on:click="if (! $event.target.closest('a')) window.location.assign('{{ route('inventory.parts.show', $p) }}')">
                             <td>
                                 <a href="{{ route('inventory.parts.show', $p) }}" class="font-medium hover:underline">{{ $p->name }}</a>
                                 <div class="font-mono text-xs text-muted">{{ $p->code }}@if($p->manufacturer_code) <span class="font-sans">· {{ $p->manufacturer }} {{ $p->manufacturer_code }}</span>@endif</div>

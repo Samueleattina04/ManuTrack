@@ -8,6 +8,7 @@ return [
     'requirements' => 'Requisiti del server',
     'requirements_failed' => 'Il server non soddisfa i requisiti indispensabili: correggi le voci in rosso e ricarica la pagina.',
     'already_installed' => 'ManuTrack è già installato: l\'installazione non può ripartire.',
+    'erased' => 'Questa installazione è stata cancellata. Per installarla di nuovo elimina prima il rapporto :file.',
     'busy' => 'Un\'altra installazione è in corso. Attendi qualche secondo e riprova.',
     'failed' => 'Installazione non riuscita: :message',
     'token_missing' => 'Per sicurezza l\'installazione dal browser richiede un codice. Scrivi un valore lungo e casuale in MANUTRACK_INSTALL_TOKEN nel file .env, poi ricarica la pagina.',

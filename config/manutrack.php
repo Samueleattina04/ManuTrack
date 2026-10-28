@@ -62,6 +62,19 @@ return [
     // Installazione dal browser: senza questo codice la procedura non parte.
     'install_token' => env('MANUTRACK_INSTALL_TOKEN'),
 
+    // Proxy di cui fidarsi per X-Forwarded-For/-Proto/-Host (elenco separato da virgole, CIDR
+    // ammessi, "*" = chiunque). Vuoto = solo questo server e le reti private (Nginx davanti ad
+    // Apache sulla stessa macchina): chi arriva da internet non può fingere un altro indirizzo.
+    'trusted_proxies' => env('MANUTRACK_TRUSTED_PROXIES', ''),
+
+    // Intestazioni di sicurezza (app/Http/Middleware/SecurityHeaders.php, docs/SICUREZZA.md)
+    'security' => [
+        // enforce = applicata; report = solo segnalata nella console del browser (per le prove); off
+        'csp' => env('MANUTRACK_CSP', 'enforce'),
+        // Strict-Transport-Security (solo su https); 0 = non inviarla
+        'hsts_seconds' => (int) env('MANUTRACK_HSTS_SECONDS', 31536000),
+    ],
+
     // Aggiornamenti
     'update' => [
         // Il cron applica da solo un pacchetto nuovo, se completo
@@ -109,6 +122,8 @@ return [
         'subject' => env('VAPID_SUBJECT', env('APP_URL')),
         'public_key' => env('VAPID_PUBLIC_KEY'),
         'private_key' => env('VAPID_PRIVATE_KEY'),
+        // Servizi push dei browser a cui il server può inviare (Chrome, Edge, Firefox, Safari)
+        'hosts' => array_filter(array_map('trim', explode(',', (string) env('MANUTRACK_PUSH_HOSTS', 'fcm.googleapis.com,android.googleapis.com,push.services.mozilla.com,push.apple.com,notify.windows.com')))),
     ],
 
 ];

@@ -17,6 +17,7 @@ return [
     'pagination_info' => ':from–:to di :total',
     'previous' => 'Precedente',
     'next' => 'Successiva',
+    'too_many_attempts' => 'Troppi tentativi: riprova tra :seconds secondi.',
 
     'nav' => [
         'label' => 'Navigazione principale',

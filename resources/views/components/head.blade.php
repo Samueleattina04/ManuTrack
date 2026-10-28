@@ -10,7 +10,7 @@
 <meta name="description" content="{{ __('app.meta_description') }}">
 
 {{-- Tema: applicato prima del disegno per evitare il lampo di colore --}}
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     (function () {
         var mode = 'dark';
         try { mode = localStorage.getItem('mt-theme') || 'dark'; } catch (e) {}
@@ -42,6 +42,6 @@
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 {{-- Dopo il CSS principale: la palette dell'azienda sostituisce quella predefinita --}}
-<style>{!! \App\Support\Brand\Brand::cssVariables() !!}</style>
+<style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">{!! \App\Support\Brand\Brand::cssVariables() !!}</style>
 @livewireStyles
 {{ $slot }}

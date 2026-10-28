@@ -2,7 +2,7 @@
 <div class="mx-auto flex max-w-5xl flex-col gap-5">
     <div class="flex flex-wrap items-center gap-2 print:hidden">
         <a href="{{ route('inventory.parts.index') }}" class="btn btn-ghost btn-sm"><x-icon name="arrow-left" class="!w-4 !h-4" />{{ __('inventory.title') }}</a>
-        @if($count)<button type="button" class="btn btn-secondary btn-sm ml-auto" onclick="window.print()"><x-icon name="printer" class="!w-4 !h-4" />{{ __('assets.labels.print') }}</button>@endif
+        @if($count)<button type="button" class="btn btn-secondary btn-sm ml-auto" x-data x-on:click="window.print()"><x-icon name="printer" class="!w-4 !h-4" />{{ __('assets.labels.print') }}</button>@endif
     </div>
     <p class="text-sm text-fg-2">{{ __('inventory.reorder.intro') }}</p>
 

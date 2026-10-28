@@ -23,6 +23,7 @@ class InviteUser
         if (! in_array($role, Access::ROLES, true)) {
             throw ValidationException::withMessages(['role' => __('users.invite.invalid_role')]);
         }
+        ManageUser::ensureMayManage($inviter, null, $role);
         if (User::query()->where('email', $email)->exists()) {
             throw ValidationException::withMessages(['email' => __('users.invite.already_user')]);
         }

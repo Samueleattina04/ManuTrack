@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ThrottleAuthForms;
 use Laravel\Fortify\Features;
 
 return [
@@ -101,7 +102,7 @@ return [
     |
     */
 
-    'middleware' => ['web', 'installed'],
+    'middleware' => ['web', 'installed', ThrottleAuthForms::class],
 
     /*
     |--------------------------------------------------------------------------

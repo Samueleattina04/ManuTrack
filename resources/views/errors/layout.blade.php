@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#0c0f14">
     <title>@yield('title') · ManuTrack</title>
-    <style>
+    <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         :root { color-scheme: dark; --bg:#0c0f14; --surface:#151a21; --line:rgba(255,255,255,.08); --fg:#e8ebf0; --muted:#8c95a3; --accent:#e8915a; --on:#1b0e06; }
         @media (prefers-color-scheme: light) { :root { color-scheme: light; --bg:#edeff2; --surface:#fff; --line:rgba(15,20,30,.08); --fg:#10141a; --muted:#5b6472; --accent:#a64b17; --on:#fff; } }
         * { box-sizing: border-box; }

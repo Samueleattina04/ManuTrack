@@ -143,6 +143,7 @@ return [
         'no_keys' => 'Chiavi push non configurate sul server: eseguire "php artisan manutrack:vapid".',
         'no_devices' => 'Nessun dispositivo iscritto: attiva prima le notifiche.',
         'send_error' => 'Invio non riuscito: :message',
+        'endpoint_not_allowed' => 'Questo indirizzo non è di un servizio di notifiche dei browser.',
         'test_title' => 'ManuTrack: notifica di prova',
         'test_body' => 'Funziona! Inviata alle :time. Tocca per aprire la diagnostica.',
         'test_result' => '{0} Nessun dispositivo ha accettato la notifica: controlla la diagnostica.|{1} Notifica inviata a :sent dispositivo su :total.|[2,*] Notifica inviata a :sent dispositivi su :total.',

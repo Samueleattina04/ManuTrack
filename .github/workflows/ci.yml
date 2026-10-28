@@ -18,6 +18,14 @@ jobs:
       - run: composer install --no-interaction --no-progress --prefer-dist
       - run: vendor/bin/pint --test
       - run: vendor/bin/phpstan analyse --memory-limit=1G --no-progress
+      # Avvisi di sicurezza sulle dipendenze (controllo di sicurezza 0.5): PHP, JavaScript del
+      # pacchetto (--omit=dev) e anche gli strumenti di sviluppo usati dalla CI
+      - run: composer audit --no-interaction
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm audit --omit=dev
+      - run: npm audit --audit-level=high
 
   test:
     name: Test (${{ matrix.db.name }})

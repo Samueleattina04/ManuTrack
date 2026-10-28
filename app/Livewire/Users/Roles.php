@@ -11,6 +11,8 @@ use Spatie\Permission\PermissionRegistrar;
 
 /**
  * Matrice ruoli × permessi. L'amministratore ha sempre tutto e non si modifica.
+ * La vede chi gestisce le persone, ma la cambia solo l'amministratore: chi ha ricevuto
+ * "users.manage" potrebbe altrimenti dare al proprio ruolo qualunque permesso.
  */
 class Roles extends Component
 {
@@ -22,6 +24,7 @@ class Roles extends Component
     public function toggle(string $roleName, string $permission): void
     {
         $this->authorize('users.manage');
+        abort_unless(auth()->user()->hasRole(Access::ADMIN), 403);
         abort_if($roleName === Access::ADMIN, 403);
         abort_unless(in_array($roleName, Access::ROLES, true) && in_array($permission, Access::allPermissions(), true), 404);
 
@@ -36,6 +39,7 @@ class Roles extends Component
     public function restoreDefaults(string $roleName): void
     {
         $this->authorize('users.manage');
+        abort_unless(auth()->user()->hasRole(Access::ADMIN), 403);
         abort_if($roleName === Access::ADMIN, 403);
         abort_unless(in_array($roleName, Access::ROLES, true), 404);
 
@@ -60,6 +64,7 @@ class Roles extends Component
             'roles' => Access::ROLES,
             'groups' => Access::PERMISSIONS,
             'granted' => $granted,
+            'canEdit' => auth()->user()->hasRole(Access::ADMIN),
         ])->title(__('access.title'))->layoutData(['heading' => __('access.title')]);
     }
 }

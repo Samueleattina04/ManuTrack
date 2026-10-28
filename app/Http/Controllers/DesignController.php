@@ -13,6 +13,9 @@ class DesignController extends Controller
 {
     public function __invoke(): View
     {
+        // Pagina per chi sviluppa: in produzione non esiste
+        abort_if(app()->isProduction(), 404);
+
         return view('design', [
             'statuses' => AssetStatus::cases(),
             'priorities' => Priority::cases(),

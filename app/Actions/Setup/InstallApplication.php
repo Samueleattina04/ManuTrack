@@ -8,6 +8,7 @@ use App\Support\Access\Access;
 use App\Support\AppVersion;
 use App\Support\Demo\Edition;
 use App\Support\FileLock;
+use App\Support\Gdpr\Eraser;
 use App\Support\Settings;
 use App\Support\Setup\EnvWriter;
 use App\Support\Setup\InstallState;
@@ -48,6 +49,12 @@ class InstallApplication
         try {
             if (InstallState::isInstalled()) {
                 throw new AlreadyInstalledException(__('install.already_installed'));
+            }
+
+            // Installazione cancellata a fine contratto: non si riparte in silenzio sopra il
+            // rapporto (le pagine mostrerebbero ancora "cancellata" con un database nuovo)
+            if (Eraser::erased()) {
+                throw new AlreadyInstalledException(__('install.erased', ['file' => Eraser::reportPath()]));
             }
 
             if (! $this->requirements->passes()) {

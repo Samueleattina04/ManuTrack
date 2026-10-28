@@ -33,7 +33,9 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Nessun indirizzo /storage/… per il disco privato: i file si servono solo dai
+            // controller che controllano i permessi (allegati, modelli, logo, esportazioni)
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

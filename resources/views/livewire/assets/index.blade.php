@@ -118,7 +118,7 @@
                     </tr></thead>
                     <tbody>
                     @forelse($assets as $a)
-                        <tr wire:key="a-{{ $a->id }}" class="cursor-pointer" onclick="if (! event.target.closest('a,input,label,button')) window.location.assign('{{ route('assets.show', $a) }}')">
+                        <tr wire:key="a-{{ $a->id }}" class="cursor-pointer" x-on:click="if (! $event.target.closest('a,input,label,button')) window.location.assign('{{ route('assets.show', $a) }}')">
                             <td><input type="checkbox" class="h-5 w-5 accent-[var(--mt-accent)]" value="{{ $a->id }}" wire:model.live="selected" aria-label="{{ __('assets.labels.select_one', ['code' => $a->code]) }}"></td>
                             <td class="w-14"><x-asset-thumb :asset="$a" /></td>
                             <td>

@@ -39,6 +39,27 @@ class PushSubscription extends Model
         ];
     }
 
+    /**
+     * Indirizzo di un servizio push ammesso (config manutrack.webpush.hosts): l'host è uno di
+     * quelli dell'elenco o un suo sottodominio. Niente IP, niente porte particolari.
+     */
+    public static function isAllowedEndpoint(string $endpoint): bool
+    {
+        $parts = parse_url($endpoint);
+        $host = strtolower((string) ($parts['host'] ?? ''));
+        if (($parts['scheme'] ?? '') !== 'https' || $host === '' || isset($parts['port']) || isset($parts['user']) || filter_var(trim($host, '[]'), FILTER_VALIDATE_IP)) {
+            return false;
+        }
+        foreach ((array) config('manutrack.webpush.hosts') as $allowed) {
+            $allowed = strtolower(trim((string) $allowed));
+            if ($allowed !== '' && ($host === $allowed || str_ends_with($host, '.'.$allowed))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static function hashEndpoint(string $endpoint): string
     {
         return hash('sha256', $endpoint);

@@ -1,12 +1,13 @@
 <div class="mx-auto flex max-w-6xl flex-col gap-5">
     <p class="max-w-prose text-fg-2">{{ __('access.intro') }}</p>
+    @unless($canEdit)<p class="max-w-prose text-sm text-muted">{{ __('access.admin_only_edit') }}</p>@endunless
 
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         @foreach($roles as $r)
             <div class="card p-4">
                 <div class="flex items-center justify-between gap-2">
                     <h2 class="font-display text-base font-bold">{{ __('access.roles.'.$r) }}</h2>
-                    @if($r !== \App\Support\Access\Access::ADMIN)
+                    @if($canEdit && $r !== \App\Support\Access\Access::ADMIN)
                         <button type="button" class="btn btn-ghost btn-sm" wire:click="restoreDefaults('{{ $r }}')" wire:confirm="{{ __('access.restore_confirm') }}">{{ __('access.restore') }}</button>
                     @endif
                 </div>
@@ -37,7 +38,7 @@
                                         <x-icon name="check" class="mx-auto text-ok" :label="__('access.always')" />
                                     @else
                                         <label class="inline-grid h-11 w-11 cursor-pointer place-items-center">
-                                            <input type="checkbox" class="h-5 w-5 accent-[var(--mt-accent)]" @checked($on)
+                                            <input type="checkbox" class="h-5 w-5 accent-[var(--mt-accent)]" @checked($on) @disabled(! $canEdit)
                                                    wire:click="toggle('{{ $r }}', '{{ $perm }}')"
                                                    aria-label="{{ __('access.permissions.'.$perm) }} · {{ __('access.roles.'.$r) }}">
                                         </label>
