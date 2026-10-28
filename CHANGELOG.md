@@ -3,6 +3,17 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.10.1] - Verifiche dopo la fase 10
+
+### Aggiunto
+- Modelli GLB: rifiutati al caricamento quelli che rimandano a file esterni (buffer o immagini con indirizzi web, percorsi relativi o `file:`); il visualizzatore blocca comunque ogni indirizzo diverso dal modello e dai dati incorporati, prima di qualunque richiesta.
+- Rotta del modello con `Content-Security-Policy: default-src 'none'; sandbox`; test che il file non sia raggiungibile da indirizzi pubblici.
+- Controllo nel browser `scripts/e2e/three-lifecycle-check.cjs` (20 verifiche): rendering fermo con scheda nascosta o vista fuori schermo, memoria e contesto WebGL liberati lasciando la pagina, nessuna richiesta esterna da un GLB malevolo.
+
+### Corretto
+- Anteprima 3D della macchina: durante la rotazione automatica ogni fotogramma ne prenotava due, così il lavoro raddoppiava a ogni fotogramma fino a rallentare la pagina; e continuava a disegnare con la scheda nascosta o fuori schermo.
+- Le viste 3D si chiudono e liberano la memoria anche quando la pagina va nella cache indietro/avanti del browser, e si riaprono tornando indietro.
+
 ## [0.10.0] - Fase 10: 3D
 
 ### Aggiunto

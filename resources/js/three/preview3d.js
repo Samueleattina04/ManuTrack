@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { buildShape, shapeMaterials } from './shapes.js';
-import { cssColor, reducedMotion } from './capability.js';
+import { cssColor, reducedMotion, track } from './capability.js';
 
 export async function mountPreview(container, cfg) {
     const reduce = reducedMotion();
@@ -16,6 +16,7 @@ export async function mountPreview(container, cfg) {
     renderer.domElement.style.touchAction = 'none';
     renderer.domElement.style.display = 'block';
 
+    const life = track('preview');
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 1000);
     scene.add(new THREE.HemisphereLight(0xffffff, 0x556070, 1.5));
@@ -24,11 +25,38 @@ export async function mountPreview(container, cfg) {
     scene.add(sun);
 
     let object;
+    try {
     if (cfg.modelUrl) {
-        const gltf = await new GLTFLoader().loadAsync(cfg.modelUrl);
+        // Solo il file del modello e i dati incorporati (data:, blob:): nessun indirizzo esterno,
+        // nemmeno relativo, viene mai richiesto. Un modello che ne ha bisogno non si mostra.
+        const allowed = new URL(cfg.modelUrl, window.location.href).href;
+        const blocked = [];
+        const manager = new THREE.LoadingManager();
+        manager.setURLModifier((url) => {
+            if (/^(data|blob):/i.test(url)) return url;
+            if (new URL(url, window.location.href).href === allowed) return url;
+            blocked.push(url);
+            return 'data:application/octet-stream;base64,';
+        });
+        let gltf;
+        try {
+            gltf = await new GLTFLoader(manager).loadAsync(cfg.modelUrl);
+        } finally {
+            if (blocked.length) window.__mt3d.blocked = [...(window.__mt3d.blocked || []), ...blocked];
+        }
+        if (blocked.length) {
+            gltf.scene.traverse((o) => { o.geometry?.dispose(); });
+            throw new Error('Riferimenti esterni bloccati: ' + blocked.join(', '));
+        }
         object = gltf.scene;
     } else {
         object = buildShape(cfg.shape, cfg.w, cfg.d, cfg.h, shapeMaterials(cssColor(`--mt-${cfg.tone}`, '#2fd3b0')));
+    }
+    } catch (e) {
+        renderer.dispose();
+        renderer.forceContextLoss();
+        life.close(null);
+        throw e;
     }
 
     // Centrato, appoggiato a terra e inquadrato
@@ -62,13 +90,17 @@ export async function mountPreview(container, cfg) {
 
     let frame = 0;
     let visible = true;
+    let disposed = false;
     const loop = () => {
         frame = 0;
         const moving = controls.update();
         renderer.render(scene, camera);
-        if ((moving || controls.autoRotate) && visible && !document.hidden) frame = requestAnimationFrame(loop);
+        life.frame();
+        // Un solo fotogramma prenotato alla volta: anche i controlli chiedono di ridisegnare
+        if ((moving || controls.autoRotate) && visible && !document.hidden) request();
     };
-    const request = () => { if (!frame) frame = requestAnimationFrame(loop); };
+    // Niente disegno se la scheda è nascosta o la vista è fuori dallo schermo (riparte da sola)
+    const request = () => { if (!frame && !disposed && visible && !document.hidden) frame = requestAnimationFrame(loop); };
     controls.addEventListener('change', request);
 
     let fitted = false;
@@ -94,14 +126,20 @@ export async function mountPreview(container, cfg) {
     ro.observe(container);
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) request(); });
     io.observe(container);
+    const onVisibility = () => { if (!document.hidden) request(); };
+    document.addEventListener('visibilitychange', onVisibility);
     resize();
     container.dataset.ready = '1';
 
     return {
         dispose() {
+            if (disposed) return;
+            disposed = true;
             cancelAnimationFrame(frame);
+            frame = 0;
             ro.disconnect();
             io.disconnect();
+            document.removeEventListener('visibilitychange', onVisibility);
             controls.dispose();
             scene.traverse((o) => {
                 o.geometry?.dispose();
@@ -111,10 +149,13 @@ export async function mountPreview(container, cfg) {
                     m.dispose();
                 }
             });
+            renderer.renderLists.dispose();
+            const memory = { ...renderer.info.memory };
             renderer.dispose();
             renderer.forceContextLoss();
             renderer.domElement.remove();
             delete container.dataset.ready;
+            life.close(memory);
         },
     };
 }

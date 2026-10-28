@@ -109,6 +109,7 @@ return [
         'uploaded' => 'Modello 3D caricato.',
         'deleted' => 'Modello 3D eliminato.',
         'invalid' => 'Il file non è un modello GLB valido (glTF 2.0 binario).',
+        'external' => 'Il modello fa riferimento a file esterni (texture o dati fuori dal GLB): esportalo con tutto incorporato (in Blender: formato glb).',
         'too_big' => 'Il modello supera :mb MB.',
     ],
 ];

@@ -52,6 +52,9 @@ final class AssetModel
         if (! self::isGlb((string) $file->getRealPath())) {
             throw ValidationException::withMessages(['model' => __('plant.model.invalid')]);
         }
+        if (self::externalUris((string) $file->getRealPath()) !== []) {
+            throw ValidationException::withMessages(['model' => __('plant.model.external')]);
+        }
 
         $old = $asset->model_path;
         $path = $file->storeAs('models/'.$asset->id, Str::random(32).'.glb', ['disk' => self::disk()]);
@@ -76,6 +79,41 @@ final class AssetModel
         }
         $asset->forceFill(['model_path' => null, 'model_name' => null, 'model_size' => null])->save();
         Audit::log('assets.model_deleted', $asset, $asset->code);
+    }
+
+    /**
+     * Riferimenti a file fuori dal GLB (buffer e immagini con un "uri" che non è un data: URI).
+     * Un modello caricato deve essere autosufficiente: il visualizzatore non scarica mai altro.
+     *
+     * @return list<string>
+     */
+    public static function externalUris(string $path): array
+    {
+        $handle = @fopen($path, 'rb');
+        if (! $handle) {
+            return ['?'];
+        }
+        $header = (string) fread($handle, 20);
+        $chunk = unpack('VchunkLength', substr($header, 12, 4));
+        $length = $chunk === false ? 0 : (int) $chunk['chunkLength'];
+        // JSON della scena: limite generoso ma finito, per non leggere file enormi in memoria
+        $json = $length > 0 && $length <= 32 * 1024 * 1024 ? (string) fread($handle, $length) : '';
+        fclose($handle);
+        $data = json_decode($json, true);
+        if (! is_array($data)) {
+            return ['?'];
+        }
+        $external = [];
+        foreach (['buffers', 'images'] as $key) {
+            foreach ((array) ($data[$key] ?? []) as $entry) {
+                $uri = is_array($entry) ? ($entry['uri'] ?? null) : null;
+                if ($uri !== null && (! is_string($uri) || ! str_starts_with(strtolower(ltrim($uri)), 'data:'))) {
+                    $external[] = is_string($uri) ? $uri : '?';
+                }
+            }
+        }
+
+        return $external;
     }
 
     /** Intestazione GLB: magic "glTF", versione 2, lunghezza totale uguale alla dimensione del file */

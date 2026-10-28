@@ -49,3 +49,31 @@ export function cssColor(name, fallback = '#808080') {
     const [r, g, b] = probe.getImageData(0, 0, 1, 1).data;
     return '#' + [r, g, b].map((n) => n.toString(16).padStart(2, '0')).join('');
 }
+
+// Registro delle viste 3D attive, letto dai controlli automatici (window.__mt3d):
+// quante sono aperte, quanti fotogrammi hanno disegnato, e cosa restava in memoria alla chiusura.
+const stats = { active: 0, opened: 0, closed: 0, frames: 0, leaks: [] };
+if (typeof window !== 'undefined') window.__mt3d = stats;
+
+export function track(name) {
+    stats.active++;
+    stats.opened++;
+    let closed = false;
+    return {
+        frame() { stats.frames++; },
+        // memory: renderer.info.memory dopo aver liberato tutto (deve essere 0 geometrie e 0 texture)
+        close(memory) {
+            if (closed) return;
+            closed = true;
+            stats.active--;
+            stats.closed++;
+            if (memory && (memory.geometries || memory.textures)) stats.leaks.push({ name, ...memory });
+        },
+    };
+}
+
+// Lasciando la pagina (anche verso la cache "indietro/avanti" del browser) le viste 3D si chiudono
+export function onLeave(callback) {
+    window.addEventListener('pagehide', callback);
+    return () => window.removeEventListener('pagehide', callback);
+}

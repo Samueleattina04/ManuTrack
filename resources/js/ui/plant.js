@@ -1,7 +1,7 @@
 // Pagina Stabilimento: sceglie tra vista 3D e 2D, tiene la macchina selezionata e
 // aggiorna gli stati ogni 30 secondi. La vista 2D (SVG dal server) c'è sempre:
 // il 3D si aggiunge solo se il dispositivo lo regge, e se fallisce si torna al 2D.
-import { deviceTier, savedMode, saveMode } from '../three/capability';
+import { deviceTier, onLeave, savedMode, saveMode } from '../three/capability';
 
 const MODE_KEY = 'mt-plant-mode';
 const POLL_MS = 30000;
@@ -23,10 +23,16 @@ export default (data, opts) => ({
             this.show3d(false);
         }
         this.timer = setInterval(() => { if (!document.hidden) this.refresh(); }, POLL_MS);
+        // Lasciando la pagina si libera il 3D; tornando indietro (cache del browser) si riapre
+        this.stopLeave = onLeave(() => { this.ctrl?.dispose(); this.ctrl = null; });
+        this.onShow = (e) => { if (e.persisted && this.mode === '3d' && !this.ctrl) this.show3d(false); };
+        window.addEventListener('pageshow', this.onShow);
     },
 
     destroy() {
         clearInterval(this.timer);
+        this.stopLeave?.();
+        window.removeEventListener('pageshow', this.onShow);
         this.ctrl?.dispose();
         this.ctrl = null;
     },

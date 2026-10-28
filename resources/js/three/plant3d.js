@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { buildShape, shapeMaterials, setMaterialsColor } from './shapes.js';
-import { cssColor, reducedMotion } from './capability.js';
+import { cssColor, reducedMotion, track } from './capability.js';
 
 const TONES = { ok: '--mt-ok', ko: '--mt-ko', mnt: '--mt-mnt', stop: '--mt-stop' };
 
@@ -52,6 +52,7 @@ export function mountPlant(container, data, { onSelect = () => {} } = {}) {
     const W = data.layout.width;
     const D = data.layout.depth;
     const reduce = reducedMotion();
+    const life = track('plant');
     let colors = themeColors();
 
     const renderer = new THREE.WebGLRenderer({ antialias: window.devicePixelRatio < 2, alpha: true, powerPreference: 'low-power' });
@@ -162,15 +163,18 @@ export function mountPlant(container, data, { onSelect = () => {} } = {}) {
 
     // Disegno su richiesta
     let frame = 0;
+    let disposed = false;
     let visible = true;
     const render = () => {
         frame = 0;
         const moving = controls.update();
         const pulsing = animatePulse();
         renderer.render(scene, camera);
+        life.frame();
         if ((moving || pulsing) && visible && !document.hidden) request();
     };
-    const request = () => { if (!frame) frame = requestAnimationFrame(render); };
+    // Niente disegno se la scheda è nascosta o la vista è fuori dallo schermo (riparte da sola)
+    const request = () => { if (!frame && !disposed && visible && !document.hidden) frame = requestAnimationFrame(render); };
     controls.addEventListener('change', request);
 
     // Le macchine in guasto pulsano (non con "riduci movimento")
@@ -271,7 +275,10 @@ export function mountPlant(container, data, { onSelect = () => {} } = {}) {
             request();
         },
         dispose() {
+            if (disposed) return;
+            disposed = true;
             cancelAnimationFrame(frame);
+            frame = 0;
             resizeObserver.disconnect();
             io.disconnect();
             theme.disconnect();
@@ -282,10 +289,13 @@ export function mountPlant(container, data, { onSelect = () => {} } = {}) {
                 const mats = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
                 for (const m of mats) { m.map?.dispose(); m.dispose(); }
             });
+            renderer.renderLists.dispose();
+            const memory = { ...renderer.info.memory };
             renderer.dispose();
             renderer.forceContextLoss();
             renderer.domElement.remove();
             delete container.dataset.ready;
+            life.close(memory);
         },
     };
 }

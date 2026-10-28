@@ -974,7 +974,8 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
   - solo file `.glb` (glTF 2.0 binario): si controllano l'intestazione, la versione e la lunghezza del file, non solo l'estensione;
   - fino a `MANUTRACK_MODEL_MAX_MB` (predefinito 20 MB), ma non oltre i limiti di caricamento di PHP del server;
   - i modelli compressi con Draco o Meshopt non sono supportati (servirebbero programmi in più): vanno esportati senza compressione. Se il modello non si può mostrare, la scheda lo dice e resta usabile;
-  - salvato sul disco privato degli allegati e servito solo a chi vede le macchine; sostituirlo cancella il file precedente; anche "Elimina il modello".
+  - **niente risorse esterne:** un GLB che rimanda a file fuori da sé (buffer o immagini con un `uri` che non sia un `data:` incorporato: indirizzi web, percorsi relativi, `file:`) viene rifiutato al caricamento. In più il visualizzatore non chiede mai altro che il file del modello e i dati incorporati: ogni altro indirizzo è bloccato prima della richiesta e il modello non si mostra (vale anche per file arrivati per altre vie);
+  - salvato sul disco privato degli allegati (fuori da `public/`; il disco privato non serve file senza firma) e servito solo dalla rotta `/macchine/{id}/modello.glb`, a chi ha fatto l'accesso e può vedere le macchine, con `Content-Type: model/gltf-binary`, `X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src 'none'; sandbox` e cache privata; sostituirlo cancella il file precedente; anche "Elimina il modello".
 - Se la macchina è in una pianta, il riquadro ha il collegamento alla pianta.
 
 ## 46. La M di ManuTrack in 3D (fase 10)
@@ -987,4 +988,6 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
 - **Three.js** (MIT) è in un file a parte (`three-*.js`, circa 160 kB compressi) scaricato **solo** da stabilimento, anteprima della macchina e M d'ingresso; le viste 3D sono file piccoli a parte. Il pacchetto principale cresce di pochi kB.
 - **Pagine operative senza 3D:** segnalazione, elenco e scheda degli ordini, scheda della macchina (finché non si preme "Mostra in 3D") non scaricano Three.js. Lo verifica `scripts/e2e/plant-check.cjs`.
 - Il 3D **non entra nella cache dell'app installata** (servono comunque i dati dal server).
-- La vista dello stabilimento disegna solo quando qualcosa cambia (rotazione, stato, guasti che pulsano) e si ferma quando la pagina non è visibile; risoluzione al massimo doppia anche sugli schermi più densi.
+- **Disegno solo quando serve:** la vista dello stabilimento disegna solo quando qualcosa cambia (rotazione, stato, guasti che pulsano); pianta, anteprima e M **si fermano** quando la scheda del browser è nascosta o la vista è fuori dallo schermo, e ripartono da sole. Un solo fotogramma prenotato alla volta. Risoluzione al massimo doppia anche sugli schermi più densi.
+- **Memoria liberata:** lasciando la pagina (anche verso la cache indietro/avanti del browser), passando al 2D o chiudendo l'anteprima, geometrie, materiali e texture vengono liberati e il contesto WebGL rilasciato; tornando indietro la vista si riapre.
+- **Controllo automatico:** `scripts/e2e/three-lifecycle-check.cjs` misura i fotogrammi disegnati (visibile, scheda nascosta, fuori schermo), verifica che dopo l'uscita restino 0 geometrie e 0 texture e il contesto sia perso, e che un GLB con un indirizzo esterno non faccia richieste fuori dal sito.

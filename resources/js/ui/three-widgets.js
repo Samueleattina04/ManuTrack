@@ -1,5 +1,5 @@
 // Piccoli componenti Alpine che caricano il 3D solo quando serve (Three.js è in un file a parte).
-import { deviceTier, reducedMotion } from '../three/capability';
+import { deviceTier, onLeave, reducedMotion } from '../three/capability';
 
 // M di ManuTrack in 3D al posto del logo SVG, quando il logo è visibile e il dispositivo regge
 export const logo3d = () => ({
@@ -9,6 +9,14 @@ export const logo3d = () => ({
 
     init() {
         if (reducedMotion() || deviceTier() !== 'full') return;
+        this.start();
+        this.stopLeave = onLeave(() => { this.ctrl?.dispose(); this.ctrl = null; this.ready = false; });
+        this.onShow = (e) => { if (e.persisted && !this.ctrl) this.start(); };
+        window.addEventListener('pageshow', this.onShow);
+    },
+
+    start() {
+        this.io?.disconnect();
         this.io = new IntersectionObserver(async ([entry]) => {
             if (!entry.isIntersecting) return;
             this.io.disconnect();
@@ -32,6 +40,8 @@ export const logo3d = () => ({
 
     destroy() {
         this.io?.disconnect();
+        this.stopLeave?.();
+        window.removeEventListener('pageshow', this.onShow);
         this.ctrl?.dispose();
     },
 });
@@ -43,6 +53,11 @@ export const assetPreview = (cfg) => ({
     error: null,
     can3d: deviceTier() !== 'none',
     ctrl: null,
+
+    init() {
+        // Lasciando la pagina l'anteprima si chiude e libera la memoria (si riapre con il pulsante)
+        this.stopLeave = onLeave(() => this.hide());
+    },
 
     async show() {
         this.open = true;
@@ -69,6 +84,7 @@ export const assetPreview = (cfg) => ({
     },
 
     destroy() {
+        this.stopLeave?.();
         this.ctrl?.dispose();
     },
 });

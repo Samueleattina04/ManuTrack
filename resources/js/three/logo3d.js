@@ -2,7 +2,7 @@
 // reazione al mouse o all'inclinazione del telefono. Si carica solo su dispositivi capaci
 // e senza "riduci movimento"; altrimenti resta il logo SVG.
 import * as THREE from 'three';
-import { cssColor } from './capability.js';
+import { cssColor, track } from './capability.js';
 
 const FACE_LIGHT = [[0, 0], [203, 202], [203, 339], [90, 227], [86, 377], [0, 292]];
 const FACE_DARK = [[406, 0], [203, 202], [203, 339], [316, 227], [320, 377], [406, 292]];
@@ -23,6 +23,7 @@ export function mountLogo(container) {
     renderer.domElement.setAttribute('aria-hidden', 'true');
     renderer.domElement.style.display = 'block';
 
+    const life = track('logo');
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(30, 1, 10, 4000);
     camera.position.set(0, 0, 900);
@@ -62,9 +63,11 @@ export function mountLogo(container) {
         m.rotation.x += (tilt.x + Math.sin(t * 0.45) * 0.05 - m.rotation.x) * 0.06;
         m.position.y = Math.sin(t * 0.9) * 6;
         renderer.render(scene, camera);
-        frame = visible && !document.hidden ? requestAnimationFrame(loop) : 0;
+        life.frame();
+        frame = visible && !document.hidden && !disposed ? requestAnimationFrame(loop) : 0;
     };
-    const start = () => { if (!frame) frame = requestAnimationFrame(loop); };
+    let disposed = false;
+    const start = () => { if (!frame && !disposed) frame = requestAnimationFrame(loop); };
 
     const resize = () => {
         const w = container.clientWidth || 1;
@@ -93,7 +96,10 @@ export function mountLogo(container) {
 
     return {
         dispose() {
+            if (disposed) return;
+            disposed = true;
             cancelAnimationFrame(frame);
+            frame = 0;
             ro.disconnect();
             io.disconnect();
             theme.disconnect();
@@ -101,9 +107,12 @@ export function mountLogo(container) {
             window.removeEventListener('pointermove', onPointer);
             window.removeEventListener('deviceorientation', onOrientation);
             for (const mesh of [light, dark]) { mesh.geometry.dispose(); mesh.material.dispose(); }
+            renderer.renderLists.dispose();
+            const memory = { ...renderer.info.memory };
             renderer.dispose();
             renderer.forceContextLoss();
             renderer.domElement.remove();
+            life.close(memory);
         },
     };
 }

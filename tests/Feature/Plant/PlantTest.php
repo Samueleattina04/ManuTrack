@@ -8,6 +8,7 @@ use App\Models\LayoutItem;
 use App\Models\Location;
 use App\Models\PlantLayout;
 use App\Support\Access\Access;
+use App\Support\Plant\AssetModel;
 use App\Support\Plant\LayoutEditor;
 use App\Support\Plant\PlantData;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -279,4 +280,54 @@ it('il 3D resta fuori dalla cache dell\'app installata', function () {
         ->not->toMatch('/preview3d-[\w-]+\.js/')
         ->not->toMatch('/logo3d-[\w-]+\.js/')
         ->not->toMatch('/chart-[\w-]+\.js/');
+});
+
+it('modello GLB: rifiuta i riferimenti a file esterni, accetta i dati incorporati', function () {
+    Storage::fake('local');
+    $asset = Asset::factory()->create();
+    $external = [
+        'buffer https' => ['buffers' => [['byteLength' => 4, 'uri' => 'https://esempio.invalid/dati.bin']]],
+        'immagine https' => ['images' => [['uri' => 'https://esempio.invalid/texture.png']]],
+        'immagine relativa' => ['images' => [['uri' => 'texture.png']]],
+        'buffer relativo' => ['buffers' => [['byteLength' => 4, 'uri' => '../segreti.bin']]],
+        'protocollo file' => ['images' => [['uri' => 'file:///etc/passwd']]],
+    ];
+    foreach ($external as $case => $extra) {
+        $this->post(route('assets.model.upload', $asset), ['model' => UploadedFile::fake()->createWithContent('esterno.glb', tinyGlb($extra))])
+            ->assertSessionHasErrors(['model' => __('plant.model.external')]);
+        expect($asset->refresh()->model_path)->toBeNull($case);
+    }
+    expect(AssetModel::externalUris(storage_path('nonesiste.glb')))->toBe(['?']);
+
+    // Immagine incorporata come data: URI: accettata
+    $png = 'data:image/png;base64,'.base64_encode(UploadedFile::fake()->image('p.png', 2, 2)->getContent());
+    $this->post(route('assets.model.upload', $asset), ['model' => UploadedFile::fake()->createWithContent('incorporato.glb', tinyGlb(['images' => [['uri' => $png]]]))])
+        ->assertRedirect()->assertSessionHasNoErrors();
+    expect($asset->refresh()->model_path)->not->toBeNull();
+});
+
+it('modello GLB: mai da un indirizzo pubblico, solo dalla rotta protetta', function () {
+    $asset = Asset::factory()->create();
+    $this->post(route('assets.model.upload', $asset), ['model' => UploadedFile::fake()->createWithContent('m.glb', tinyGlb())])->assertRedirect();
+    $path = $asset->refresh()->model_path;
+
+    // Il file non è sotto public/ e il disco privato non lo serve senza firma
+    expect(file_exists(public_path($path)))->toBeFalse()
+        ->and(file_exists(public_path('storage/'.$path)))->toBeFalse()
+        ->and(Storage::disk('local')->path($path))->toStartWith(config('filesystems.disks.local.root'))
+        ->and(str_starts_with(config('filesystems.disks.local.root'), public_path()))->toBeFalse();
+    $this->get('/storage/'.$path)->assertStatus(403);
+
+    // Rotta protetta: accesso e permesso di vedere le macchine; tipo giusto, niente esecuzione
+    $res = $this->get(route('assets.model', $asset))->assertOk()
+        ->assertHeader('Content-Type', 'model/gltf-binary')
+        ->assertHeader('X-Content-Type-Options', 'nosniff')
+        ->assertHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+    expect($res->headers->get('Cache-Control'))->toContain('private');
+    auth()->logout();
+    $this->get(route('assets.model', $asset))->assertRedirect(route('login'));
+    $noAssets = userWithRole(Access::REQUESTER);
+    $noAssets->roles->first()->revokePermissionTo('assets.view');
+    $this->actingAs($noAssets->fresh())->get(route('assets.model', $asset))->assertForbidden();
+    Storage::disk('local')->delete($path);
 });

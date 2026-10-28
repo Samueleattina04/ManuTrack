@@ -48,6 +48,8 @@ class PlantController extends Controller
         return Storage::disk(AssetModel::disk())->response($asset->model_path, $asset->code.'.glb', [
             'Content-Type' => 'model/gltf-binary',
             'X-Content-Type-Options' => 'nosniff',
+            // Se aperto direttamente nel browser non può eseguire nulla né caricare altro
+            'Content-Security-Policy' => "default-src 'none'; sandbox",
             // Il nome del file cambia a ogni caricamento: il browser può tenerlo a lungo
             'Cache-Control' => 'private, max-age=604800',
         ], 'inline');
