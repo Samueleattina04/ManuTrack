@@ -427,6 +427,25 @@
 
     /* Schede con inclinazione 3D (attivata da Alpine, x-tilt) */
     .tilt { transform-style: preserve-3d; transition: transform 0.2s ease, box-shadow 0.2s ease; will-change: transform; }
+
+    /* Pianta dello stabilimento in 2D (vista e editor): unità in metri */
+    .plant-svg { display: block; width: 100%; height: 100%; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+    .plant-floor { fill: var(--mt-surface-2); stroke: var(--mt-line); stroke-width: 0.06; }
+    .plant-grid { stroke: var(--mt-line-soft); stroke-width: 0.02; }
+    .plant-grid-5 { stroke: var(--mt-line); stroke-width: 0.04; }
+    .plant-zone rect { fill: color-mix(in oklab, var(--mt-accent-soft) 30%, transparent); stroke: var(--mt-accent-fg); stroke-width: 0.06; stroke-dasharray: 0.3 0.2; }
+    .plant-zone text { fill: var(--mt-accent-fg); font-weight: 600; }
+    .plant-item { --c: var(--mt-stop); cursor: pointer; outline: none; }
+    .plant-item.tone-ok { --c: var(--mt-ok); }
+    .plant-item.tone-ko { --c: var(--mt-ko); }
+    .plant-item.tone-mnt { --c: var(--mt-mnt); }
+    .plant-item rect { fill: color-mix(in oklab, var(--c) 72%, var(--mt-surface)); stroke: color-mix(in oklab, var(--c) 60%, #000); stroke-width: 0.06; }
+    .plant-item text { fill: #0e1218; font-weight: 700; font-family: "IBM Plex Mono", ui-monospace, monospace; pointer-events: none; }
+    .plant-item:hover rect, .plant-item:focus-visible rect { stroke: var(--mt-fg); stroke-width: 0.12; }
+    .plant-item[data-selected="true"] rect, .plant-item.is-selected rect { stroke: var(--mt-accent-fg); stroke-width: 0.18; }
+    .plant-item.tone-ko rect { animation: plant-pulse 1.4s ease-in-out infinite; }
+    .plant-item.is-dragging { opacity: 0.85; cursor: grabbing; }
+    @keyframes plant-pulse { 50% { fill: color-mix(in oklab, var(--c) 95%, var(--mt-surface)); } }
 }
 
 /* ---------- Movimento ---------- */

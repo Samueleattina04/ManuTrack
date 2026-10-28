@@ -276,6 +276,11 @@ Il requisito "Foto in formato WebP" dell'installazione e la voce **Foto** della 
 
 Senza SSH: una voce di cron da eseguire una sola volta, come per le chiavi VAPID.
 
+### Modelli 3D delle macchine
+- Si caricano dalla scheda della macchina (file `.glb`, fino a `MANUTRACK_MODEL_MAX_MB` MB, predefinito 20).
+- Il limite reale è il più basso tra questo e `upload_max_filesize` / `post_max_size` di PHP: in DirectAdmin si cambiano in *PHP Settings* (o *Select PHP version › Options*). La scheda della macchina mostra il limite in vigore.
+- Servono i modelli **senza compressione** Draco o Meshopt (in Blender: *Esporta › glTF 2.0*, formato *glb*, compressione disattivata).
+
 ### Email, esportazioni e rapporto mensile
 - Le **email degli avvisi** usano la posta configurata nel `.env` (paragrafo 8). Chi riceve cosa si sceglie in *Impostazioni › Avvisi via email*; ognuno può cambiare le proprie scelte in *Avvisi › Preferenze*.
 - Le **esportazioni Excel** richiedono l'estensione PHP `zip` (già tra i requisiti). Senza, l'app offre solo il CSV.

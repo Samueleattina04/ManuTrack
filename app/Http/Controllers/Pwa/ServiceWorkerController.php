@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Support\Brand\Brand;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 
 /**
  * Service worker e pagina offline.
@@ -16,6 +17,9 @@ use Illuminate\Http\Response;
  */
 class ServiceWorkerController extends Controller
 {
+    /** File compilati che non entrano nella cache dell'app (grafici, Three.js e viste 3D) */
+    public const LAZY = ['chart-', 'three-', 'shapes-', 'plant3d-', 'preview3d-', 'logo3d-'];
+
     public function worker(): Response
     {
         $assets = $this->buildAssets();
@@ -59,9 +63,9 @@ class ServiceWorkerController extends Controller
                 continue;
             }
             $path = (string) $entry['file'];
-            // Librerie caricate solo quando servono e inutili senza rete (i grafici vogliono i dati
+            // Librerie caricate solo quando servono e inutili senza rete (grafici e 3D vogliono i dati
             // dal server): non si scaricano all'installazione dell'app
-            if (($entry['isDynamicEntry'] ?? false) && str_starts_with(basename($path), 'chart-')) {
+            if (Str::startsWith(basename($path), self::LAZY)) {
                 continue;
             }
             $isFont = str_ends_with($path, '.woff2');

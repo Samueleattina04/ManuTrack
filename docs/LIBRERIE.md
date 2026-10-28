@@ -2,7 +2,7 @@
 
 Elenco delle librerie usate da ManuTrack e delle loro licenze, con la verifica di compatibilità per un **uso commerciale** (software installato presso clienti e venduto come servizio).
 
-Aggiornato alla versione **0.9.0**. Fase 4: aggiunta `openspout/openspout` (MIT) per leggere i file Excel. Fase 5: aggiunta `jsqr` (Apache-2.0) per leggere i codici QR sui telefoni senza lettore nativo (iPhone). Fasi 6, 7 e 8: nessuna libreria nuova. Fase 9: aggiunta `chart.js` (MIT, con la sua dipendenza `@kurkle/color`, MIT) per i grafici; `openspout` ora scrive anche le esportazioni Excel; il rapporto PDF usa la stampa del browser, senza librerie. Il service worker è generato da Laravel, quindi `vite-plugin-pwa` e Workbox non servono. Le fasi successive aggiungono le librerie previste in `docs/PROPOSTA.md`, ciascuna verificata prima dell'uso.
+Aggiornato alla versione **0.10.0**. Fase 4: aggiunta `openspout/openspout` (MIT) per leggere i file Excel. Fase 5: aggiunta `jsqr` (Apache-2.0) per leggere i codici QR sui telefoni senza lettore nativo (iPhone). Fasi 6, 7 e 8: nessuna libreria nuova. Fase 9: aggiunta `chart.js` (MIT, con la sua dipendenza `@kurkle/color`, MIT) per i grafici; `openspout` ora scrive anche le esportazioni Excel; il rapporto PDF usa la stampa del browser, senza librerie. Fase 10: aggiunta `three` (Three.js, MIT) per lo stabilimento 3D, l'anteprima delle macchine e la M d'ingresso. Il service worker è generato da Laravel, quindi `vite-plugin-pwa` e Workbox non servono. Le fasi successive aggiungono le librerie previste in `docs/PROPOSTA.md`, ciascuna verificata prima dell'uso.
 
 ## In sintesi
 
@@ -38,6 +38,7 @@ Le icone sono di **Lucide** (licenza ISC): il contenuto SVG è copiato in `resou
 | opentype.js | 1.x | MIT | lettura del font per la scritta del logo (solo sviluppo) |
 | Lucide | — | ISC | icone |
 | Chart.js (con @kurkle/color) | 4.4 (0.3) | MIT | grafici degli indicatori; caricato solo nella pagina degli indicatori, in un file a parte (`chart-*.js`) |
+| Three.js (con OrbitControls e GLTFLoader, inclusi) | 0.170 | MIT | vista 3D dello stabilimento, anteprima della macchina (modelli GLB), M 3D d'ingresso; in un file a parte (`three-*.js`) scaricato solo dalle pagine 3D |
 | jsQR | 1.4 | Apache-2.0 | lettura dei codici QR dalla fotocamera dove manca `BarcodeDetector` (iPhone); caricato solo quando serve |
 
 ### Strumenti di sviluppo (non inclusi nel pacchetto)

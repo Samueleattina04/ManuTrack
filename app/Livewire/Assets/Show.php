@@ -14,6 +14,8 @@ use App\Support\Assets\QrCode;
 use App\Support\Audit\Audit;
 use App\Support\Files\PhotoProcessor;
 use App\Support\Numbers;
+use App\Support\Plant\AssetModel;
+use App\Support\Plant\Shapes;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
@@ -271,6 +273,9 @@ class Show extends Component
             'historyCount' => $user->can('work_orders.view') ? $this->asset->workOrders()->count() : 0,
             'openRequests' => $this->asset->workRequests()->where('status', 'nuova')->when(! $user->can('requests.view_all'), fn ($q) => $q->where('user_id', $user->id))->latest('id')->get(),
             'downtimeMinutes' => (int) $this->asset->downtimes()->where('started_at', '>=', now()->subDays(90))->get()->sum(fn ($d) => $d->minutes()),
+            'plantItem' => $this->asset->plantItem()->with('layout')->first(),
+            'modelMaxMb' => AssetModel::maxMegabytes(),
+            'shapeSize' => Shapes::size($this->asset->category?->shape),
             'warrantyExpired' => $this->asset->warranty_until?->isPast() ?? false,
             'can' => [
                 'manage' => $user->can('assets.manage'),

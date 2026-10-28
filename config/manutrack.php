@@ -88,6 +88,11 @@ return [
     'demo_reset_at' => env('MANUTRACK_DEMO_RESET_AT', '03:00'),
 
     // Foto e documenti allegati (disco privato, mai raggiungibili direttamente dal web)
+    // Modelli 3D (GLB) delle macchine, sullo stesso disco degli allegati
+    'models' => [
+        'max_mb' => (int) env('MANUTRACK_MODEL_MAX_MB', 20),
+    ],
+
     'attachments' => [
         'disk' => env('MANUTRACK_ATTACHMENTS_DISK', 'local'),
         'max_mb' => (int) env('MANUTRACK_UPLOAD_MAX_MB', 20),

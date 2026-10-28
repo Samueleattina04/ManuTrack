@@ -26,6 +26,8 @@ return [
         'work_orders' => 'Ordini di lavoro',
         'inventory' => 'Magazzino',
         'preventive' => 'Preventiva',
+        'reports' => 'Esportazioni',
+        'plant' => 'Stabilimento',
     ],
 
     'actions' => [
@@ -79,6 +81,15 @@ return [
             'category_created' => 'Categoria creata',
             'category_updated' => 'Categoria modificata',
             'category_deleted' => 'Categoria eliminata',
+            'model_uploaded' => 'Modello 3D caricato',
+            'model_deleted' => 'Modello 3D eliminato',
+        ],
+        'plant' => [
+            'layout_created' => 'Pianta creata',
+            'layout_updated' => 'Pianta modificata',
+            'layout_deleted' => 'Pianta eliminata',
+            'item_added' => 'Elemento aggiunto alla pianta',
+            'item_removed' => 'Elemento tolto dalla pianta',
         ],
         'requests' => [
             'created' => 'Segnalazione inviata',

@@ -253,10 +253,10 @@ Ogni fase si chiude con:
 | 7 | Manutenzione preventiva | piani a tempo e a contatore, generazione automatica, calendario, rispetto dei piani |
 | 8 | Dashboard KPI | indicatori con definizioni in `docs/KPI.md` (MTTR, MTBF, fermi, arretrato, preventivo/correttivo, costi per macchina, rispetto dei piani), filtri per periodo, ubicazione e categoria (anticipata su richiesta) |
 | 9 | Notifiche complete, report ed esportazioni | eventi e preferenze, email per ruolo, raggruppamento, badge, centro notifiche, avviso nuova versione; grafici con tabella equivalente, esportazioni CSV/XLSX con protezione dalle formule, rapporto mensile stampabile/PDF. **Proposta per una fase successiva:** orario di lavoro per l'MTBF (vedi sotto) |
-| 10 | 3D | M 3D d'ingresso, gemello digitale con editor e vista 2D di riserva, anteprima 3D della macchina |
+| 10 | 3D | M 3D d'ingresso, gemello digitale con editor e vista 2D di riserva, anteprima 3D della macchina (fatta: 0.10.0). Poi l'orario di lavoro per l'MTBF, prima della fase 11 |
 | 11 | GDPR, demo e consegna | esportazione, anonimizzazione, cancellazione totale, installazione demo con azzeramento notturno, revisione di sicurezza, README, `docs/INSTALLAZIONE.md` completa, licenze delle librerie, verifica finale PC, iPhone e Android, `scripts/deploy-many` facoltativo |
 
-### Proposta: orario di lavoro per l'MTBF (per una fase successiva, da approvare)
+### Proposta: orario di lavoro per l'MTBF (approvata dopo la fase 9, si fa dopo la fase 10)
 
 **Il problema.** Oggi l'MTBF usa il tempo di calendario, 24 ore su 24 (`docs/KPI.md` §2.3). Per una macchina che lavora un turno di 8 ore dal lunedì al venerdì, il tempo di calendario è circa 4 volte quello di lavoro: l'MTBF risulta 4 volte più alto e non si confronta con quello di una macchina su tre turni.
 
@@ -283,11 +283,13 @@ Ogni fase si chiude con:
 
 **Test previsti.** Un mese con dati noti calcolato a mano: cambio dell'ora legale con turno di notte, festività infrasettimanale, chiusura aziendale, fermo che comincia fuori orario e finisce dentro, guasto di domenica, cambio di orario a metà mese.
 
-**Domande per te prima di cominciare:**
-1. Calendario anche per singola macchina, o bastano azienda e ubicazione?
-2. Va bene la validità nel tempo (i mesi passati non cambiano), o preferisci che un nuovo orario ricalcoli anche il passato?
-3. Mostrare tutti e due gli MTBF (calendario e lavoro) o solo quello sulle ore di lavoro quando c'è un calendario?
-4. Festività nazionali proposte in automatico (da confermare) o inserite a mano?
+**Decisioni approvate (dopo la fase 9):**
+1. **Livelli:** azienda e ubicazione. L'eredità fino alla singola macchina è predisposta nel modello dati ma non compare nell'interfaccia.
+2. **Mesi passati invariati:** ogni schema ha la sua data "valido dal".
+3. **MTBF principale sulle ore di lavoro** quando esiste un calendario; quello sulle 24 ore resta visibile come valore secondario, con la sua etichetta.
+4. **Festività nazionali italiane proposte in automatico e modificabili;** chiusure aziendali e santo patrono si inseriscono a mano.
+
+**Ordine approvato:** fase 10 (3D), poi orario di lavoro, poi fase 11 (GDPR e demo finale).
 
 ### `docs/INSTALLAZIONE.md` (indice previsto)
 1. Requisiti dell'hosting: PHP 8.3 con le estensioni `pdo_mysql`, `mbstring`, `openssl`, `curl`, `gd`, `zip`, `intl`, `fileinfo`, `bcmath` o `gmp`; MySQL 8 o MariaDB 10.6+.

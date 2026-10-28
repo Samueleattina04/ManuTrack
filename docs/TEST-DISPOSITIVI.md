@@ -475,3 +475,28 @@ Servono un **responsabile** e un **tecnico** con l'app installata e le notifiche
 - [ ] *Indicatori › Rapporto mensile* dal PC: mese precedente, logo dell'azienda in alto. **Stampa o salva in PDF** › "Salva come PDF": il PDF è A4 verticale, senza la barra dei pulsanti, con le intestazioni delle tabelle ripetute sulle pagine nuove.
 - [ ] Dal telefono: la pagina si legge senza zoom; **Stampa** apre la stampa del sistema (iPhone: Condividi › Stampa, poi allarga l'anteprima per avere il PDF; Android: "Salva come PDF").
 - [ ] Il 1° del mese, dopo le 07:20, chi vede gli indicatori trova l'avviso "Rapporto mensile di …" che apre il rapporto del mese finito.
+
+## 14. Fase 10: 3D
+
+Servono un **responsabile** (PC e telefono) e, se possibile, un telefono economico o vecchio.
+
+### 14.1 Pianta dello stabilimento (responsabile, dal PC)
+- [ ] *Stabilimento 3D › Nuova pianta*: nome, ubicazione "Sito principale" (o la vostra), misure del capannone in metri.
+- [ ] Nell'editor: aggiungi una zona per ogni linea, poi **Aggiungi tutte**: le macchine finiscono dentro la zona della loro linea.
+- [ ] Trascina una macchina con il mouse; poi sceglila con Tab e spostala con le frecce (Maiusc: 1 metro), R per ruotarla. Ricarica la pagina: le posizioni restano.
+
+### 14.2 Vista dal telefono
+- [ ] *Stabilimento 3D* sul telefono di fascia media o alta: parte in **3D**. Ruota con un dito, zoom con due dita, tocca una macchina: si apre il pannello con stato e collegamenti.
+- [ ] Sul telefono economico (o vecchio): parte in **2D** con "Prova il 3D". La pagina resta fluida; il 3D, se provato, non deve bloccare il telefono.
+- [ ] Dal PC metti una macchina "In guasto": entro 30 secondi sul telefono diventa rossa (e pulsa in 3D), senza ricaricare.
+- [ ] Impostazioni del telefono › Accessibilità › **Riduci movimento**: niente pulsazioni né rotazioni automatiche.
+
+### 14.3 Pagine operative leggere
+- [ ] Sul telefono economico: *Segnala*, elenco e scheda degli ordini restano veloci come prima della fase 10 (non scaricano il 3D).
+
+### 14.4 Anteprima della macchina
+- [ ] Scheda di una pressa › **Mostra in 3D**: la forma generica gira lentamente; toccandola si ferma e si ruota a mano.
+- [ ] Carica un file `.glb` (es. esportato da Blender senza compressione): **Mostra in 3D** mostra il modello. Un file `.glb` compresso con Draco deve dare un messaggio chiaro, senza bloccare la scheda.
+
+### 14.5 La M d'ingresso
+- [ ] Senza logo del cliente, la pagina di accesso mostra la M in 3D: segue il mouse sul PC; su Android segue l'inclinazione; sull'iPhone, toccando la M, chiede il permesso per il movimento e poi la segue.

@@ -942,3 +942,49 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
   - **ricambi sotto scorta** e **piani preventivi in ritardo**: situazione al momento della stampa, indicata come tale.
 - **Permessi:** serve "Vedere gli indicatori"; ogni parte compare solo a chi la può vedere (ordini, magazzino, preventiva, costi).
 - **Avviso:** il 1° del mese alle 07:20 (`manutrack:rapporto-mensile`) chi vede gli indicatori riceve "Rapporto mensile di …" con il link, nel centro avvisi e via email (predefinito "subito").
+
+## 44. Stabilimento 3D (`/stabilimento`, fase 10)
+
+- **Pianta** di uno stabilimento o di un reparto: pavimento in metri (da 2 a 500 per lato), con un'**ubicazione** di riferimento. Si possono mettere nella pianta le macchine di quell'ubicazione e delle sue sotto-ubicazioni, non dismesse. Si possono avere più piante (una per sito o reparto); ogni macchina sta in una sola pianta.
+- **Elementi:**
+  - **macchine**, con la forma generica della loro categoria (blocco, cilindro, pressa, nastro, serbatoio, robot) e il suo ingombro predefinito, modificabile (larghezza, profondità, altezza, rotazione);
+  - **zone** del pavimento: una sotto-ubicazione (es. "Linea 1") o un nome libero. Una macchina aggiunta finisce dentro la zona della sua ubicazione, se c'è posto, altrimenti nel primo posto libero.
+- **Vista 3D** (chi vede le macchine):
+  - macchine colorate per stato (operativa, in guasto, in manutenzione, ferma) con il codice sopra; quelle in guasto pulsano, salvo con "riduci movimento";
+  - si ruota, si ingrandisce e si sposta con mouse o dita; un tocco su una macchina apre il pannello con stato, ordini aperti e i collegamenti a scheda, ordini e "Segnala un guasto" (secondo i permessi);
+  - gli stati si aggiornano da soli ogni 30 secondi, senza ricaricare la pagina.
+- **Vista 2D di riserva**, sempre disponibile con lo stesso contenuto: pianta dall'alto disegnata dal server (SVG), con codice, colore e un simbolo per lo stato (✓ ! ⚙ ■), selezionabile con mouse, dito o tastiera.
+- **Quando si usa il 2D:**
+  - dispositivo senza WebGL: solo 2D;
+  - dispositivo debole (poca memoria, pochi processori, risparmio dati): parte in 2D, con "Prova il 3D";
+  - scelta della persona (3D o 2D), ricordata dal browser;
+  - se il 3D non riesce a partire, si torna al 2D con un avviso. Il 3D non blocca mai un'azione: la pagina è usabile mentre si carica.
+- **Accessibilità:** sotto la vista c'è l'elenco delle macchine della pianta con lo stato; la vista 3D è decorativa per i lettori di schermo (`aria-hidden`), la 2D ha un'etichetta per ogni macchina.
+- **Editor** (`/stabilimento/piante/{id}/modifica`, "Gestire le macchine"):
+  - pianta dall'alto in 2D, anche sul telefono: macchine e zone si trascinano con il mouse o il dito; con la tastiera Tab sceglie, le frecce spostano di 25 cm (con Maiusc di 1 m), R ruota di 90°;
+  - posizioni arrotondate a 25 cm e sempre dentro il pavimento, anche ruotate; se il pavimento si rimpicciolisce, gli elementi rientrano;
+  - aggiunta di una macchina o di tutte quelle che mancano (al massimo 200 per volta), di zone, misure e rotazione dell'elemento scelto;
+  - eliminare una pianta non tocca le macchine; eliminare una macchina la toglie dalla pianta.
+- Modifiche alla pianta nel **registro attività** (gruppo "Stabilimento").
+
+## 45. Vista 3D della macchina e modello GLB (fase 10)
+
+- Nella scheda della macchina, riquadro **Vista 3D**: si apre solo premendo "Mostra in 3D". Mostra il **modello GLB** caricato oppure la **forma generica** della categoria, colorata per stato; si ruota e si ingrandisce, gira lentamente da sola finché non la si tocca (non con "riduci movimento").
+- **Caricamento del modello** ("Gestire le macchine"):
+  - solo file `.glb` (glTF 2.0 binario): si controllano l'intestazione, la versione e la lunghezza del file, non solo l'estensione;
+  - fino a `MANUTRACK_MODEL_MAX_MB` (predefinito 20 MB), ma non oltre i limiti di caricamento di PHP del server;
+  - i modelli compressi con Draco o Meshopt non sono supportati (servirebbero programmi in più): vanno esportati senza compressione. Se il modello non si può mostrare, la scheda lo dice e resta usabile;
+  - salvato sul disco privato degli allegati e servito solo a chi vede le macchine; sostituirlo cancella il file precedente; anche "Elimina il modello".
+- Se la macchina è in una pianta, il riquadro ha il collegamento alla pianta.
+
+## 46. La M di ManuTrack in 3D (fase 10)
+
+- Nella **panoramica** (su PC) e nella **pagina di accesso** quando il cliente non ha caricato il suo logo, la M di ManuTrack diventa 3D: le due facce del logo estruse, con un leggero movimento e la reazione al mouse o all'inclinazione del telefono. Con il logo del cliente la pagina di accesso resta com'è (revisione 3 della proposta).
+- Prima si vede subito il logo SVG; il 3D lo sostituisce solo su un dispositivo capace, senza "riduci movimento", quando il logo è visibile. Sull'iPhone l'inclinazione richiede il permesso, chiesto solo toccando il logo.
+
+## 47. Prestazioni del 3D (fase 10)
+
+- **Three.js** (MIT) è in un file a parte (`three-*.js`, circa 160 kB compressi) scaricato **solo** da stabilimento, anteprima della macchina e M d'ingresso; le viste 3D sono file piccoli a parte. Il pacchetto principale cresce di pochi kB.
+- **Pagine operative senza 3D:** segnalazione, elenco e scheda degli ordini, scheda della macchina (finché non si preme "Mostra in 3D") non scaricano Three.js. Lo verifica `scripts/e2e/plant-check.cjs`.
+- Il 3D **non entra nella cache dell'app installata** (servono comunque i dati dal server).
+- La vista dello stabilimento disegna solo quando qualcosa cambia (rotazione, stato, guasti che pulsano) e si ferma quando la pagina non è visibile; risoluzione al massimo doppia anche sugli schermi più densi.

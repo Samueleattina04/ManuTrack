@@ -354,6 +354,55 @@
                 @endif
             </section>
 
+            {{-- Vista 3D: modello caricato o forma generica della categoria, solo su richiesta --}}
+            @php($shape = \App\Support\Plant\Shapes::normalize($asset->category?->shape))
+            <section class="card flex flex-col gap-3 p-4" aria-labelledby="s-3d"
+                     x-data="assetPreview(@js(['modelUrl' => $asset->hasModel() ? route('assets.model', $asset).'?v='.substr(md5((string) $asset->model_path), 0, 8) : null, 'shape' => $shape, 'w' => $shapeSize[0], 'd' => $shapeSize[1], 'h' => $shapeSize[2], 'tone' => $asset->status->tone(), 'error' => __('plant.model.error')]))">
+                <h2 id="s-3d" class="text-base font-bold">{{ __('plant.model.title') }}</h2>
+                <p class="text-sm text-fg-2">
+                    @if($asset->hasModel())
+                        {{ __('plant.model.custom', ['name' => $asset->model_name, 'size' => \Illuminate\Support\Number::fileSize((int) $asset->model_size, 1)]) }}
+                    @else
+                        {{ __('plant.model.generic', ['shape' => __('assets.categories.shapes.'.$shape)]) }}
+                    @endif
+                </p>
+                <div wire:ignore>
+                    <div x-show="open" x-cloak class="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-md)] bg-surface-2">
+                        <div x-ref="stage" class="absolute inset-0"></div>
+                        <div class="absolute inset-0 grid place-items-center text-sm text-muted" x-show="loading" role="status">{{ __('plant.model.loading') }}</div>
+                    </div>
+                </div>
+                <p class="text-xs text-muted" x-show="open && ! loading" x-cloak>{{ __('plant.model.help') }}</p>
+                <div class="alert alert-warn" role="alert" x-show="error" x-cloak><x-icon name="alert-triangle" /><span x-text="error"></span></div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-secondary btn-sm" x-show="can3d && ! open" @click="show()"><x-icon name="cube" class="!h-4 !w-4" />{{ __('plant.model.show') }}</button>
+                    <button type="button" class="btn btn-ghost btn-sm" x-show="open" x-cloak @click="hide()">{{ __('plant.model.hide') }}</button>
+                    @if($plantItem)
+                        <a href="{{ route('plant.index', ['pianta' => $plantItem->plant_layout_id]) }}" class="btn btn-ghost btn-sm"><x-icon name="map-pin" class="!h-4 !w-4" />{{ $plantItem->layout->name }}</a>
+                    @endif
+                </div>
+                <p class="text-xs text-muted" x-show="! can3d" x-cloak>{{ __('plant.model.none') }}</p>
+                @if($can['manage'])
+                    <form method="POST" action="{{ route('assets.model.upload', $asset) }}" enctype="multipart/form-data" class="flex flex-col gap-2 border-t border-line-soft pt-3" x-data="{ busy: false }" @submit="busy = true">
+                        @csrf
+                        <label for="s-model" class="field-label">{{ $asset->hasModel() ? __('plant.model.replace') : __('plant.model.upload') }}</label>
+                        <input id="s-model" type="file" name="model" accept=".glb,model/gltf-binary" required class="text-sm" aria-describedby="s-model-hint">
+                        <span id="s-model-hint" class="field-hint">{{ __('plant.model.upload_hint', ['mb' => $modelMaxMb]) }}</span>
+                        @error('model')<span class="field-error"><x-icon name="alert-circle" class="!h-4 !w-4" />{{ $message }}</span>@enderror
+                        <div class="flex flex-wrap gap-2">
+                            <button type="submit" class="btn btn-secondary btn-sm" :disabled="busy"><x-icon name="upload" class="!h-4 !w-4" />{{ __('plant.model.upload') }}</button>
+                        </div>
+                    </form>
+                    @if($asset->hasModel())
+                        <form method="POST" action="{{ route('assets.model.delete', $asset) }}" onsubmit="return confirm(@js(__('plant.model.delete_confirm')))">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-ghost btn-sm text-ko"><x-icon name="trash" class="!h-4 !w-4" />{{ __('plant.model.delete') }}</button>
+                        </form>
+                    @endif
+                @endif
+            </section>
+
             {{-- Codice QR --}}
             <section class="card flex flex-col items-center gap-3 p-4 text-center" aria-labelledby="s-qr">
                 <h2 id="s-qr" class="self-start text-base font-bold">{{ __('assets.qr.title') }}</h2>

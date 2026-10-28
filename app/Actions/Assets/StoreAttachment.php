@@ -113,7 +113,7 @@ class StoreAttachment
         return min($limits);
     }
 
-    private static function iniBytes(string $value): int
+    public static function iniBytes(string $value): int
     {
         $value = trim($value);
         $number = (int) $value;

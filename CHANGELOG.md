@@ -3,6 +3,24 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.10.0] - Fase 10: 3D
+
+### Aggiunto
+- **Stabilimento 3D** (`/stabilimento`, scorciatoia `G T`): piante di stabilimenti o reparti con zone (linee) e macchine colorate per stato, il codice sopra, guasti che pulsano.
+  - Un tocco su una macchina apre stato, ordini aperti e i collegamenti a scheda, ordini e "Segnala un guasto".
+  - Stati aggiornati da soli ogni 30 secondi.
+  - **Vista 2D di riserva** con gli stessi dati (SVG dal server, simboli oltre ai colori): automatica senza WebGL, iniziale sui dispositivi deboli (con "Prova il 3D"), a scelta per tutti; se il 3D non parte si torna al 2D.
+  - Elenco accessibile delle macchine sotto la vista.
+- **Editor della pianta** (chi gestisce le macchine): trascinamento con mouse o dito, frecce e R da tastiera, griglia di 25 cm, elementi sempre dentro il pavimento anche ruotati; macchine messe da sole nella zona della loro ubicazione; misure, rotazione, zone libere o da sotto-ubicazioni.
+- **Vista 3D della macchina** nella scheda, su richiesta: modello **GLB** caricato (glTF 2.0 binario controllato nell'intestazione, fino a `MANUTRACK_MODEL_MAX_MB`, sul disco privato) oppure forma generica della categoria.
+- **M di ManuTrack in 3D** nella panoramica e nella pagina di accesso senza logo del cliente: segue mouse o inclinazione del telefono (sull'iPhone dopo un tocco); SVG con "riduci movimento" o su dispositivi deboli.
+- Pianta dimostrativa nei dati di prova (solo sviluppo e pacchetto demo).
+- Controllo nel browser `scripts/e2e/plant-check.cjs`: pagine operative senza Three.js, 3D/2D secondo il dispositivo, editor, anteprima, riduci movimento.
+
+### Modificato
+- Three.js (MIT) in un file a parte scaricato solo dalle pagine 3D; grafici e 3D fuori dalla cache dell'app installata.
+- Registro attività: gruppi "Esportazioni" e "Stabilimento" nel filtro.
+
 ## [0.9.0] - Fase 9: avvisi completi, grafici, esportazioni e rapporto mensile
 
 ### Aggiunto

@@ -22,7 +22,7 @@ class Navigation
             ['work_orders', 'clipboard-list', 'work-orders.index', 'g o', 'odl interventi lavori ordini', 'work_orders.view'],
             ['requests', 'alert-triangle', 'requests.index', 'g e', 'segnalazioni guasti richieste', null],
             ['assets', 'factory', 'assets.index', 'g m', 'macchine impianti ubicazioni categorie qr etichette contatori', 'assets.view'],
-            ['plant', 'cube', null, null, 'stabilimento 3d gemello', 'assets.view'],
+            ['plant', 'cube', 'plant.index', 'g t', 'stabilimento 3d 2d pianta gemello digitale layout', 'assets.view'],
             ['preventive', 'calendar', 'preventive.index', 'g p', 'preventiva piani calendario scadenze rispetto contatore', 'preventive.view'],
             ['kpi', 'bar-chart', 'kpi', 'g k', 'indicatori kpi mttr mtbf fermi arretrato costi report', 'reports.view'],
             ['inventory', 'box', 'inventory.parts.index', 'g r', 'ricambi magazzino fornitori movimenti riordino scorta', 'inventory.view'],

@@ -11,7 +11,15 @@
             <x-theme-switcher />
         </header>
         @if($brand)
-            <div class="flex justify-center pt-2"><x-company-logo size="lg" /></div>
+            @if(\App\Support\Brand\CompanyLogo::url())
+                <div class="flex justify-center pt-2"><x-company-logo size="lg" /></div>
+            @else
+                {{-- Senza logo del cliente: la M di ManuTrack in 3D (SVG su dispositivi deboli o con meno movimento) e il nome dell'azienda --}}
+                <div class="flex flex-col items-center gap-2 pt-2">
+                    <x-logo-3d class="aspect-[500/470] w-28" />
+                    <span class="text-lg font-bold">{{ settings('company.name', config('app.name')) }}</span>
+                </div>
+            @endif
         @endif
         <main id="contenuto" class="flex-1 page-enter">
             {{ $slot }}

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
@@ -38,6 +39,9 @@ use Illuminate\Support\Str;
  * @property string|null $purchase_cost
  * @property Carbon|null $warranty_until
  * @property string|null $notes
+ * @property string|null $model_path modello 3D (GLB) sul disco privato
+ * @property string|null $model_name
+ * @property int|null $model_size
  * @property int|null $created_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -85,6 +89,17 @@ class Asset extends Model
     public static function newQrToken(): string
     {
         return Str::lower(Str::random(24));
+    }
+
+    /** @return HasOne<LayoutItem, $this> */
+    public function plantItem(): HasOne
+    {
+        return $this->hasOne(LayoutItem::class);
+    }
+
+    public function hasModel(): bool
+    {
+        return $this->model_path !== null;
     }
 
     /** @return BelongsTo<AssetCategory, $this> */

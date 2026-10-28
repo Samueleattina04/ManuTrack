@@ -10,6 +10,16 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                // Three.js in un file a parte "three-*.js", scaricato solo dalle pagine 3D
+                manualChunks(id) {
+                    if (id.includes('/node_modules/three/')) return 'three';
+                },
+            },
+        },
+    },
     server: {
         watch: {
             ignored: ['**/storage/framework/views/**'],

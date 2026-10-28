@@ -12,6 +12,7 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\Maintenance\QuickReportController;
 use App\Http\Controllers\ManifestController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PlantController;
 use App\Http\Controllers\Push\PushSubscriptionController;
 use App\Http\Controllers\Push\PushTestController;
 use App\Http\Controllers\Pwa\PwaController;
@@ -38,6 +39,7 @@ use App\Livewire\Kpi\Dashboard as KpiDashboard;
 use App\Livewire\Maintenance\Settings as MaintenanceSettings;
 use App\Livewire\Notifications\Index as NotificationsIndex;
 use App\Livewire\Notifications\Preferences as NotificationPreferences;
+use App\Livewire\Plant\Editor as PlantEditor;
 use App\Livewire\Preventive\Calendar as PreventiveCalendar;
 use App\Livewire\Preventive\Form as PlanForm;
 use App\Livewire\Preventive\Index as PreventiveIndex;
@@ -150,6 +152,19 @@ Route::middleware(['installed', 'auth', 'active'])->group(function () {
     Route::get('/avvisi/preferenze', NotificationPreferences::class)->name('notifications.preferences');
     Route::get('/avvisi/conteggio', [NotificationController::class, 'count'])->name('notifications.count');
     Route::get('/impostazioni/avvisi', NotificationRules::class)->middleware('can:settings.manage')->name('settings.notifications');
+
+    // Stabilimento: pianta in 3D o 2D, editor, modelli 3D delle macchine
+    Route::middleware('can:assets.view')->group(function () {
+        Route::get('/stabilimento', [PlantController::class, 'index'])->name('plant.index');
+        Route::get('/stabilimento/piante/{plant}/stato', [PlantController::class, 'status'])->whereNumber('plant')->name('plant.status');
+        Route::get('/macchine/{asset}/modello.glb', [PlantController::class, 'model'])->whereNumber('asset')->name('assets.model');
+    });
+    Route::middleware('can:assets.manage')->group(function () {
+        Route::get('/stabilimento/piante/nuova', PlantEditor::class)->name('plant.create');
+        Route::get('/stabilimento/piante/{plant}/modifica', PlantEditor::class)->whereNumber('plant')->name('plant.edit');
+        Route::post('/macchine/{asset}/modello', [PlantController::class, 'uploadModel'])->whereNumber('asset')->name('assets.model.upload');
+        Route::delete('/macchine/{asset}/modello', [PlantController::class, 'deleteModel'])->whereNumber('asset')->name('assets.model.delete');
+    });
 
     // Indicatori
     Route::get('/indicatori', KpiDashboard::class)->middleware('can:reports.view')->name('kpi');

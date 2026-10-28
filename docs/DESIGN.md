@@ -185,6 +185,15 @@ I numeri in colonna usano `.num` (`tabular-nums`). Le etichette in maiuscolo (`.
 - **Esporta** è un pulsante secondario con menu (Excel o CSV) accanto alle altre azioni dell'elenco; dice in una riga che esporta i filtri applicati, tutte le pagine.
 - **Rapporto mensile:** pagina chiara a sé, come le etichette QR: barra in alto (indietro, mesi, "Stampa o salva in PDF") che sparisce in stampa; foglio A4 con logo del cliente, riquadri degli indicatori e tabelle con intestazione ripetuta su ogni pagina. Sul telefono il foglio occupa tutta la larghezza e le tabelle scorrono di lato.
 
+## 3D
+
+- **Facce piane come il logo:** forme semplici a pochi poligoni, ombreggiatura piatta, nessuna texture. Una tinta per macchina (il colore dello stato) e la stessa tinta più scura per i dettagli.
+- **Colori dai token** (`--mt-ok`, `--mt-ko`, `--mt-mnt`, `--mt-stop`, `--mt-surface-2`, `--mt-accent-soft`): cambiano con il tema chiaro o scuro e con la palette, senza ricaricare.
+- **Stato mai solo con il colore:** nel 3D c'è il pannello con il testo, nel 2D un simbolo (✓ ! ⚙ ■) accanto al codice; elenco con le etichette di stato sotto la vista.
+- **Vista dello stabilimento:** inquadratura dall'alto in diagonale che contiene tutto il pavimento; griglia di 1 m (più marcata ogni 5 m); zone tratteggiate con il nome in basso a sinistra; anello d'accento sotto la macchina scelta.
+- **Movimento:** guasti che pulsano lentamente, rotazione lenta dell'anteprima, oscillazione leggera della M. Niente di tutto questo con "riduci movimento".
+- **Sempre una versione 2D o SVG** pronta subito; il 3D arriva dopo, senza spostare la pagina.
+
 ## Manutenzione preventiva
 
 - **Stato del piano** sempre con icona e testo: "In regola" (verde), "In scadenza" (ambra, orologio), "Scaduto" (rosso, triangolo), "Sospeso" (grigio, pausa).

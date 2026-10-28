@@ -31,7 +31,7 @@
                         </div>
                     @endcan
                 </div>
-                <x-logo variant="mark" class="hidden w-40 lg:block" :label="null" />
+                <x-logo-3d class="hidden aspect-[500/470] w-40 shrink-0 lg:block" />
             </div>
         </section>
 
