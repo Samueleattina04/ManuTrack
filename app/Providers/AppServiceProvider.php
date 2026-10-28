@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\RequireAdminTwoFactor;
 use App\Http\Middleware\RequirePassword;
 use App\Models\User;
 use App\Support\Access\Access;
@@ -81,7 +82,7 @@ class AppServiceProvider extends ServiceProvider
         // Le azioni Livewire (/livewire/update) ripassano dai middleware della pagina solo se
         // sono in questo elenco: senza, una persona disattivata con la pagina aperta continua
         // a lavorare e le pagine con la password riconfermata restano usabili dopo la scadenza
-        Livewire::addPersistentMiddleware([EnsureUserIsActive::class, RequirePassword::class]);
+        Livewire::addPersistentMiddleware([EnsureUserIsActive::class, RequireAdminTwoFactor::class, RequirePassword::class]);
 
         $this->registerAuditListeners();
     }

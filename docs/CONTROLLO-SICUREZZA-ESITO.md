@@ -39,7 +39,7 @@ correzioni passano tutti.
 | A3 | bassa | Tempo di risposta di "password dimenticata" (invio della mail) | accettato |
 | A4 | bassa | Id inesistente dello ZIP: 404 invece di 403 | accettato |
 | A5 | bassa | Pacchetto di aggiornamento senza firma | accettato |
-| A6 | info | Larastan livello 8 su `app/Http` e `app/Livewire` | da decidere |
+| A6 | info | Larastan livello 8 su `app/Http` e `app/Livewire` | deciso: resta il livello 6 |
 | A7 | bassa | Limite di accesso solo per email + IP (nessun blocco dell'account) | accettato |
 
 ### P1 — Link per la nuova password avvelenabile (alta)
@@ -185,10 +185,18 @@ correzioni passano tutti.
 - **A6 Larastan livello 8** su `app/Http` e `app/Livewire`: 188 avvisi, quasi tutti
   `auth()->user()` che potrebbe essere nullo su rotte già protette da `auth` (nessun problema
   di sicurezza trovato). Si resta a livello 6; per salire servirebbe un aiuto tipizzato per la
-  persona collegata. **Da decidere.**
+  persona collegata. **Decisione del titolare (28 ottobre 2026): resta il livello 6.**
 - **A7 Accesso:** nessun blocco dell'account dopo N errori (permetterebbe a chiunque di
   bloccare un collega); restano 5 tentativi al minuto per email + IP e 30 per IP, ora con l'IP
   vero (P2). La verifica in due passaggi è consigliata agli amministratori.
+
+### Decisioni del titolare
+
+28 ottobre 2026: esito approvato. A1, A2, A3, A4, A5 e A7 accettati come descritti; A6: resta
+il livello 6 di Larastan. Aggiunte nella stessa 0.12.1: verifica in due passaggi obbligatoria per
+gli amministratori (impostazione dell'azienda), controllo di `APP_URL` in installazione e nella
+pagina Sistema, email di prova dalla pagina Sistema, errori comprensibili per le iscrizioni push
+rifiutate, checklist dopo l'installazione in `INSTALLAZIONE.md` §12.
 
 ## 2. I sei punti obbligatori
 

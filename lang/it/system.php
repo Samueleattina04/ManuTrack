@@ -50,6 +50,10 @@ return [
     ],
 
     'checks' => [
+        'install_lock' => 'Installazione dal browser bloccata',
+        'install_lock_open' => 'Manca il file storage/app/installed.lock oppure MANUTRACK_INSTALL_TOKEN nel .env non è vuoto: svuotalo.',
+        'vapid_subject' => 'Contatto delle chiavi push (VAPID_SUBJECT)',
+        'vapid_subject_fake' => '":subject" non è un contatto reale: scrivi nel .env VAPID_SUBJECT="mailto:" seguito da un tuo indirizzo email.',
         'title' => 'Requisiti',
         'ok' => 'OK',
         'warning' => 'Attenzione',
@@ -84,6 +88,17 @@ return [
         'backup_saved' => 'Copia del database: :file',
         'failed' => 'Aggiornamento a :version non riuscito: :message',
         'restore_hint' => 'Per tornare ai dati di prima: php artisan manutrack:restore :file',
+    ],
+
+    'mail_test' => [
+        'title' => 'Email di prova',
+        'intro' => 'Invia subito un\'email per controllare la posta in uscita (invio: :mailer, mittente: :from). Se arriva nello spam, controlla SPF, DKIM e DMARC del dominio del mittente (docs/INSTALLAZIONE.md).',
+        'button' => 'Invia un\'email di prova a :email',
+        'subject' => 'ManuTrack: email di prova',
+        'body' => "Questa è un'email di prova inviata da ManuTrack (:app) il :time.\n\nSe la ricevi, la posta in uscita funziona. Se è finita nello spam, controlla SPF, DKIM e DMARC del dominio del mittente.",
+        'sent' => 'Email di prova inviata a :email (mittente :from). Controlla la casella, anche lo spam.',
+        'failed' => 'Il server di posta ha rifiutato l\'invio: :message',
+        'not_real' => 'L\'invio è impostato su ":mailer": le email non partono davvero. Imposta MAIL_MAILER=smtp e i dati del server di posta nel file .env.',
     ],
 
     'backup' => [

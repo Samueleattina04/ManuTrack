@@ -1,12 +1,12 @@
 @php
     $texts = [
         'checks' => __('pwa.diag.checks'), 'values' => __('pwa.diag.values'), 'hints' => __('pwa.diag.hints'),
-        'enabled' => __('pwa.wizard.notify_on'), 'copied' => __('pwa.diag.report_copied'),
+        'enabled' => __('pwa.wizard.notify_on'), 'copied' => __('pwa.diag.report_copied'), 'failures' => __('pwa.diag.failures'),
     ];
 @endphp
 <x-layouts.app :title="__('pwa.diag.title')" :heading="__('pwa.diag.title')">
     <div class="mx-auto flex max-w-5xl flex-col gap-5"
-         x-data="pushDiagnostics(@js(['texts' => $texts, 'hashes' => $endpointHashes, 'pushConfigured' => $pushConfigured, 'appUrl' => $appUrl]))">
+         x-data="pushDiagnostics(@js(['texts' => $texts, 'hashes' => $endpointHashes, 'pushConfigured' => $pushConfigured, 'appUrl' => $appUrl, 'pushHosts' => $pushHosts]))">
         <p class="max-w-prose text-fg-2">{{ __('pwa.diag.intro') }}</p>
 
         <section class="card overflow-hidden" aria-labelledby="d-device">

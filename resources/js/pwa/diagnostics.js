@@ -1,6 +1,14 @@
 // Pagina diagnostica: mostra perché una notifica non arriva su questo dispositivo.
 import { environment, deviceName, registration, currentSubscription, sha256, enablePush, disablePush, sendTest, workerVersion } from './core';
 
+const SERVICES = [['push.apple.com', 'Apple'], ['googleapis.com', 'Google (FCM)'], ['mozilla.com', 'Mozilla'], ['notify.windows.com', 'Microsoft (WNS)']];
+
+function serviceName(host) {
+    const found = SERVICES.find(([suffix]) => host === suffix || host.endsWith('.' + suffix));
+
+    return found ? found[1] : host;
+}
+
 export default (config = {}) => ({
     env: environment(),
     device: '',
@@ -36,19 +44,52 @@ export default (config = {}) => ({
             row('permission', env.permission === 'granted' ? 'ok' : env.permission === 'denied' ? 'ko' : 'warn', v[env.permission] || env.permission, env.permission === 'denied' ? t.hints.permission_denied : null),
             row('subscription', sub ? 'ok' : 'warn', sub ? v.yes : v.no, sub ? null : t.hints.subscription),
             row('server_subscription', onServer ? 'ok' : 'warn', onServer ? v.yes : v.no, sub && !onServer ? t.hints.server_subscription : null),
+            ...(sub ? [this.serviceRow(row, sub.endpoint)] : []),
             row('vapid', config.pushConfigured ? 'ok' : 'ko', config.pushConfigured ? v.yes : v.no, config.pushConfigured ? null : t.hints.vapid),
             row('badge', env.badging ? 'ok' : 'info', env.badging ? v.yes : v.unsupported, env.badging ? null : t.hints.badge),
         ];
+    },
+
+    /** Servizio di notifiche del browser (dall'indirizzo dell'iscrizione) e se il server lo accetta */
+    serviceRow(row, endpoint) {
+        const t = config.texts;
+        let host = '';
+        try { host = new URL(endpoint).hostname.toLowerCase(); } catch (e) { /* indirizzo non valido */ }
+        const allowed = host !== '' && (config.pushHosts || []).some((h) => host === h || host.endsWith('.' + h));
+        const name = serviceName(host);
+
+        // Valore breve (il nome); l'indirizzo completo va nella spiegazione, che va a capo
+        return row('push_service', allowed ? 'ok' : 'ko', allowed ? name : t.values.not_allowed, allowed ? null : t.hints.push_service.replace(':host', host));
+    },
+
+    /** Messaggio comprensibile per ogni esito negativo dell'attivazione */
+    explain(result) {
+        const e = config.texts.failures;
+        if (result.status === 422) {
+            let host = '';
+            try { host = new URL(result.subscription.endpoint).hostname; } catch (x) { /* nessun indirizzo */ }
+            return e.service_not_allowed.replace(':host', host || '?');
+        }
+        if (result.status === 429) return e.too_many;
+        if (result.status === 419 || result.status === 401) return e.session;
+        if (result.message === 'no-vapid') return e.no_vapid;
+        if (result.permission === 'denied') return e.denied;
+        if (result.permission === 'default') return e.dismissed;
+        if (result.permission === 'unsupported') return e.unsupported;
+
+        return result.message ? e.generic.replace(':message', result.message) : e.generic.replace(':message', result.permission);
     },
 
     async enable() {
         this.busy = true;
         try {
             const result = await enablePush();
-            this.say(result.ok ? config.texts.enabled : (result.message || result.permission), result.ok ? 'ok' : 'ko');
+            this.say(result.ok ? config.texts.enabled : this.explain(result), result.ok ? 'ok' : 'ko');
             if (result.ok) window.location.reload();
         } catch (e) {
-            this.say(e.message, 'ko');
+            // Errori del browser o del servizio push durante l'iscrizione (es. servizio irraggiungibile)
+            const f = config.texts.failures;
+            this.say(e && (e.name === 'NotAllowedError' || /permission denied/i.test(e.message || '')) ? f.denied : f.browser.replace(':message', e.message || e.name), 'ko');
         } finally {
             this.busy = false;
             await this.refresh();

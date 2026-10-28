@@ -510,3 +510,52 @@ Serve l'**amministratore**, dal PC.
 - [ ] *Dove si applica*: "Tutta l'azienda" → "Un turno", valido da oggi. La tabella mostra il calendario anche per le ubicazioni (eredità).
 - [ ] *Indicatori*: il riquadro MTBF dice "sulle ore di lavoro" e sotto "24 ore su 24: …". Per i periodi prima di oggi il valore resta sulle 24 ore ("in parte su 24 ore" se il periodo è a cavallo).
 - [ ] Il giorno dopo, aprendo il calendario, l'orario risulta bloccato: crea "Nuovo orario dal" una data futura e modifica quello.
+
+## 16. Dopo il controllo di sicurezza (0.12.1)
+
+La 0.12.1 aggiunge una Content-Security-Policy su tutte le pagine, limita la fotocamera alla
+sola pagina *Segnala*, accetta le iscrizioni push solo dai servizi dei browser e cambia
+l'indirizzo base dei link (sempre `APP_URL`). Sui computer è tutto verificato in automatico
+(`scripts/e2e/csp-check.cjs`: 53 pagine senza violazioni); sui telefoni veri vanno provati
+almeno un **iPhone** (Safari, app installata dalla schermata Home, iOS 16.4 o successivo) e un
+**Android** (Chrome, app installata). Prima di iniziare: pagina **Sistema** senza voci rosse
+(APP_URL, cron, chiavi push e `VAPID_SUBJECT` reale).
+
+**CSP: l'app funziona come prima**
+
+- [ ] Accesso, panoramica, elenchi e schede si aprono senza pagine bianche o pulsanti che non rispondono (Livewire e Alpine funzionano con la CSP).
+- [ ] Tema chiaro/scuro e colori dell'azienda compaiono subito, senza lampi di colore diverso all'apertura.
+- [ ] Indicatori: i grafici si disegnano.
+- [ ] Avviso "Nuova versione disponibile" e aggiornamento dell'app installata funzionano (carica un pacchetto nuovo o forza `php artisan manutrack:update`).
+- [ ] Senza rete: si apre la pagina offline; *Segnala* salva la segnalazione e la invia al ritorno della rete.
+
+**Notifiche push**
+
+- [ ] *App e notifiche › Diagnostica*: "Servizio di notifiche del browser" mostra **Apple** (iPhone) o **Google (FCM)** (Android) con il pallino verde.
+- [ ] "Attiva notifiche" e "Prova su questo dispositivo": la notifica arriva con l'app chiusa e il tocco apre la pagina giusta.
+- [ ] Un avviso urgente vero (segnalazione critica su una macchina di criticità A) arriva entro pochi secondi.
+- [ ] Notifiche negate nelle impostazioni del telefono: la diagnostica dice "Le notifiche sono bloccate per questo sito…" e non un errore tecnico.
+- [ ] Facoltativo, se li usate: Firefox su Android (servizio **Mozilla**) ed Edge su Windows (servizio **Microsoft**).
+
+**QR e fotocamera**
+
+- [ ] *Segnala › Inquadra il QR*: il telefono chiede il permesso della fotocamera, il QR di un'etichetta viene letto e la macchina viene scelta.
+- [ ] "Da una foto" del QR funziona anche senza permesso della fotocamera dal vivo.
+- [ ] Foto di un guasto: anteprima visibile prima dell'invio, foto caricata nella segnalazione.
+- [ ] Nelle altre pagine la fotocamera non viene mai chiesta.
+
+**3D**
+
+- [ ] *Stabilimento*: la pianta 3D si apre (su telefoni deboli parte in 2D con "Prova il 3D"); toccando una macchina si apre il pannello; le macchine in guasto pulsano.
+- [ ] Scheda di una macchina con modello GLB caricato: "Mostra in 3D" mostra il modello con i suoi colori e le texture.
+- [ ] La M 3D della panoramica segue l'inclinazione del telefono (su iPhone dopo un tocco sul logo, che chiede il permesso del movimento).
+
+**Link nelle email**
+
+- [ ] "Password dimenticata" e un invito: il link nell'email porta all'indirizzo pubblico in `https://` e si apre sul telefono.
+- [ ] Pagina Sistema › *Invia un'email di prova*: arriva nella posta in arrivo, non nello spam.
+
+Se qualcosa non va: copia il rapporto della diagnostica (*Copia rapporto*) e, per la CSP, prova
+con `MANUTRACK_CSP=report` nel `.env`: la pagina funziona di nuovo e le violazioni compaiono
+nella console del browser (Safari su Mac collegato all'iPhone, oppure `chrome://inspect` per
+Android).

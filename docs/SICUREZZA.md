@@ -109,6 +109,22 @@ chi ha un account.
   (`MANUTRACK_PUSH_HOSTS`, di serie Google, Mozilla, Apple e Microsoft): un'iscrizione verso un
   altro indirizzo è rifiutata.
 
+### Servizi push ammessi
+
+Il server manda le notifiche solo agli indirizzi di questi servizi (o loro sottodomini), elenco
+in `MANUTRACK_PUSH_HOSTS` (separati da virgole); qualunque altra iscrizione è rifiutata e la
+diagnostica notifiche (*App e notifiche › Diagnostica*) lo spiega con il servizio del browser.
+
+| Host ammesso | Servizio | Browser |
+|---|---|---|
+| `fcm.googleapis.com` | Google Firebase Cloud Messaging | Chrome, Edge su Android, Samsung Internet, Opera, Brave |
+| `android.googleapis.com` | Google (indirizzi vecchi di FCM) | iscrizioni Chrome molto vecchie |
+| `push.services.mozilla.com` | Mozilla Push Service (es. `updates.push.services.mozilla.com`) | Firefox |
+| `push.apple.com` | Apple Push Notification service (es. `web.push.apple.com`) | Safari su iPhone, iPad e Mac |
+| `notify.windows.com` | Microsoft Windows Push Notification Services (es. `wns2-par02p.notify.windows.com`) | Edge su Windows |
+
+Solo `https`, senza porte, credenziali o indirizzi IP nell'indirizzo.
+
 ## 5. Sessioni
 
 - Cambiando la password (dal profilo o con il link) le altre sessioni della persona si chiudono
@@ -132,3 +148,23 @@ chi ha un account.
 
 La cartella delle copie di sicurezza (`storage/app/backups`) è fuori da `public/` e ha anche un
 `.htaccess` con `Require all denied`.
+
+## 7. Verifica in due passaggi obbligatoria per gli amministratori
+
+*Impostazioni › Azienda › Verifica in due passaggi*, solo l'amministratore, e solo se l'ha già
+attivata sul proprio account (altrimenti resterebbe chiuso fuori). Con l'obbligo attivo:
+- un amministratore senza verifica viene portato al suo profilo con l'avviso e non può fare
+  altro (anche le azioni delle pagine già aperte rispondono 403) finché non la attiva;
+- un amministratore non può disattivare la propria; se perde il telefono usa i codici di
+  recupero o chiede a un altro amministratore di azzerarla (al successivo accesso dovrà
+  riattivarla);
+- la pagina elenca gli amministratori che non l'hanno ancora attivata; attivazione e
+  disattivazione dell'obbligo restano nel registro attività.
+
+## 8. APP_URL
+
+`APP_URL` deve essere l'indirizzo pubblico in `https://` con lo stesso dominio con cui si apre
+l'app. L'installazione dal browser non parte se non lo è; `manutrack:install` si ferma se in
+produzione non è `https` o è un indirizzo locale; la pagina Sistema lo segnala in rosso. Tutti
+gli indirizzi generati dall'app (link nelle email, QR) partono da qui.
+

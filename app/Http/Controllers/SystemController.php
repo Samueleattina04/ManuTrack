@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Setup\AppUrlCheck;
 use App\Support\Setup\SystemStatus;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
 
 /**
  * Pagina Sistema: versione, aggiornamenti, copie del database, requisiti, cron.
@@ -11,13 +13,14 @@ use Illuminate\Contracts\View\View;
  */
 class SystemController extends Controller
 {
-    public function __invoke(SystemStatus $status): View
+    public function __invoke(SystemStatus $status, Request $request): View
     {
         return view('system', [
             'status' => $status->summary(),
             'history' => $status->history(),
             'backups' => $status->backups(),
             'checks' => $status->checks(),
+            'appUrlProblems' => AppUrlCheck::problems($request),
         ]);
     }
 }

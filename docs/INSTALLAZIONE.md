@@ -288,11 +288,41 @@ Senza SSH: una voce di cron da eseguire una sola volta, come per le chiavi VAPID
 - Le **esportazioni Excel** richiedono l'estensione PHP `zip` (già tra i requisiti). Senza, l'app offre solo il CSV.
 - Il **rapporto mensile** si stampa o si salva in PDF dal browser: sul server non serve nessun programma.
 
-## 12. Verifica finale
+## 12. Checklist dopo l'installazione
 
-- [ ] `https://<dominio>` apre ManuTrack con il lucchetto e `http://` reindirizza su `https://`.
-- [ ] `https://<dominio>/.env` e `https://<dominio>/../.env` non sono raggiungibili.
-- [ ] **Sistema**: versione applicata, cron "attivo", requisiti senza voci rosse, notifiche push "chiavi configurate", nessun avviso di account `@example.com`.
+Da fare su ogni nuova installazione, prima di dare l'indirizzo al cliente. La pagina **Sistema**
+segnala da sola i punti contrassegnati con ⚙.
+
+**Indirizzo e HTTPS**
+
+- [ ] ⚙ `APP_URL` nel `.env` è l'indirizzo pubblico esatto, con `https://` e lo stesso dominio con cui si apre l'app (niente `localhost`, IP o dominio provvisorio). Da qui nascono i link delle email (nuova password, inviti) e dei QR: l'installazione dal browser non parte se è sbagliato e la pagina Sistema lo segnala in rosso.
+- [ ] `https://<dominio>` apre ManuTrack con il lucchetto e `http://<dominio>` reindirizza su `https://`.
+- [ ] **HSTS iniziale basso**: lascia `MANUTRACK_HSTS_SECONDS=300` (5 minuti, il valore del `.env.example`). Dopo qualche giorno con HTTPS e rinnovo del certificato funzionanti, portalo a `31536000` (un anno). Con un valore alto e un certificato scaduto o sbagliato i browser rifiutano il sito per tutto quel tempo, senza possibilità di "procedere comunque".
+- [ ] `SESSION_SECURE_COOKIE=true` (cookie di sessione solo in HTTPS) e `SESSION_ENCRYPT=true`.
+- [ ] **Proxy fidati**: su DirectAdmin normale (Apache, eventualmente con Nginx sullo stesso server) lascia `MANUTRACK_TRUSTED_PROXIES` vuoto. Solo con un proxy o una CDN esterna (es. un servizio davanti al sito) scrivi i loro indirizzi, separati da virgole. Verifica: nel **Registro attività** il tuo ultimo accesso deve mostrare il tuo IP pubblico, non quello del proxy (vedi [SICUREZZA.md](SICUREZZA.md)).
+- [ ] `https://<dominio>/.env`, `https://<dominio>/storage/` e `https://<dominio>/../.env` non sono raggiungibili.
+- [ ] `APP_ENV=production` e `APP_DEBUG=false`.
+
+**Funzionamento**
+
+- [ ] ⚙ **Cron**: la pagina Sistema mostra il cron "attivo" (ultimo giro da meno di 2 minuti).
+- [ ] ⚙ **Blocco dell'installazione**: `https://<dominio>/install` risponde "pagina non trovata", `MANUTRACK_INSTALL_TOKEN` nel `.env` è vuoto e `storage/app/installed.lock` esiste.
+- [ ] ⚙ Requisiti senza voci rosse; nessun avviso di account `@example.com`.
+- [ ] ⚙ **Chiavi VAPID con soggetto reale**: notifiche push "chiavi configurate" e `VAPID_SUBJECT` con un indirizzo vero (`mailto:assistenza@tuodominio.it`), non quello d'esempio: i servizi push lo usano per contattarti. La pagina Sistema avvisa se è ancora `example.com`.
+- [ ] **Copie di sicurezza**: dalla pagina Sistema "Fai una copia adesso" crea un file in `storage/app/backups`; `MANUTRACK_BACKUPS_KEEP` è il numero voluto; anche il backup automatico dell'hosting (DirectAdmin › *Create/Restore Backups*) è attivo e comprende i file caricati. Tieni almeno una copia fuori dal server.
+- [ ] Verifica in due passaggi attiva per l'amministratore e, se il cliente lo vuole, *Impostazioni › Azienda › Verifica in due passaggi obbligatoria per gli amministratori*.
+
+**Posta**
+
+- [ ] Il **dominio del mittente** (`MAIL_FROM_ADDRESS`) ha i record DNS:
+  - **SPF** (record TXT sul dominio, es. `v=spf1 include:<server-di-posta> ~all`) che autorizza il server da cui parte la posta: su DirectAdmin è di solito già presente per il dominio ospitato; con un servizio di posta esterno va aggiunto il suo `include:`;
+  - **DKIM** (record TXT `<selettore>._domainkey`) con la firma attiva sul server di posta: su DirectAdmin *E-mail Manager › DKIM* (o *DNS Management*), con un servizio esterno dal suo pannello;
+  - **DMARC** (record TXT `_dmarc`, all'inizio `v=DMARC1; p=none; rua=mailto:<indirizzo-per-i-rapporti>`), da portare a `p=quarantine` quando i rapporti mostrano che SPF e DKIM passano.
+  Si controllano con uno strumento di verifica DNS o leggendo le intestazioni di un'email ricevuta (`spf=pass`, `dkim=pass`, `dmarc=pass`).
+- [ ] ⚙ **Email di prova**: pagina Sistema › *Invia un'email di prova*. Deve arrivare nella posta in arrivo (non nello spam) con `spf=pass dkim=pass dmarc=pass` nelle intestazioni. Se il server rifiuta, la pagina mostra l'errore; se l'invio è impostato su `log` lo dice.
+
+**Telefoni**
+
 - [ ] Prova di installazione su un telefono e "Invia notifica di prova": checklist in [`TEST-DISPOSITIVI.md`](TEST-DISPOSITIVI.md).
 
 ## 13. Aggiornamenti

@@ -159,6 +159,22 @@ class SystemStatus
      */
     public function checks(): array
     {
-        return $this->requirements->checks();
+        $checks = $this->requirements->checks();
+
+        // Dopo l'installazione: blocco attivo e codice tolto dal .env
+        $locked = InstallState::hasLock() && blank(config('manutrack.install_token'));
+        $checks[] = ['key' => 'install-lock', 'label' => __('system.checks.install_lock'), 'status' => $locked ? Requirements::OK : Requirements::WARNING,
+            'detail' => $locked ? __('install.req.yes') : __('system.checks.install_lock_open')];
+
+        // Soggetto delle chiavi push: un contatto vero, non quello d'esempio
+        if ($this->pushConfigured()) {
+            $subject = (string) config('manutrack.webpush.subject');
+            $real = $subject !== '' && (str_starts_with($subject, 'mailto:') || str_starts_with($subject, 'https://'))
+                && ! preg_match('/@?example\.(com|org|net)\b/i', $subject) && ! str_contains($subject, 'localhost');
+            $checks[] = ['key' => 'vapid-subject', 'label' => __('system.checks.vapid_subject'), 'status' => $real ? Requirements::OK : Requirements::WARNING,
+                'detail' => $real ? $subject : __('system.checks.vapid_subject_fake', ['subject' => $subject ?: '—'])];
+        }
+
+        return $checks;
     }
 }

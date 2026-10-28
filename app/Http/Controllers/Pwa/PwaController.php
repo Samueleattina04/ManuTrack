@@ -31,6 +31,7 @@ class PwaController extends Controller
             'endpointHashes' => $devices->pluck('endpoint_hash')->all(),
             'serverHttps' => $request->isSecure(),
             'appUrl' => config('app.url'),
+            'pushHosts' => array_values(array_map('strtolower', (array) config('manutrack.webpush.hosts'))),
         ]);
     }
 }

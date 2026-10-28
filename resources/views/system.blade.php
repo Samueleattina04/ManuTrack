@@ -13,6 +13,16 @@
             <div class="alert alert-ko" role="alert"><x-icon name="alert-triangle" /><span>{{ $problem }}</span></div>
         @endforeach
 
+        @if($appUrlProblems !== [])
+            <div class="alert alert-ko" role="alert">
+                <x-icon name="alert-triangle" />
+                <div class="min-w-0 flex-1">
+                    <strong>{{ __('install.app_url.system_title') }}</strong>
+                    @foreach($appUrlProblems as $problem)<p class="mt-1 text-fg-2">{{ $problem }}</p>@endforeach
+                </div>
+            </div>
+        @endif
+
         @if($status['example_accounts'] !== [])
             <div class="alert alert-warn" role="alert">
                 <x-icon name="alert-triangle" />
@@ -133,6 +143,14 @@
                         <form method="POST" action="{{ route('system.backup') }}" x-data="{ busy: false }" @submit="busy = true">@csrf<button class="btn btn-secondary btn-sm" :disabled="busy"><x-icon name="database" />{{ __('system.actions.backup_now') }}</button></form>
                     @endcan
                 </div>
+            </section>
+
+            <section class="card flex flex-col gap-3 p-4" aria-labelledby="s-mail">
+                <h2 id="s-mail" class="text-base font-bold">{{ __('system.mail_test.title') }}</h2>
+                <p class="text-sm text-fg-2">{{ __('system.mail_test.intro', ['mailer' => config('mail.default'), 'from' => config('mail.from.address')]) }}</p>
+                @can('system.update')
+                    <form method="POST" action="{{ route('system.mail-test') }}" x-data="{ busy: false }" @submit="busy = true">@csrf<button class="btn btn-secondary btn-sm" :disabled="busy"><x-icon name="mail" />{{ __('system.mail_test.button', ['email' => auth()->user()->email]) }}</button></form>
+                @endcan
             </section>
 
             <section class="card overflow-hidden">

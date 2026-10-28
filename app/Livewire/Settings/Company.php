@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Settings;
 
+use App\Support\Access\Access;
 use App\Support\Audit\Audit;
 use App\Support\Brand\Brand;
 use App\Support\Brand\Color;
 use App\Support\Brand\CompanyLogo;
 use App\Support\Brand\CustomIcons;
 use App\Support\Brand\PaletteBuilder;
+use App\Support\Security\AdminTwoFactor;
 use App\Support\Setup\Requirements;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\File;
@@ -37,6 +39,9 @@ class Company extends Component
     public string $locale = 'it';
 
     #[Validate(['logo' => 'nullable|file|mimes:png,jpg,jpeg,webp|mimetypes:image/png,image/jpeg,image/webp|max:2048'])]
+    /** Verifica in due passaggi obbligatoria per gli amministratori */
+    public bool $adminTwoFactor = false;
+
     public ?TemporaryUploadedFile $logo = null;
 
     #[Validate(['logoDark' => 'nullable|file|mimes:png,jpg,jpeg,webp|mimetypes:image/png,image/jpeg,image/webp|max:2048'])]
@@ -50,6 +55,7 @@ class Company extends Component
         $this->palette = Brand::paletteKey();
         $this->timezone = (string) settings('company.timezone', config('app.timezone'));
         $this->locale = (string) settings('company.locale', config('app.locale'));
+        $this->adminTwoFactor = AdminTwoFactor::required();
 
         $custom = settings(Brand::CUSTOM_SETTING);
         if (is_array($custom)) {
@@ -190,6 +196,27 @@ class Company extends Component
         return collect(File::directories(lang_path()))->map(fn ($d) => basename($d))->values()->all();
     }
 
+    /**
+     * Solo l'amministratore, e solo se lui stesso l'ha già attivata (altrimenti resterebbe
+     * chiuso fuori subito dopo aver salvato).
+     */
+    public function saveTwoFactor(): void
+    {
+        abort_unless(auth()->user()->hasRole(Access::ADMIN), 403);
+        if ($this->adminTwoFactor && ! auth()->user()->hasTwoFactor()) {
+            $this->addError('adminTwoFactor', __('settings.two_factor.enable_yours_first'));
+            $this->adminTwoFactor = false;
+
+            return;
+        }
+        $before = AdminTwoFactor::required();
+        settings()->set(AdminTwoFactor::SETTING, $this->adminTwoFactor);
+        if ($before !== $this->adminTwoFactor) {
+            Audit::log('settings.admin_two_factor', null, $this->adminTwoFactor ? __('settings.two_factor.audit_on') : __('settings.two_factor.audit_off'));
+        }
+        $this->dispatch('toast', message: __('settings.saved'));
+    }
+
     public function render(): View
     {
         $preview = null;
@@ -200,6 +227,8 @@ class Company extends Component
         }
 
         return view('livewire.settings.company', [
+            'isAdmin' => auth()->user()->hasRole(Access::ADMIN),
+            'adminsWithout' => AdminTwoFactor::adminsWithout(),
             'palettes' => (array) config('manutrack.palettes'),
             'preview' => $preview,
             'contrast' => $preview ? [

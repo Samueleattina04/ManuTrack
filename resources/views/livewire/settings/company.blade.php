@@ -151,4 +151,20 @@
             <button type="submit" class="btn btn-primary" wire:loading.attr="disabled"><x-icon name="check" />{{ __('settings.save') }}</button>
         </div>
     </form>
+
+    @if($isAdmin)
+        <section class="card flex flex-col gap-4 p-5" aria-labelledby="s-2fa">
+            <h2 id="s-2fa" class="text-lg font-bold">{{ __('settings.two_factor.title') }}</h2>
+            <p class="max-w-prose text-sm text-fg-2">{{ __('settings.two_factor.intro') }}</p>
+            <label class="flex items-start gap-3">
+                <input type="checkbox" class="mt-1" wire:model="adminTwoFactor">
+                <span>{{ __('settings.two_factor.require') }}</span>
+            </label>
+            @error('adminTwoFactor')<span class="field-error"><x-icon name="alert-circle" class="!h-4 !w-4" />{{ $message }}</span>@enderror
+            @if($adminsWithout !== [])
+                <div class="alert alert-warn" role="status"><x-icon name="alert-triangle" /><span>{{ __('settings.two_factor.without', ['names' => implode(', ', $adminsWithout)]) }}</span></div>
+            @endif
+            <div><button type="button" class="btn btn-secondary" wire:click="saveTwoFactor"><x-icon name="shield" />{{ __('settings.save') }}</button></div>
+        </section>
+    @endif
 </div>

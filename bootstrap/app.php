@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureAppInstalled;
 use App\Http\Middleware\EnsureInstallerAvailable;
 use App\Http\Middleware\EnsureNotErased;
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\RequireAdminTwoFactor;
 use App\Http\Middleware\RequirePassword;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\TrustProxies;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'installed' => EnsureAppInstalled::class,
             'installer' => EnsureInstallerAvailable::class,
             'active' => EnsureUserIsActive::class,
+            'admin.2fa' => RequireAdminTwoFactor::class,
             // Anche per le azioni Livewire (vedi il middleware)
             'password.confirm' => RequirePassword::class,
         ]);

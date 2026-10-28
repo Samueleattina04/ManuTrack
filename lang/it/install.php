@@ -67,6 +67,17 @@ return [
     'icons_need_gd' => 'Per generare le icone serve l\'estensione GD (o Imagick). Senza, l\'app usa le icone già incluse nel pacchetto.',
     'palette_unknown' => 'Palette sconosciuta: :name',
 
+    'app_url' => [
+        'label' => 'Indirizzo dell\'app (APP_URL nel file .env)',
+        'missing' => 'APP_URL manca o non è un indirizzo valido (:url). Scrivi nel file .env l\'indirizzo completo, per esempio APP_URL=https://manutenzione.example.com',
+        'https' => 'APP_URL deve iniziare con https:// (ora è :url): con http i link nelle email e l\'app installabile non funzionano.',
+        'local' => 'APP_URL punta a un indirizzo locale (:url): i link nelle email non funzionerebbero fuori da questo server.',
+        'host' => 'APP_URL (:url) non corrisponde all\'indirizzo con cui hai aperto l\'app (:host): i link per la nuova password e gli inviti porterebbero a un altro indirizzo. Correggi APP_URL nel file .env oppure apri l\'app dall\'indirizzo giusto.',
+        'request_https' => 'L\'app è aperta senza HTTPS: attiva il certificato (DirectAdmin › SSL) e il reindirizzamento a https.',
+        'console' => 'Attenzione, APP_URL: :problems',
+        'system_title' => 'Indirizzo dell\'app da correggere',
+    ],
+
     'req' => [
         'php' => 'PHP :version o successivo',
         'extension' => 'Estensione :name',

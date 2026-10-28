@@ -2,8 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Support\Access\Access;
 use App\Support\Audit\Audit;
 use App\Support\Security\ActionLimit;
+use App\Support\Security\AdminTwoFactor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -110,6 +112,12 @@ class Profile extends Component
     {
         $this->limitPasswordChecks();
         $this->validate(['twoFactorPassword' => ['required', 'current_password']], attributes: ['twoFactorPassword' => __('auth_ui.password')]);
+        // Con l'obbligo per gli amministratori non si può togliere (si rigenerano i codici, se serve)
+        if (AdminTwoFactor::required() && auth()->user()->hasRole(Access::ADMIN)) {
+            $this->addError('twoFactorPassword', __('settings.two_factor.cannot_disable'));
+
+            return;
+        }
         $disable(auth()->user());
         $this->reset('twoFactorPassword', 'showRecoveryCodes');
     }

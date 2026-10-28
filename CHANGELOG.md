@@ -26,6 +26,13 @@ CSP, limiti e proxy: `docs/SICUREZZA.md`.
 - `.env.example`: `SESSION_ENCRYPT=true` per le nuove installazioni.
 
 ### Aggiunto
+- **Verifica in due passaggi obbligatoria per gli amministratori** (*Impostazioni › Azienda*, solo l'amministratore che l'ha già attivata): chi non l'ha attivata viene portato al profilo con un avviso e non può fare altro finché non la attiva; non si può disattivare la propria; elenco degli amministratori senza.
+- **Controllo di `APP_URL`**: deve essere `https` e avere il dominio con cui si apre l'app. L'installazione dal browser non parte se è sbagliato, `manutrack:install` si ferma in produzione se non è `https` o è locale, la pagina Sistema lo segnala.
+- **Email di prova** dalla pagina Sistema, inviata subito (non in coda) con l'errore vero del server di posta, o l'avviso se l'invio è impostato su `log`; al massimo 3 al minuto; nel registro attività.
+- Pagina Sistema: controlli del blocco dell'installazione e del contatto delle chiavi push (`VAPID_SUBJECT` d'esempio).
+- Diagnostica notifiche: riga "Servizio di notifiche del browser" (Apple, Google, Mozilla, Microsoft) con l'esito rispetto all'elenco ammesso; messaggi comprensibili per iscrizione rifiutata, troppi tentativi, sessione scaduta, chiavi mancanti, permesso negato, errore del servizio push.
+- `INSTALLAZIONE.md` §12: checklist dopo l'installazione (APP_URL, HTTPS e HSTS iniziale basso, proxy fidati, cron, `SESSION_SECURE_COOKIE`, chiavi VAPID con soggetto reale, blocco dell'installazione, copie di sicurezza, SPF, DKIM e DMARC, email di prova).
+- `.env.example`: `MANUTRACK_HSTS_SECONDS=300` per le nuove installazioni, da alzare a un anno quando HTTPS funziona da qualche giorno.
 - Test di sicurezza in `tests/Feature/Security` (richieste costruite a mano verso `/livewire/update`, limiti, intestazioni, caricamenti, installazione e demo).
 - CI: `composer audit` e `npm audit` (pacchetto e strumenti di sviluppo).
 

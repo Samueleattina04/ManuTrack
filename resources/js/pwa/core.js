@@ -112,7 +112,7 @@ export async function enablePush() {
     const encodings = window.PushManager?.supportedContentEncodings || ['aes128gcm'];
     const res = await api('POST', '/push/iscrizioni', { ...sub.toJSON(), contentEncoding: encodings.includes('aes128gcm') ? 'aes128gcm' : encodings[0] });
 
-    return { ok: res.ok, permission, subscription: sub, message: res.ok ? null : (res.data.message || `HTTP ${res.status}`) };
+    return { ok: res.ok, status: res.status, permission, subscription: sub, message: res.ok ? null : (res.data.message || `HTTP ${res.status}`) };
 }
 
 export async function disablePush() {

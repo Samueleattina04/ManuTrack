@@ -71,6 +71,7 @@ return [
             'work_calendar_day' => 'Giorno speciale del calendario',
             'work_calendar_assigned' => 'Calendario di lavoro assegnato',
             'retention' => 'Regole di conservazione dei dati modificate',
+            'admin_two_factor' => 'Obbligo della verifica in due passaggi per gli amministratori',
             'work_calendar_assigned_past' => 'Calendario di lavoro assegnato da una data passata (indicatori ricalcolati)',
         ],
         'assets' => [
@@ -147,6 +148,8 @@ return [
             'data_export_deleted' => 'Esportazione completa dei dati eliminata',
             'erase_refused' => 'Cancellazione totale rifiutata (conferma sbagliata)',
             'retention' => 'Conservazione dei dati applicata',
+            'mail_test_sent' => 'Email di prova inviata',
+            'mail_test_failed' => 'Email di prova non riuscita',
             'update_success' => 'Aggiornamento applicato',
             'update_failed' => 'Aggiornamento non riuscito',
             'update_up_to_date' => 'Aggiornamento: già aggiornato',

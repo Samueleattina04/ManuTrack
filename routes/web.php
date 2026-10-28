@@ -106,7 +106,7 @@ Route::middleware(['installed', 'guest', 'throttle:invitation'])->group(function
     Route::post('/invito/{token}', [InvitationController::class, 'accept'])->name('invitation.accept');
 });
 
-Route::middleware(['installed', 'auth', 'active'])->group(function () {
+Route::middleware(['installed', 'auth', 'active', 'admin.2fa'])->group(function () {
     Route::get('/', HomeController::class)->name('home');
     Route::get('/profilo', Profile::class)->name('profile');
     Route::get('/design', DesignController::class)->name('design');
@@ -237,5 +237,6 @@ Route::middleware(['installed', 'auth', 'active'])->group(function () {
         Route::post('/aggiorna', [SystemActionsController::class, 'update'])->name('update');
         Route::post('/ritenta', [SystemActionsController::class, 'retry'])->name('retry');
         Route::post('/copia', [SystemActionsController::class, 'backup'])->name('backup');
+        Route::post('/email-di-prova', [SystemActionsController::class, 'mailTest'])->name('mail-test');
     });
 });

@@ -55,4 +55,17 @@ return [
         'contrast_text' => 'testo :value:1',
         'aa_note' => 'Contrasti WCAG: almeno 4,5:1 per testi e pulsanti. Il calcolo tiene conto dei due temi.',
     ],
+
+    'two_factor' => [
+        'title' => 'Verifica in due passaggi',
+        'intro' => 'Gli amministratori possono cambiare persone, permessi, dati e aggiornamenti: con la verifica in due passaggi una password rubata non basta per entrare. Con l\'obbligo attivo, un amministratore che non l\'ha ancora attivata viene portato al suo profilo e non può fare altro finché non la attiva.',
+        'require' => 'Obbligatoria per gli amministratori',
+        'without' => 'Amministratori senza verifica in due passaggi: :names.',
+        'enable_yours_first' => 'Attiva prima la verifica in due passaggi sul tuo account (Profilo), poi rendila obbligatoria.',
+        'must_enable' => 'L\'azienda richiede la verifica in due passaggi agli amministratori: attivala qui sotto per continuare a usare ManuTrack.',
+        'blocked' => 'Attiva la verifica in due passaggi nel tuo profilo per continuare.',
+        'cannot_disable' => 'La verifica in due passaggi è obbligatoria per gli amministratori: non si può disattivare. Se hai cambiato telefono, rigenera i codici di recupero o chiedi a un altro amministratore di azzerarla.',
+        'audit_on' => 'Verifica in due passaggi obbligatoria per gli amministratori',
+        'audit_off' => 'Verifica in due passaggi non più obbligatoria per gli amministratori',
+    ],
 ];

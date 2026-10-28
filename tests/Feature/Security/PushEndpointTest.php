@@ -34,9 +34,12 @@ it('accetta i servizi push di Chrome, Firefox, Safari ed Edge', function (string
     $this->actingAs($this->admin)->postJson('/push/iscrizioni', ['endpoint' => $endpoint, 'keys' => browserKeys()])->assertSuccessful();
 })->with([
     'Chrome' => ['https://fcm.googleapis.com/fcm/send/abc123'],
+    'Chrome (indirizzo nuovo)' => ['https://fcm.googleapis.com/wp/abc123'],
+    'Android vecchio' => ['https://android.googleapis.com/gcm/send/abc123'],
     'Firefox' => ['https://updates.push.services.mozilla.com/wpush/v2/abc'],
     'Safari' => ['https://web.push.apple.com/QGuQyavXutnMH_8ZjlxIkW4m'],
     'Edge' => ['https://wns2-par02p.notify.windows.com/w/?token=abc'],
+    'Edge (altro nodo)' => ['https://db5p.notify.windows.com/w/?token=abc'],
 ]);
 
 it('anche il rinnovo dal service worker non può puntare altrove', function () {
@@ -44,4 +47,17 @@ it('anche il rinnovo dal service worker non può puntare altrove', function () {
 
     $this->postJson('/push/rinnova', ['old_endpoint' => 'https://fcm.googleapis.com/fcm/send/vecchia', 'subscription' => ['endpoint' => 'https://127.0.0.1/interno', 'keys' => browserKeys()]])->assertUnprocessable();
     expect(PushSubscription::query()->sole()->endpoint)->toBe('https://fcm.googleapis.com/fcm/send/vecchia');
+});
+
+it('un\'iscrizione rifiutata ha un messaggio comprensibile, mostrato dalla diagnostica', function () {
+    $this->actingAs($this->admin)->postJson('/push/iscrizioni', ['endpoint' => 'https://push.servizio-sconosciuto.example/x', 'keys' => browserKeys()])
+        ->assertUnprocessable()
+        ->assertJsonPath('message', __('pwa.push.endpoint_not_allowed'));
+
+    // La pagina passa alla diagnostica l'elenco dei servizi ammessi e i messaggi per ogni errore
+    $this->get(route('pwa.diagnostics'))->assertOk()
+        ->assertSee('push.apple.com', false)->assertSee('fcm.googleapis.com', false)
+        ->assertSee('push.services.mozilla.com', false)->assertSee('notify.windows.com', false)
+        ->assertSee(__('pwa.diag.checks.push_service'), false);
+    expect(__('pwa.diag.failures.service_not_allowed'))->toContain(':host');
 });

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\Setup\AlreadyInstalledException;
 use App\Actions\Setup\InstallApplication;
+use App\Support\Setup\AppUrlCheck;
 use App\Support\Setup\EnvWriter;
 use App\Support\Setup\Requirements;
 use Illuminate\Contracts\View\View;
@@ -43,6 +44,13 @@ class InstallController extends Controller
             'palette' => ['required', 'in:'.implode(',', array_keys((array) config('manutrack.palettes')))],
             'vapid' => ['sometimes', 'boolean'],
         ]);
+
+        // APP_URL sbagliato = link per la nuova password e inviti che portano altrove: si corregge prima
+        $urlProblems = AppUrlCheck::problems($request);
+        if ($urlProblems !== []) {
+            return back()->withInput($request->except(['password', 'password_confirmation', 'token']))
+                ->withErrors(['install' => implode(' ', $urlProblems)]);
+        }
 
         $expected = (string) config('manutrack.install_token');
         if ($expected === '' || ! hash_equals($expected, (string) $data['token'])) {

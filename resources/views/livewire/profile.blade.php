@@ -22,6 +22,10 @@
             <div><button type="submit" class="btn btn-secondary"><x-icon name="key" />{{ __('profile.change_password') }}</button></div>
         </form>
 
+        @if(\App\Support\Security\AdminTwoFactor::missingFor($user))
+            <div class="alert alert-warn" role="alert"><x-icon name="shield" /><span>{{ __('settings.two_factor.must_enable') }}</span></div>
+        @endif
+
         <section class="card flex flex-col gap-4 p-5" aria-labelledby="p-2fa">
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <h2 id="p-2fa" class="text-lg font-bold">{{ __('profile.two_factor.title') }}</h2>

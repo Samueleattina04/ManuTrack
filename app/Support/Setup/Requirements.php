@@ -99,6 +99,9 @@ class Requirements
             $envWritable ? __('install.req.yes') : __('install.req.env_manual'),
         );
 
+        // Indirizzo dell'app: da qui nascono i link nelle email e nei QR
+        $checks[] = AppUrlCheck::requirement(app()->runningInConsole() ? null : request());
+
         if ($withDatabase) {
             $checks[] = $this->databaseCheck();
         }
