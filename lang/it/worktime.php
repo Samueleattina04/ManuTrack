@@ -4,6 +4,7 @@ return [
     'title' => 'Orario di lavoro',
     'intro' => 'L\'orario di lavoro serve a calcolare l\'MTBF sulle ore in cui le macchine dovrebbero lavorare, invece che 24 ore su 24. Senza calendari assegnati tutto resta sulle 24 ore.',
     'inherit' => 'Eredita',
+    'months_range' => '{1} :from (1 mese)|[2,*] da :from a :to (:n mesi)',
     'h24' => '24 ore su 24',
     'calendars' => 'Calendari',
     'new' => 'Nuovo calendario',
@@ -30,7 +31,9 @@ return [
         'location' => 'Ubicazione',
         'calendar' => 'Calendario',
         'valid_from' => 'Valido dal',
-        'past_warning' => 'Una data passata cambia gli indicatori da quel giorno in poi.',
+        'past_warning' => 'Data passata: cambieranno gli indicatori di :months, già consultati o esportati. L\'operazione resta nel registro attività.',
+        'past_confirm' => 'Confermo: ricalcolare gli indicatori di quei mesi con questo calendario',
+        'past_admin_only' => 'Solo l\'amministratore può scegliere una data passata.',
         'save' => 'Assegna',
         'saved' => 'Assegnazione salvata.',
         'current' => 'Adesso',
@@ -109,6 +112,8 @@ return [
         'overlap' => 'Turni sovrapposti: :a e :b.',
         'night_last' => 'Il turno che passa la mezzanotte deve essere l\'ultimo del giorno.',
         'scope' => 'Livello non valido.',
+        'past_admin_only' => 'Solo l\'amministratore può assegnare un calendario da una data passata.',
+        'past_confirm' => 'La data è passata: cambieranno gli indicatori di :months. Spunta la conferma per procedere.',
     ],
 
     'kpi' => [

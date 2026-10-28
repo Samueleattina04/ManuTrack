@@ -22,6 +22,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $locale
  * @property bool $is_active
  * @property Carbon|null $deactivated_at
+ * @property Carbon|null $anonymized_at
  * @property Carbon|null $last_login_at
  * @property Carbon|null $email_verified_at
  * @property Carbon|null $two_factor_confirmed_at
@@ -64,6 +65,7 @@ class User extends Authenticatable
             'deactivated_at' => 'datetime',
             'last_login_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
+            'anonymized_at' => 'datetime',
         ];
     }
 

@@ -40,6 +40,7 @@ return [
             '2fa_disabled' => 'Verifica in 2 passaggi disattivata',
         ],
         'users' => [
+            'anonymized' => 'Persona anonimizzata',
             'invited' => 'Invito inviato',
             'invitation_accepted' => 'Invito accettato',
             'invitation_revoked' => 'Invito annullato',
@@ -69,6 +70,8 @@ return [
             'work_calendar_version' => 'Nuovo orario settimanale',
             'work_calendar_day' => 'Giorno speciale del calendario',
             'work_calendar_assigned' => 'Calendario di lavoro assegnato',
+            'retention' => 'Regole di conservazione dei dati modificate',
+            'work_calendar_assigned_past' => 'Calendario di lavoro assegnato da una data passata (indicatori ricalcolati)',
         ],
         'assets' => [
             'created' => 'Macchina creata',
@@ -138,6 +141,11 @@ return [
             'password_changed' => 'Password cambiata',
         ],
         'system' => [
+            'data_export_requested' => 'Esportazione completa dei dati richiesta',
+            'data_export_ready' => 'Esportazione completa dei dati pronta',
+            'data_export_downloaded' => 'Esportazione completa dei dati scaricata',
+            'data_export_deleted' => 'Esportazione completa dei dati eliminata',
+            'retention' => 'Conservazione dei dati applicata',
             'update_success' => 'Aggiornamento applicato',
             'update_failed' => 'Aggiornamento non riuscito',
             'update_up_to_date' => 'Aggiornamento: già aggiornato',

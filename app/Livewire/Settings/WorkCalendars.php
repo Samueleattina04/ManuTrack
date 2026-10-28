@@ -6,7 +6,9 @@ use App\Models\Location;
 use App\Models\WorkCalendar;
 use App\Models\WorkCalendarAssignment;
 use App\Models\WorkCalendarShift;
+use App\Support\Access\Access;
 use App\Support\WorkTime\CalendarEditor;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
@@ -25,6 +27,14 @@ class WorkCalendars extends Component
 
     /** @var array{target: string, calendar: string, valid_from: string} target: "azienda" o l'id dell'ubicazione */
     public array $assign = ['target' => 'azienda', 'calendar' => '', 'valid_from' => ''];
+
+    /** Conferma esplicita per una data passata (solo amministratore) */
+    public bool $confirmPast = false;
+
+    public function updatedAssignValidFrom(): void
+    {
+        $this->confirmPast = false;
+    }
 
     public function mount(): void
     {
@@ -51,10 +61,11 @@ class WorkCalendars extends Component
     public function saveAssignment(CalendarEditor $editor): void
     {
         $this->authorize('settings.manage');
+        $this->resetErrorBag();
         $location = $this->assign['target'] !== 'azienda' ? Location::query()->find((int) $this->assign['target']) : null;
         $calendar = ctype_digit($this->assign['calendar']) ? WorkCalendar::query()->find((int) $this->assign['calendar']) : null;
         try {
-            $editor->assign($location ? 'ubicazione' : 'azienda', $location, $calendar, $this->assign['valid_from']);
+            $editor->assign($location ? 'ubicazione' : 'azienda', $location, $calendar, $this->assign['valid_from'], actor: auth()->user(), confirmPast: $this->confirmPast);
         } catch (ValidationException $e) {
             foreach ($e->errors() as $key => $messages) {
                 $this->addError('assign.'.$key, $messages[0]);
@@ -62,7 +73,18 @@ class WorkCalendars extends Component
 
             return;
         }
+        $this->confirmPast = false;
         $this->dispatch('toast', message: __('worktime.assign.saved'));
+    }
+
+    /** Mesi che cambierebbero con la data scelta, se è passata */
+    private function pastMonths(): ?string
+    {
+        $date = CarbonImmutable::createFromFormat('!Y-m-d', $this->assign['valid_from'], config('app.timezone'));
+
+        return $date && $date->format('Y-m-d') === $this->assign['valid_from'] && $date->lt(today()->toImmutable())
+            ? CalendarEditor::affectedMonths($date)
+            : null;
     }
 
     public function render(): View
@@ -122,6 +144,8 @@ class WorkCalendars extends Component
             'effective' => $effective,
             'history' => $rows->reverse()->take(30),
             'presets' => array_keys(CalendarEditor::PRESETS),
+            'pastMonths' => $this->pastMonths(),
+            'isAdmin' => auth()->user()->hasRole(Access::ADMIN),
         ])->title(__('worktime.title'))->layoutData(['heading' => __('worktime.title')]);
     }
 }

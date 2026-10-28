@@ -3,10 +3,12 @@
 namespace App\Support\WorkTime;
 
 use App\Models\Location;
+use App\Models\User;
 use App\Models\WorkCalendar;
 use App\Models\WorkCalendarAssignment;
 use App\Models\WorkCalendarException;
 use App\Models\WorkCalendarSchedule;
+use App\Support\Access\Access;
 use App\Support\Audit\Audit;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -203,12 +205,24 @@ final class CalendarEditor
      * Assegna un calendario (null = eredita / 24 ore su 24) all'azienda o a un'ubicazione da una data.
      * L'assegnazione alla singola macchina è prevista dal calcolo ma non dalle pagine.
      */
-    public function assign(string $scope, ?Location $location, ?WorkCalendar $calendar, string $validFrom, ?int $assetId = null): WorkCalendarAssignment
+    public function assign(string $scope, ?Location $location, ?WorkCalendar $calendar, string $validFrom, ?int $assetId = null, ?User $actor = null, bool $confirmPast = false): WorkCalendarAssignment
     {
         if (! in_array($scope, WorkCalendarAssignment::SCOPES, true) || ($scope === 'ubicazione' && ! $location) || ($scope === 'macchina' && ! $assetId)) {
             throw ValidationException::withMessages(['scope' => __('worktime.errors.scope')]);
         }
         $date = self::date($validFrom, 'valid_from');
+        // Data passata: cambia gli indicatori già calcolati. Solo l'amministratore (o un comando
+        // dal terminale, es. i dati dimostrativi), con conferma esplicita; sempre nel registro.
+        $past = $date->lt(today()->toImmutable());
+        if ($past) {
+            $actor ??= auth()->user();
+            if ($actor ? ! $actor->hasRole(Access::ADMIN) : ! app()->runningInConsole()) {
+                throw ValidationException::withMessages(['valid_from' => __('worktime.errors.past_admin_only')]);
+            }
+            if (! $confirmPast) {
+                throw ValidationException::withMessages(['valid_from' => __('worktime.errors.past_confirm', ['months' => self::affectedMonths($date)])]);
+            }
+        }
         $row = WorkCalendarAssignment::query()
             ->where('scope', $scope)
             ->where('location_id', $scope === 'ubicazione' ? $location->id : null)
@@ -222,9 +236,25 @@ final class CalendarEditor
             ]);
         $row->work_calendar_id = $calendar?->id;
         $row->save();
-        Audit::log('settings.work_calendar_assigned', $calendar, ($scope === 'ubicazione' ? $location->name : __('worktime.scope.'.$scope)).' · '.($calendar->name ?? __('worktime.inherit')).' · '.$date->toDateString());
+        Audit::log(
+            $past ? 'settings.work_calendar_assigned_past' : 'settings.work_calendar_assigned',
+            $calendar,
+            ($scope === 'ubicazione' ? $location->name : __('worktime.scope.'.$scope)).' · '.($calendar->name ?? __('worktime.inherit')).' · '.$date->toDateString(),
+            $past ? ['valido_dal' => $date->toDateString(), 'mesi_degli_indicatori_che_cambiano' => self::affectedMonths($date)] : [],
+            $actor,
+        );
 
         return $row;
+    }
+
+    /** Mesi degli indicatori che cambiano con un'assegnazione da una data passata, es. "marzo 2026 – ottobre 2026 (8 mesi)" */
+    public static function affectedMonths(CarbonImmutable $from): string
+    {
+        $first = $from->startOfMonth();
+        $last = today()->toImmutable()->startOfMonth();
+        $n = (int) $first->diffInMonths($last) + 1;
+
+        return trans_choice('worktime.months_range', $n, ['from' => $first->translatedFormat('F Y'), 'to' => $last->translatedFormat('F Y'), 'n' => $n]);
     }
 
     /**

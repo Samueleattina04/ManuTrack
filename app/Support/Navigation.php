@@ -44,6 +44,7 @@ class Navigation
             ['notification_rules', 'mail', 'settings.notifications', null, 'avvisi email ruoli riepilogo regole', 'settings.manage'],
             ['worktime', 'clock', 'settings.worktime', null, 'orario di lavoro turni calendario festività chiusure mtbf', 'settings.manage'],
             ['audit', 'clipboard-list', 'audit.index', null, 'registro attività log', 'audit.view'],
+            ['privacy', 'shield', 'gdpr.exports', null, 'dati privacy gdpr esportazione anonimizza conservazione cancellazione', 'data.export'],
             ['system', 'server', 'system', 'g s', 'sistema versione aggiornamento copie', 'system.view'],
             ['design', 'palette', 'design', null, 'design system stile componenti', 'settings.manage'],
         ]);

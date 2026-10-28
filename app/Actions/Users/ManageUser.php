@@ -33,6 +33,9 @@ class ManageUser
 
     public function setActive(User $actor, User $user, bool $active): void
     {
+        if ($user->anonymized_at !== null) {
+            throw ValidationException::withMessages(['user' => __('gdpr.anonymize.already')]);
+        }
         if (! $active && $actor->is($user)) {
             throw ValidationException::withMessages(['user' => __('users.cannot_deactivate_self')]);
         }

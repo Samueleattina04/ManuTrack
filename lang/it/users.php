@@ -36,6 +36,8 @@ return [
     'reset_2fa_confirm' => 'La persona dovrà riattivare la verifica in due passaggi. Continuare?',
     'two_factor_reset_done' => 'Verifica in due passaggi azzerata.',
     'deactivate' => 'Disattiva',
+    'anonymize' => 'Anonimizza…',
+    'anonymized' => 'Anonimizzata',
     'activate' => 'Riattiva',
     'deactivate_confirm' => ':name non potrà più accedere. I suoi interventi restano nello storico. Continuare?',
     'cannot_deactivate_self' => 'Non puoi disattivare il tuo account.',

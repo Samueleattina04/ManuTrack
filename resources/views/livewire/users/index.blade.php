@@ -94,7 +94,7 @@
                             </div>
                         </td>
                         <td>
-                            @if($canManage)
+                            @if($canManage && ! $u->anonymized_at)
                                 <label class="sr-only" for="role-{{ $u->id }}">{{ __('users.field.role') }} {{ $u->name }}</label>
                                 <select id="role-{{ $u->id }}" class="input !min-h-[36px] !py-0 text-sm" wire:change="changeRole({{ $u->id }}, $event.target.value)">
                                     @foreach($roles as $r)<option value="{{ $r }}" @selected($u->roleName() === $r)>{{ __('access.roles.'.$r) }}</option>@endforeach
@@ -107,7 +107,9 @@
                         <td>@if($u->hasTwoFactor())<x-status tone="ok" icon="shield">{{ __('users.two_factor_on') }}</x-status>@else<span class="text-muted">—</span>@endif</td>
                         <td class="num text-fg-2">{{ $u->last_login_at?->diffForHumans() ?? __('users.never') }}</td>
                         <td class="text-right">
-                            @if($canManage)
+                            @if($u->anonymized_at)
+                                <span class="text-sm text-muted">{{ __('users.anonymized') }}</span>
+                            @elseif($canManage)
                                 <div x-data="{ open: false }" class="relative inline-block text-left" @keydown.escape="open = false" @click.outside="open = false">
                                     <button type="button" class="btn btn-ghost btn-sm" @click="open = ! open" :aria-expanded="open.toString()">{{ __('users.more') }} <x-icon name="chevron-down" class="!w-4 !h-4" /></button>
                                     <div x-cloak x-show="open" x-transition class="absolute right-0 z-20 mt-1 w-60 card p-1.5 text-left">
@@ -118,6 +120,9 @@
                                         <button type="button" class="nav-item w-full" wire:click="toggleActive({{ $u->id }})" @if($u->is_active) wire:confirm="{{ __('users.deactivate_confirm', ['name' => $u->name]) }}" @endif @click="open = false">
                                             <x-icon :name="$u->is_active ? 'pause-circle' : 'check-circle'" />{{ $u->is_active ? __('users.deactivate') : __('users.activate') }}
                                         </button>
+                                        @if(! $u->is_active && $isAdmin && ! $u->is(auth()->user()))
+                                            <a href="{{ route('gdpr.anonymize', ['persona' => $u->id]) }}" class="nav-item w-full" wire:navigate><x-icon name="shield" />{{ __('users.anonymize') }}</a>
+                                        @endif
                                     </div>
                                 </div>
                             @endif

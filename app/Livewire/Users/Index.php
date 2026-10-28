@@ -96,7 +96,7 @@ class Index extends Component
     public function changeRole(int $userId, string $role, ManageUser $manage): void
     {
         $this->authorize('users.manage');
-        $this->guarded(fn () => $manage->changeRole(auth()->user(), User::query()->findOrFail($userId), $role));
+        $this->guarded(fn () => $manage->changeRole(auth()->user(), User::query()->whereNull('anonymized_at')->findOrFail($userId), $role));
     }
 
     public function toggleActive(int $userId, ManageUser $manage): void
@@ -116,7 +116,7 @@ class Index extends Component
     public function sendPasswordReset(int $userId): void
     {
         $this->authorize('users.manage');
-        $user = User::query()->findOrFail($userId);
+        $user = User::query()->whereNull('anonymized_at')->findOrFail($userId);
         Password::sendResetLink(['email' => $user->email]);
         Audit::log('users.password_link_sent', $user, $user->email);
         $this->dispatch('toast', message: __('users.reset_link_sent', ['email' => $user->email]));
@@ -150,6 +150,7 @@ class Index extends Component
             'invitations' => Invitation::query()->pending()->with('inviter')->latest()->get(),
             'roles' => Access::ROLES,
             'canManage' => auth()->user()->can('users.manage'),
+            'isAdmin' => auth()->user()->hasRole(Access::ADMIN),
         ])->title(__('users.title'))->layoutData(['heading' => __('users.title')]);
     }
 }

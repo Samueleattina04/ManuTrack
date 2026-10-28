@@ -3,6 +3,7 @@
 use App\Actions\Preventive\GeneratePlanOrders;
 use App\Support\Demo\DemoInstaller;
 use App\Support\Demo\Edition;
+use App\Support\Gdpr\Eraser;
 use App\Support\Setup\SystemStatus;
 use App\Support\Update\Updater;
 use Illuminate\Support\Facades\Artisan;
@@ -22,6 +23,11 @@ use Illuminate\Support\Facades\Schedule;
 | Nessun processo resta attivo dopo la fine del minuto.
 |
 */
+
+// Installazione cancellata a fine contratto: niente database, niente compiti
+if (Eraser::erased()) {
+    return;
+}
 
 // Segnale di vita del cron, mostrato nella pagina Sistema
 Schedule::call(function (): void {
@@ -72,6 +78,11 @@ Schedule::call(function (): void {
 Schedule::call(function (): void {
     Artisan::call('manutrack:festivita');
 })->dailyAt('02:45')->name('manutrack:holidays')->withoutOverlapping(30);
+
+// Conservazione dei dati (GDPR): anonimizzazione, registro attività, esportazioni scadute
+Schedule::call(function (): void {
+    Artisan::call('manutrack:conservazione');
+})->dailyAt('03:50')->name('manutrack:retention')->withoutOverlapping(60);
 
 // Pulizie periodiche
 Schedule::call(function (): void {

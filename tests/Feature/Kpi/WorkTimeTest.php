@@ -100,7 +100,7 @@ it('senza calendari assegnati nulla cambia: MTBF solo sulle 24 ore', function ()
 });
 
 it('MTBF sulle ore di lavoro: marzo 2026 calcolato a mano', function () {
-    $this->editor->assign('ubicazione', $this->site, $this->calendar, '2026-01-01');
+    $this->editor->assign('ubicazione', $this->site, $this->calendar, '2026-01-01', confirmPast: true);
     $this->travelTo(CarbonImmutable::parse('2026-04-10 12:00:00'));
 
     $time = (new WorkTime)->forAsset($this->a->refresh()->load('location'), CarbonImmutable::parse('2026-03-01 00:00:00'), CarbonImmutable::parse('2026-04-01 00:00:00'));
@@ -148,12 +148,12 @@ it('eredità: ubicazione vuota eredita, la più vicina vince, macchina predispos
     $chain = [$this->line->id, $this->site->id];
 
     expect((new WorkTime)->calendarFor($this->a->id, $chain, '2026-03-10'))->toBeNull();
-    $this->editor->assign('azienda', null, $night, '2026-01-01');
+    $this->editor->assign('azienda', null, $night, '2026-01-01', confirmPast: true);
     expect($wt()->calendarFor($this->a->id, $chain, '2026-03-10'))->toBe($night->id);
-    $this->editor->assign('ubicazione', $this->site, $this->calendar, '2026-01-01');
+    $this->editor->assign('ubicazione', $this->site, $this->calendar, '2026-01-01', confirmPast: true);
     expect($wt()->calendarFor($this->a->id, $chain, '2026-03-10'))->toBe($this->calendar->id);
     // Ubicazione più vicina "eredita": resta quella del sito
-    $this->editor->assign('ubicazione', $this->line, null, '2026-01-01');
+    $this->editor->assign('ubicazione', $this->line, null, '2026-01-01', confirmPast: true);
     expect($wt()->calendarFor($this->a->id, $chain, '2026-03-10'))->toBe($this->calendar->id);
     // Dal 20/3 la linea ha il suo calendario
     $this->editor->assign('ubicazione', $this->line, $night, '2026-03-20');
@@ -163,7 +163,7 @@ it('eredità: ubicazione vuota eredita, la più vicina vince, macchina predispos
     $this->editor->assign('macchina', null, $this->calendar, '2026-03-25', $this->a->id);
     expect($wt()->calendarFor($this->a->id, $chain, '2026-03-26'))->toBe($this->calendar->id);
     // Stessa data: si aggiorna la riga, non se ne crea un'altra
-    $this->editor->assign('azienda', null, null, '2026-01-01');
+    $this->editor->assign('azienda', null, null, '2026-01-01', confirmPast: true);
     expect(WorkCalendarAssignment::query()->where('scope', 'azienda')->count())->toBe(1);
 });
 

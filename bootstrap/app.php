@@ -3,6 +3,7 @@
 use App\Http\Middleware\ApplyCompanyPreferences;
 use App\Http\Middleware\EnsureAppInstalled;
 use App\Http\Middleware\EnsureInstallerAvailable;
+use App\Http\Middleware\EnsureNotErased;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
@@ -24,7 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Dietro il proxy HTTPS dell'hosting (DirectAdmin con Nginx davanti ad Apache)
         $middleware->trustProxies(at: '*');
-        $middleware->web(append: [ApplyCompanyPreferences::class]);
+        $middleware->web(prepend: [EnsureNotErased::class], append: [ApplyCompanyPreferences::class]);
         // Il rinnovo push arriva dal service worker, che non ha il token CSRF (verifica interna)
         $middleware->validateCsrfTokens(except: ['push/rinnova', 'segnalazioni/invia']);
         // Prima dell'installazione si va all'installazione, non alla pagina di accesso

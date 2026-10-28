@@ -10,6 +10,7 @@ use App\Models\WorkCalendarAssignment;
 use App\Support\Access\Access;
 use App\Support\WorkTime\CalendarEditor;
 use Carbon\CarbonImmutable;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -37,13 +38,27 @@ it('dalla pagina: crea da un modello, assegna da una data, avvisa per le date pa
 
     Livewire::test(WorkCalendars::class)->set('name', 'Due turni')->call('create')->assertHasErrors('name');
 
+    // Da oggi: nessun avviso
+    Livewire::test(WorkCalendars::class)->set('assign.calendar', (string) $calendar->id)->call('saveAssignment')->assertHasNoErrors();
+    expect(AuditLog::query()->where('action', 'settings.work_calendar_assigned')->exists())->toBeTrue();
+
+    // Data passata: avviso con i mesi, conferma esplicita obbligatoria, registro dedicato
+    $this->travelTo(CarbonImmutable::parse('2026-10-15 10:00:00'));
+    $months = trans_choice('worktime.months_range', 8, ['from' => 'marzo 2026', 'to' => 'ottobre 2026', 'n' => 8]);
     $page = Livewire::test(WorkCalendars::class)
         ->set('assign.calendar', (string) $calendar->id)
-        ->set('assign.valid_from', today()->subDays(3)->toDateString())
-        ->assertSee(__('worktime.assign.past_warning'))
-        ->call('saveAssignment');
-    expect(WorkCalendarAssignment::query()->where('scope', 'azienda')->value('work_calendar_id'))->toBe($calendar->id)
-        ->and(AuditLog::query()->where('action', 'settings.work_calendar_assigned')->exists())->toBeTrue();
+        ->set('assign.valid_from', '2026-03-10')
+        ->assertSee(__('worktime.assign.past_warning', ['months' => $months]))
+        ->assertSee(__('worktime.assign.past_confirm'))
+        ->call('saveAssignment')->assertHasErrors('assign.valid_from');
+    expect(WorkCalendarAssignment::query()->whereDate('valid_from', '2026-03-10')->exists())->toBeFalse();
+    $page->set('confirmPast', true)->call('saveAssignment')->assertHasNoErrors();
+    $log = AuditLog::query()->where('action', 'settings.work_calendar_assigned_past')->firstOrFail();
+    expect($log->changes['mesi_degli_indicatori_che_cambiano'])->toBe($months)
+        ->and($log->changes['valido_dal'])->toBe('2026-03-10')
+        ->and($log->user_id)->toBe($this->admin->id);
+    // Cambiando la data la conferma si azzera
+    $page->set('confirmPast', true)->set('assign.valid_from', '2026-04-01')->assertSet('confirmPast', false);
     $this->get(route('settings.worktime'))->assertSee(__('worktime.assign.company'))->assertSee('Due turni');
 });
 
@@ -82,7 +97,7 @@ it('dashboard, esportazione e rapporto: MTBF sulle ore di lavoro principale, 24 
     $editor = app(CalendarEditor::class);
     $calendar = $editor->create('Giorno', 'vuoto');
     $editor->saveShifts($calendar->schedules()->first(), array_fill_keys([1, 2, 3, 4, 5], [['08:00', '16:00']]));
-    $editor->assign('azienda', null, $calendar, '2026-01-01');
+    $editor->assign('azienda', null, $calendar, '2026-01-01', confirmPast: true);
     $asset = Asset::factory()->create(['installed_on' => '2025-01-01']);
     foreach (['2026-03-03 09:00', '2026-03-10 09:00', '2026-03-17 09:00', '2026-03-24 09:00'] as $start) {
         DowntimeEvent::query()->create(['asset_id' => $asset->id, 'started_at' => $start, 'ended_at' => CarbonImmutable::parse($start)->addHour()]);
@@ -112,4 +127,26 @@ it('il comando propone le festività senza ripristinare quelle tolte', function 
     expect($calendar->exceptions()->whereYear('date', $year)->count())->toBe($year >= 2026 ? 13 : 12);
     $this->artisan('manutrack:festivita')->assertSuccessful();
     expect($calendar->exceptions()->count())->toBe($calendar->exceptions()->distinct('date')->count('date'));
+});
+
+it('data passata: mai a chi non è amministratore, nemmeno con il permesso delle impostazioni', function () {
+    $editor = app(CalendarEditor::class);
+    $calendar = $editor->create('Prova', 'vuoto');
+    $manager = userWithRole(Access::MANAGER);
+    $manager->givePermissionTo('settings.manage');
+    $past = today()->subMonth()->toDateString();
+
+    expect(fn () => $editor->assign('azienda', null, $calendar, $past, actor: $manager, confirmPast: true))
+        ->toThrow(ValidationException::class, __('worktime.errors.past_admin_only'));
+    Livewire::actingAs($manager)->test(WorkCalendars::class)
+        ->set('assign.calendar', (string) $calendar->id)->set('assign.valid_from', $past)
+        ->assertSee(__('worktime.assign.past_admin_only'))->assertDontSee(__('worktime.assign.past_confirm'))
+        ->set('confirmPast', true)->call('saveAssignment')->assertHasErrors('assign.valid_from');
+    expect(WorkCalendarAssignment::query()->count())->toBe(0);
+
+    // Senza conferma nemmeno l'amministratore
+    expect(fn () => $editor->assign('azienda', null, $calendar, $past, actor: $this->admin))->toThrow(ValidationException::class);
+    // Da oggi o dopo: chi gestisce le impostazioni può
+    $editor->assign('azienda', null, $calendar, today()->toDateString(), actor: $manager);
+    expect(WorkCalendarAssignment::query()->count())->toBe(1);
 });

@@ -29,6 +29,7 @@ return [
         'kpi' => 'Indicatori',
         'notification_rules' => 'Avvisi via email',
         'worktime' => 'Orario di lavoro',
+        'privacy' => 'Dati e privacy',
         'notifications' => 'Avvisi',
         'system' => 'Sistema',
         'design' => 'Design system',

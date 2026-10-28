@@ -32,7 +32,11 @@ abstract class TestCase extends BaseTestCase
         config([
             'manutrack.backups.path' => $this->sandbox.'/storage/app/backups',
             'manutrack.update.base_path' => $this->sandbox.'/release',
+            // I dischi sono configurati prima della cartella temporanea: vanno spostati anche loro
+            'filesystems.disks.local.root' => $this->sandbox.'/storage/app/private',
+            'filesystems.disks.public.root' => $this->sandbox.'/storage/app/public',
         ]);
+        $this->app->make('filesystem')->forgetDisk(['local', 'public']);
 
         $this->withoutVite();
         Artisan::call('db:wipe', ['--force' => true]);

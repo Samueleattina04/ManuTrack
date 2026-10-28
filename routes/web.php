@@ -5,6 +5,7 @@ use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\DesignController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\GdprController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\InventoryController;
@@ -27,6 +28,10 @@ use App\Livewire\Assets\Index as AssetsIndex;
 use App\Livewire\Assets\Locations as AssetLocations;
 use App\Livewire\Assets\Show as AssetShow;
 use App\Livewire\Audit\Index as AuditIndex;
+use App\Livewire\Gdpr\Anonymize as GdprAnonymize;
+use App\Livewire\Gdpr\DataExports as GdprExports;
+use App\Livewire\Gdpr\Erase as GdprErase;
+use App\Livewire\Gdpr\RetentionSettings as GdprRetention;
 use App\Livewire\Inventory\Import as PartImport;
 use App\Livewire\Inventory\Movements as StockMovements;
 use App\Livewire\Inventory\PartForm;
@@ -219,6 +224,15 @@ Route::middleware(['installed', 'auth', 'active'])->group(function () {
     Route::get('/registro', AuditIndex::class)->middleware('can:audit.view')->name('audit.index');
 
     Route::get('/sistema', SystemController::class)->middleware(['can:system.view', 'password.confirm'])->name('system');
+
+    // Dati e privacy (GDPR): esportazione completa, anonimizzazione, conservazione, cancellazione
+    Route::middleware(['can:data.export', 'password.confirm'])->prefix('sistema/dati')->name('gdpr.')->group(function () {
+        Route::get('/esportazione', GdprExports::class)->name('exports');
+        Route::get('/esportazione/{export}/scarica', [GdprController::class, 'download'])->whereNumber('export')->name('exports.download');
+        Route::get('/anonimizzazione', GdprAnonymize::class)->name('anonymize');
+        Route::get('/conservazione', GdprRetention::class)->name('retention');
+        Route::get('/cancellazione', GdprErase::class)->name('erase');
+    });
     Route::middleware(['can:system.update', 'password.confirm'])->prefix('sistema')->name('system.')->group(function () {
         Route::post('/aggiorna', [SystemActionsController::class, 'update'])->name('update');
         Route::post('/ritenta', [SystemActionsController::class, 'retry'])->name('retry');

@@ -63,11 +63,23 @@
                 </div>
                 <div>
                     <x-form.input name="assign.valid_from" type="date" :label="__('worktime.assign.valid_from')" wire:model.live="assign.valid_from" />
-                    @if($assign['valid_from'] !== '' && $assign['valid_from'] < today()->toDateString())
-                        <p class="mt-1 text-xs text-warn" role="note">{{ __('worktime.assign.past_warning') }}</p>
-                    @endif
                 </div>
-                <button type="submit" class="btn btn-primary"><x-icon name="check" />{{ __('worktime.assign.save') }}</button>
+                <button type="submit" class="btn btn-primary" @disabled($pastMonths && (! $isAdmin || ! $confirmPast))><x-icon name="check" />{{ __('worktime.assign.save') }}</button>
+                @if($pastMonths)
+                    {{-- Data passata: mai silenziosa --}}
+                    <div class="alert alert-warn sm:col-span-2 lg:col-span-4" role="alert">
+                        <x-icon name="alert-triangle" />
+                        <div class="flex flex-col gap-2">
+                            <span>{{ __('worktime.assign.past_warning', ['months' => $pastMonths]) }}</span>
+                            @if($isAdmin)
+                                <label class="flex min-h-[40px] items-center gap-2.5 font-semibold"><input type="checkbox" wire:model.live="confirmPast" class="h-5 w-5 accent-[var(--mt-accent)]">{{ __('worktime.assign.past_confirm') }}</label>
+                            @else
+                                <span class="font-semibold">{{ __('worktime.assign.past_admin_only') }}</span>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+                @error('assign.valid_from')<p class="field-error sm:col-span-2 lg:col-span-4">{{ $message }}</p>@enderror
             </form>
         @endif
         <div class="overflow-x-auto">

@@ -22,12 +22,12 @@ class DemoWorkTimeSeeder extends Seeder
         $from = today()->subMonthsNoOverflow(6)->startOfMonth()->toDateString();
 
         $two = $editor->create('Due turni', 'due_turni');
-        $editor->assign('azienda', null, $two, $from);
+        $editor->assign('azienda', null, $two, $from, confirmPast: true);
 
         $line = Location::query()->where('name', 'Linea 1')->first();
         if ($line) {
             $three = $editor->create('Tre turni', 'tre_turni');
-            $editor->assign('ubicazione', $line, $three, $from);
+            $editor->assign('ubicazione', $line, $three, $from, confirmPast: true);
         }
     }
 }
