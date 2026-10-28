@@ -110,9 +110,12 @@
                             @if($u->anonymized_at)
                                 <span class="text-sm text-muted">{{ __('users.anonymized') }}</span>
                             @elseif($canManage)
-                                <div x-data="{ open: false }" class="relative inline-block text-left" @keydown.escape="open = false" @click.outside="open = false">
-                                    <button type="button" class="btn btn-ghost btn-sm" @click="open = ! open" :aria-expanded="open.toString()">{{ __('users.more') }} <x-icon name="chevron-down" class="!w-4 !h-4" /></button>
-                                    <div x-cloak x-show="open" x-transition class="absolute right-0 z-20 mt-1 w-60 card p-1.5 text-left">
+                                {{-- Menu spostato nel body: la tabella scorre in orizzontale e taglierebbe un menu "absolute" --}}
+                                <div x-data="{ open: false, pos: '' }" class="relative inline-block text-left" @keydown.escape.window="open = false" @scroll.window="open = false" @resize.window="open = false">
+                                    <button type="button" x-ref="btn" class="btn btn-ghost btn-sm" :aria-expanded="open.toString()"
+                                        @click="const r = $refs.btn.getBoundingClientRect(); const up = r.bottom + 240 > window.innerHeight; pos = 'right:' + (window.innerWidth - r.right) + 'px;' + (up ? 'bottom:' + (window.innerHeight - r.top + 4) : 'top:' + (r.bottom + 4)) + 'px'; open = ! open">{{ __('users.more') }} <x-icon name="chevron-down" class="!w-4 !h-4" /></button>
+                                    <template x-teleport="body">
+                                    <div x-cloak x-show="open" x-transition :style="pos" class="fixed z-50 w-60 card p-1.5 text-left" @click.outside="if (! $refs.btn.contains($event.target)) open = false">
                                         <button type="button" class="nav-item w-full" wire:click="sendPasswordReset({{ $u->id }})" @click="open = false"><x-icon name="key" />{{ __('users.send_reset') }}</button>
                                         @if($u->hasTwoFactor())
                                             <button type="button" class="nav-item w-full" wire:click="resetTwoFactor({{ $u->id }})" wire:confirm="{{ __('users.reset_2fa_confirm') }}" @click="open = false"><x-icon name="shield" />{{ __('users.reset_2fa') }}</button>
@@ -124,6 +127,7 @@
                                             <a href="{{ route('gdpr.anonymize', ['persona' => $u->id]) }}" class="nav-item w-full" wire:navigate><x-icon name="shield" />{{ __('users.anonymize') }}</a>
                                         @endif
                                     </div>
+                                    </template>
                                 </div>
                             @endif
                         </td>

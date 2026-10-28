@@ -71,6 +71,8 @@ class DemoMaintenanceSeeder extends Seeder
 
         // Da valutare
         $submit->handle($operator, ['asset_id' => $asset('NAS-01')->id, 'description' => 'Il nastro slitta quando è carico e fa un rumore forte vicino al motore.', 'priority' => 'alta', 'machine_stopped' => false, 'reported_at' => now()->subMinutes(40)->toIso8601String()]);
+        // Guasto appena segnalato: macchina ferma, ancora da valutare
+        $submit->handle($operator, ['asset_id' => $asset('ROB-02')->id, 'description' => 'Robot fermo con errore di collisione sull\'asse 3, non riparte dopo il ripristino.', 'priority' => 'critica', 'machine_stopped' => true, 'reported_at' => now()->subMinutes(15)->toIso8601String()]);
         $submit->handle($operator, ['asset_id' => $asset('CMP-02')->id, 'description' => 'Piccola perdita d\'aria dal raccordo di uscita.', 'priority' => 'bassa', 'machine_stopped' => false, 'reported_at' => now()->subHours(5)->toIso8601String()]);
 
         // Accettata e in corso

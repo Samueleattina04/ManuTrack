@@ -41,10 +41,31 @@ class DemoPlantSeeder extends Seeder
             $editor->move($item, $x, $z);
         }
 
-        // Ogni macchina dove c'è posto nella zona della sua ubicazione
+        // Corsie senza ubicazione (solo un nome sul pavimento)
+        foreach ([['Corsia tra le linee', 12, 12.5, 20, 2], ['Corsia principale', 35, 17.5, 22, 3]] as [$label, $x, $z, $w, $d]) {
+            $item = $editor->addZone($layout, null, $label);
+            $editor->update($item, ['w' => $w, 'd' => $d]);
+            $editor->move($item, $x, $z);
+        }
+
+        // Macchine in fila lungo le linee, come in un reparto vero: [codice, x, z, rotazione]
+        $positions = [
+            'PRS-01' => [5, 5, 0], 'PRS-01-CEN' => [5, 8.5, 0], 'PRS-02' => [11, 5, 0],
+            'PRS-03' => [5, 18.5, 0], 'ROB-01' => [9, 18.5, 0], 'NAS-01' => [15, 18.5, 0],
+            'ROB-02' => [32, 6.5, 0], 'NAS-02' => [36, 9, 0], 'AVV-01' => [42, 11, 0],
+            'CMP-01' => [28, 23, 0], 'CMP-02' => [31, 23, 0], 'QEL-01' => [42, 23, 0],
+            'CAR-01' => [40, 17.5, 90],
+        ];
         foreach ($layout->placeableAssets()->with(['category', 'location'])->orderBy('code')->get() as $asset) {
             /** @var Asset $asset */
-            $editor->addAsset($layout, $asset);
+            $item = $editor->addAsset($layout, $asset);
+            if (isset($positions[$asset->code])) {
+                [$x, $z, $rotation] = $positions[$asset->code];
+                if ($rotation) {
+                    $editor->update($item, ['rotation' => $rotation]);
+                }
+                $editor->move($item, $x, $z);
+            }
         }
     }
 }

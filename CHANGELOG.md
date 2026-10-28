@@ -3,6 +3,24 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [0.12.0] - Fase 11: dati e privacy, demo finale
+
+### Aggiunto
+- **Dati e privacy** (*Sistema › Dati e privacy*, solo amministratore di serie, password riconfermata), descritto in `docs/GDPR.md`:
+  - **esportazione completa** dei dati dell'azienda in uno ZIP preparato in coda: `INDICE.md` e `indice.json` con tabelle, righe e descrizioni, una tabella JSON per file, allegati, modelli 3D e logo con impronta SHA-256 e collegamento alla scheda; esclusi password, codici di accesso, token, sessioni e chiavi; scaricabile 7 giorni; richieste e download nel registro attività;
+  - **anonimizzazione di una persona** disattivata (o di un nome senza account) con anteprima di dove compare e conferma scritta: l'account diventa "Persona anonimizzata #id" senza accessi, i testi liberi e il registro attività vengono ripuliti (anche dentro le modifiche registrate), le sue azioni nel registro perdono IP e browser; storico e indicatori restano identici. Collegamento "Anonimizza…" nell'elenco Persone;
+  - **conservazione**: anonimizzazione automatica delle persone disattivate dopo N mesi e durata del registro attività (almeno 6 mesi), con anteprima di cosa succederà la notte; comando `manutrack:conservazione` ogni notte alle 03:50;
+  - **cancellazione totale** a fine contratto con presa d'atto, frase con il nome dell'azienda, password e ultima conferma (o `manutrack:cancella-tutto --conferma=…`): database e cartelle dei dati cancellati, rapporto senza dati personali di cosa è stato eliminato e di cosa resta fuori; poi l'app mostra solo il rapporto (HTTP 410) e il cron si ferma.
+- **Modelli legali** in `docs/legale/`, bozze da far rivedere a un avvocato: informativa privacy per gli utenti, accordo art. 28 GDPR tra cliente e fornitore, elenco dei sub-responsabili (hosting, posta), condizioni di servizio e licenza d'uso dell'installazione.
+- Orario di lavoro: un'assegnazione con data passata è consentita solo all'amministratore, con avviso dei mesi degli indicatori che cambiano, conferma esplicita e voce dedicata nel registro attività.
+- Demo: macchine disposte in fila lungo le linee e corsie nella pianta; un ex tecnico disattivato da anonimizzare, uno già anonimizzato e regole di conservazione d'esempio.
+
+### Modificato
+- CI: il database dei test parte in memoria (tmpfs) senza scritture di sicurezza su disco; stessi test (474), MySQL 8 da circa 23 a 9 minuti, MariaDB da circa 5,5 a 3.
+
+### Corretto
+- Test: i dischi `local` e `public` scrivevano nella cartella `storage` del progetto invece che nella cartella temporanea del test.
+
 ## [0.11.0] - Orario di lavoro per l'MTBF
 
 ### Aggiunto

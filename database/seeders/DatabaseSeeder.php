@@ -74,6 +74,7 @@ class DatabaseSeeder extends Seeder
         $this->call(DemoPreventiveSeeder::class);
         $this->call(DemoPlantSeeder::class);
         $this->call(DemoWorkTimeSeeder::class);
+        $this->call(DemoPrivacySeeder::class);
 
         InstallState::writeLock(['version' => AppVersion::code(), 'seeded' => true]);
 

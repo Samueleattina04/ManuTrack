@@ -33,7 +33,7 @@
                 @if($terms === [])
                     <p class="text-sm text-muted">{{ __('gdpr.anonymize.preview_empty') }}</p>
                 @else
-                    <p class="mb-2 text-sm text-muted">{{ __('gdpr.anonymize.terms', ['n' => count($terms)]) }}</p>
+                    <p class="mb-2 text-sm text-muted">{{ trans_choice('gdpr.anonymize.terms', count($terms), ['n' => count($terms)]) }}</p>
                     @if($preview === [])
                         <p class="text-sm">{{ __('gdpr.anonymize.no_matches') }}</p>
                     @else

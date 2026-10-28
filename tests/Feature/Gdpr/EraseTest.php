@@ -20,7 +20,7 @@ afterEach(function () {
 it('mostra cosa verrà cancellato e cosa resta fuori; solo l\'amministratore', function () {
     $this->get(route('gdpr.erase'))->assertOk()
         ->assertSee(__('gdpr.erase.outside_title'))->assertSee(__('gdpr.erase.outside')[0])
-        ->assertSee('CANCELLA OFFICINE PROVA')->assertSee(__('gdpr.erase.no_export'));
+        ->assertSee('CANCELLA OFFICINE PROVA')->assertSee(__('gdpr.erase.no_export'))->assertDontSee(['gdpr.columns', 'gdpr.retention.', 'gdpr.erase.', 'gdpr.anonymize.', '{1}']);
     $manager = userWithRole(Access::MANAGER);
     $manager->givePermissionTo('data.export');
     $this->actingAs($manager)->withSession(['auth.password_confirmed_at' => time()])->get(route('gdpr.erase'))->assertForbidden();

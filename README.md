@@ -38,6 +38,8 @@ In alternativa `php artisan manutrack:install` installa come in produzione.
 | `php artisan manutrack:preventiva [--prova]` | genera gli ordini dei piani in scadenza (il cron lo fa ogni 15 minuti) |
 | `php artisan manutrack:avvisi-riepilogo` | riepilogo giornaliero degli avvisi via email (il cron alle 07:10) |
 | `php artisan manutrack:festivita` | propone le festività nazionali nei calendari di lavoro (il cron ogni notte) |
+| `php artisan manutrack:conservazione` | regole di conservazione dei dati (il cron alle 03:50) |
+| `php artisan manutrack:cancella-tutto --conferma="CANCELLA NOME AZIENDA"` | cancellazione totale a fine contratto, con rapporto (vedi `docs/GDPR.md`) |
 | `php artisan manutrack:rapporto-mensile` | avvisa che il rapporto del mese precedente è pronto (il cron il 1° del mese) |
 | `scripts/release.sh` / `scripts\release.ps1` | prepara il pacchetto da caricare via FTP |
 | `php artisan test` | test automatici (database `manutrack_test`) |
@@ -50,6 +52,8 @@ In alternativa `php artisan manutrack:install` installa come in produzione.
 - [Specifica funzionale](docs/SPECIFICA.md), aggiornata a ogni fase
 - [Design system](docs/DESIGN.md) e [anteprima dello stile](docs/anteprima/stile.html)
 - [Librerie e licenze](docs/LIBRERIE.md)
+- [Piano di controllo di sicurezza](docs/CONTROLLO-SICUREZZA.md) (da far eseguire prima della 1.0)
+- [Dati personali e GDPR](docs/GDPR.md) (esportazione, anonimizzazione, conservazione, cancellazione) e [modelli legali da far rivedere a un avvocato](docs/legale/README.md)
 - [Registro delle modifiche](CHANGELOG.md)
 
 ## Struttura

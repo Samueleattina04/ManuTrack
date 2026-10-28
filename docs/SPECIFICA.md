@@ -1002,3 +1002,15 @@ Pulsante centrale della barra in basso, scheda macchina, panoramica. Pensata per
 - **Indicatori:** con un calendario, l'MTBF principale è sulle ore di lavoro (dashboard, tabella per macchina, rapporto mensile, esportazione); sotto resta quello sulle 24 ore. Quando alcune macchine o alcuni giorni non hanno un calendario si legge "sulle ore di lavoro (in parte su 24 ore)". Minimo: 3 guasti e 40 ore di lavoro.
 - **Senza calendari assegnati non cambia nulla.**
 - Tutte le modifiche nel registro attività (Impostazioni).
+- **Data passata (dalla 0.12.0):** un'assegnazione con "valido dal" nel passato cambia gli indicatori dei mesi già chiusi. È consentita **solo all'amministratore** (o dal terminale), con un avviso che indica i mesi coinvolti ("da marzo 2026 a ottobre 2026, 8 mesi"), una conferma esplicita da spuntare e una voce dedicata nel registro attività con i mesi. Mai silenziosa; chi gestisce le impostazioni senza essere amministratore può assegnare solo da oggi in avanti.
+
+## 49. Dati e privacy (`/sistema/dati`, fase 11)
+
+Dettagli, limiti e procedure in `docs/GDPR.md`; modelli legali (bozze) in `docs/legale/`.
+
+- **Dove:** *Sistema › Dati e privacy*, con il permesso `data.export` (di serie solo l'amministratore) e la password riconfermata. Quattro schede: Esportazione, Anonimizzazione, Conservazione, Cancellazione totale.
+- **Esportazione completa:** ZIP preparato in coda con `INDICE.md` e `indice.json` (tabelle, righe, descrizioni, file con impronta SHA-256 e collegamento), una tabella JSON per file, allegati, modelli 3D e logo. Esclusi segreti, password, token, sessioni e iscrizioni push. Il file resta 7 giorni; richieste e download nel registro attività.
+- **Anonimizzazione** (solo amministratore, persona disattivata, mai se stessi): anteprima di dove compaiono nome, email, telefono e le varianti aggiunte; conferma scrivendo `ANONIMIZZA`. L'account diventa "Persona anonimizzata #id" senza accessi né ruoli e non si riattiva; i testi liberi e il registro (anche dentro le modifiche) vengono ripuliti, le azioni della persona nel registro perdono IP e browser. Gli id non cambiano: storico e indicatori restano identici. Anche per un nome senza account. Collegamento "Anonimizza…" nell'elenco Persone per le persone disattivate.
+- **Conservazione:** anonimizzazione delle persone disattivate dopo N mesi; registro attività per N mesi (almeno 6); vuoto = per sempre. Anteprima di cosa farà la notte successiva. Procedura ogni notte alle 03:50 (`manutrack:conservazione`), che cancella anche gli ZIP scaduti.
+- **Cancellazione totale** (solo amministratore): inventario di righe e file, avviso se manca un'esportazione recente, presa d'atto, frase `CANCELLA <NOME AZIENDA>`, password e ultima conferma; oppure `manutrack:cancella-tutto --conferma=…` dal terminale. Cancella tabelle e cartelle dei dati e lascia un rapporto senza dati personali (`storage/app/manutrack-cancellata.json`); poi ogni pagina mostra il rapporto (HTTP 410) e il cron si ferma. Copie dell'hosting, file scaricati ed email restano fuori dal controllo dell'app.
+

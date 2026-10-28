@@ -70,7 +70,8 @@ it('toglie la persona ovunque e lascia storico e indicatori identici', function 
     $minutes = TimeEntry::query()->where('user_id', $this->tech->id)->sum('minutes');
 
     $page = Livewire::test(Anonymize::class)->set('userId', (string) $this->tech->id)->set('extra', "G. Esempio\nGino Esempió\nab");
-    $page->assertSee(__('gdpr.columns.work_orders.description'))->assertSee(__('gdpr.columns.work_order_comments.body'))->assertSee(__('gdpr.columns.audit_logs.changes'));
+    $page->assertSee('Ordini: descrizione')->assertSee('Commenti degli ordini')->assertSee('Registro attività: modifiche')
+        ->assertSee('Si cercano 5 parole.')->assertDontSee(['gdpr.columns', 'gdpr.retention.', 'gdpr.erase.', 'gdpr.anonymize.', '{1}']);
     $page->call('anonymize')->assertHasErrors('confirm');
     expect($this->tech->refresh()->anonymized_at)->toBeNull();
     $page->set('confirm', 'ANONIMIZZA')->call('anonymize')->assertHasNoErrors()->assertSee(__('gdpr.anonymize.pseudonym', ['id' => $this->tech->id]));

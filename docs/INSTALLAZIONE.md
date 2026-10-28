@@ -191,6 +191,7 @@ In *Advanced Features › Cron Jobs* aggiungi **una** voce, ogni minuto (tutti i
   - manda il riepilogo giornaliero degli avvisi via email alle 07:10 (`php artisan manutrack:avvisi-riepilogo`) e cancella gli avvisi più vecchi di 90 giorni;
   - il 1° del mese alle 07:20 avvisa che il rapporto mensile è pronto (`php artisan manutrack:rapporto-mensile`);
   - ogni notte alle 02:45 propone nei calendari di lavoro le festività nazionali dell'anno in corso e del successivo (`php artisan manutrack:festivita`);
+  - ogni notte alle 03:50 applica le regole di conservazione dei dati: anonimizza le persone disattivate da troppo tempo, accorcia il registro attività, cancella le esportazioni scadute (`php artisan manutrack:conservazione`, vedi [GDPR.md](GDPR.md));
   - fa le pulizie;
   - applica gli aggiornamenti caricati.
 - Nessun processo resta attivo e non servono `exec` o `proc_open`.
@@ -358,6 +359,8 @@ Il ripristino:
 Un aggiornamento rimasto "in corso" nella copia viene segnato come fallito, così il cron non lo ritenta da solo.
 
 Le copie non sostituiscono il backup dell'hosting: tieni attivo anche quello di DirectAdmin (*Create/Restore Backups*), che comprende i file caricati.
+
+Le copie contengono i dati personali com'erano al momento della copia, anche di persone anonimizzate dopo. Come eliminare quelle vecchie, e cosa fare a fine contratto (esportazione, cancellazione totale, copie dell'hosting): [GDPR.md](GDPR.md) §5 e §6.
 
 ## 15. Problemi frequenti
 

@@ -16,7 +16,7 @@ beforeEach(function () {
 });
 
 it('salva le regole con il minimo per il registro e mostra cosa farebbe stanotte', function () {
-    $this->get(route('gdpr.retention'))->assertOk()->assertSee(__('gdpr.retention.intro'));
+    $this->get(route('gdpr.retention'))->assertOk()->assertSee(__('gdpr.retention.intro'))->assertSee('nessuna persona da anonimizzare')->assertDontSee(['gdpr.columns', 'gdpr.retention.', 'gdpr.erase.', 'gdpr.anonymize.', '{1}']);
     $this->actingAs(userWithRole(Access::MANAGER))->withSession(['auth.password_confirmed_at' => time()])->get(route('gdpr.retention'))->assertForbidden();
     $this->actingAs($this->admin);
 
