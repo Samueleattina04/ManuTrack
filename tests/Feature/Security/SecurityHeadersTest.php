@@ -107,6 +107,10 @@ it('fotocamera permessa solo nella pagina Segnala (lettura del QR)', function ()
 it('HSTS solo su https e configurabile; CSP anche solo segnalata o spenta', function () {
     installManuTrack();
     expect($this->get('/login')->headers->has('Strict-Transport-Security'))->toBeFalse();
+    // Il valore viene dal .env (MANUTRACK_HSTS_SECONDS, 300 nel .env.example per iniziare): qui si fissa
+    config(['manutrack.security.hsts_seconds' => 300]);
+    expect($this->get('https://localhost/login')->headers->get('Strict-Transport-Security'))->toBe('max-age=300');
+    config(['manutrack.security.hsts_seconds' => 31536000]);
     expect($this->get('https://localhost/login')->headers->get('Strict-Transport-Security'))->toBe('max-age=31536000');
     config(['manutrack.security.hsts_seconds' => 0]);
     expect($this->get('https://localhost/login')->headers->has('Strict-Transport-Security'))->toBeFalse();

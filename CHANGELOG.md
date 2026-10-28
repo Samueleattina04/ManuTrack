@@ -24,6 +24,7 @@ CSP, limiti e proxy: `docs/SICUREZZA.md`.
 - Caricamenti temporanei di Livewire: tolti gli indirizzi `/storage/…` del disco privato, temporanei abbandonati cancellati dopo un giorno dalla pulizia notturna.
 - Snapshot Livewire modificati a mano: rifiutati con 419 senza riempire i registri del server; i tentativi sbagliati di cancellazione totale restano nel registro attività.
 - `.env.example`: `SESSION_ENCRYPT=true` per le nuove installazioni.
+- Dipendenze: `symfony/mime` 7.4.22 (CVE-2026-45070, iniezione di intestazioni nelle email tramite nomi di parametro MIME), segnalata da `composer audit` in CI il giorno stesso.
 
 ### Aggiunto
 - **Verifica in due passaggi obbligatoria per gli amministratori** (*Impostazioni › Azienda*, solo l'amministratore che l'ha già attivata): chi non l'ha attivata viene portato al profilo con un avviso e non può fare altro finché non la attiva; non si può disattivare la propria; elenco degli amministratori senza.
