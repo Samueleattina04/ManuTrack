@@ -28,24 +28,22 @@ jobs:
         db:
           - { name: 'MySQL 8.0', image: 'mysql:8.0' }
           - { name: 'MariaDB 10.11', image: 'mariadb:10.11' }
-    services:
-      database:
-        image: ${{ matrix.db.image }}
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MARIADB_ROOT_PASSWORD: root
-          MYSQL_DATABASE: manutrack_test
-          MARIADB_DATABASE: manutrack_test
-          MYSQL_USER: manutrack
-          MARIADB_USER: manutrack
-          MYSQL_PASSWORD: manutrack
-          MARIADB_PASSWORD: manutrack
-        ports: ['3306:3306']
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot || mariadb-admin ping -h 127.0.0.1 -uroot -proot"
-          --health-interval=5s --health-timeout=5s --health-retries=20
+    # Il database parte con docker run (non come "services") per poterlo avviare in memoria
+    # (tmpfs) e senza le scritture di sicurezza su disco: sono dati di prova, rifatti a ogni
+    # test. Gli stessi test di prima, solo senza attese sul disco (MySQL 8 ne fa molte per
+    # ogni CREATE/DROP TABLE).
     steps:
       - uses: actions/checkout@v4
+      - name: Avvia ${{ matrix.db.name }} in memoria
+        run: |
+          FLAGS="--innodb-flush-log-at-trx-commit=0 --innodb-doublewrite=0 --performance-schema=0 --sync-binlog=0"
+          case "${{ matrix.db.image }}" in mysql*) FLAGS="$FLAGS --skip-log-bin --innodb-flush-method=nosync" ;; esac
+          docker run -d --name db -p 3306:3306 --tmpfs /var/lib/mysql:rw,size=2g \
+            -e MYSQL_ROOT_PASSWORD=root -e MARIADB_ROOT_PASSWORD=root \
+            -e MYSQL_DATABASE=manutrack_test -e MARIADB_DATABASE=manutrack_test \
+            -e MYSQL_USER=manutrack -e MARIADB_USER=manutrack \
+            -e MYSQL_PASSWORD=manutrack -e MARIADB_PASSWORD=manutrack \
+            ${{ matrix.db.image }} $FLAGS
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
@@ -59,6 +57,18 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run build
       - run: cp .env.example .env && php artisan key:generate
+      - name: Attendi il database
+        run: |
+          # Via TCP: il server temporaneo dell'inizializzazione non ascolta in rete
+          for i in $(seq 1 60); do
+            if docker exec db sh -c 'mysql -h127.0.0.1 -umanutrack -pmanutrack -e "SELECT 1" manutrack_test || mariadb -h127.0.0.1 -umanutrack -pmanutrack -e "SELECT 1" manutrack_test' >/dev/null 2>&1; then
+              docker exec db sh -c 'mysql -h127.0.0.1 -uroot -proot -e "SELECT VERSION()" 2>/dev/null || mariadb -h127.0.0.1 -uroot -proot -e "SELECT VERSION()"'
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs db
+          exit 1
       - run: php artisan test
         env:
           DB_HOST: 127.0.0.1
