@@ -3,6 +3,11 @@
 Tutte le modifiche rilevanti di ManuTrack sono elencate qui.
 Formato ispirato a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/), versioni secondo [SemVer](https://semver.org/lang/it/).
 
+## [Non rilasciato]
+
+### Corretto
+- La pagina **Ruoli e permessi** (`/ruoli`) non aveva nessun collegamento: si raggiungeva solo scrivendo l'indirizzo. Ora c'è il pulsante *Ruoli e permessi* in cima alla pagina Persone, per chi gestisce le persone.
+
 ## [0.12.1] - Controllo di sicurezza
 
 Esito completo, con gravità, scenari e test: `docs/CONTROLLO-SICUREZZA-ESITO.md`. Intestazioni,

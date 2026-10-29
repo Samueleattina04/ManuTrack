@@ -20,6 +20,7 @@
             </select>
         </div>
         @if($canManage)
+            <a href="{{ route('roles.index') }}" class="btn btn-secondary" wire:navigate><x-icon name="shield" />{{ __('access.title') }}</a>
             <button type="button" class="btn btn-primary" wire:click="$set('inviting', true)"><x-icon name="plus" />{{ __('users.invite.button') }}</button>
         @endif
     </div>

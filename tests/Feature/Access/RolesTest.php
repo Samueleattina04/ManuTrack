@@ -91,3 +91,8 @@ it('il ruolo amministratore non si modifica', function () {
 it('chi non è amministratore non modifica i permessi', function () {
     Livewire::actingAs(userWithRole(Access::MANAGER))->test(Roles::class)->assertForbidden();
 });
+
+it('la pagina Persone porta a Ruoli e permessi solo a chi gestisce le persone', function () {
+    $this->actingAs($this->admin)->get('/utenti')->assertOk()->assertSee(route('roles.index'), false)->assertSee(__('access.title'));
+    $this->actingAs(userWithRole(Access::MANAGER))->get('/utenti')->assertOk()->assertDontSee(route('roles.index'), false);
+});
